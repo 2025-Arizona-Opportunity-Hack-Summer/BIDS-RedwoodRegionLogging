@@ -1,6 +1,7 @@
 import './globals.css'
-import Provider  from '@/app/provider'
+import { Provider } from '@/components/ui/provider'
 import type { Metadata } from 'next'
+import Navbar from '@/components/navbar'
 
 export const metadata: Metadata = {
   title: 'RRLC App',
@@ -16,7 +17,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body>
-        <Provider>{children}</Provider>
+        <Provider>
+          <Navbar />
+          {children}
+        </Provider>
       </body>
     </html>
   )
