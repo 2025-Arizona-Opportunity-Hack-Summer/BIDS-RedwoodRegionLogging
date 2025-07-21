@@ -1,233 +1,328 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import {
   Box,
   Button,
   Heading,
-  Spinner,
+  VStack,
+  HStack,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Badge,
   IconButton,
   Input,
-  Stack,
-  Text,
-  CloseButton
+  Card,
+  CardBody,
+  Skeleton,
+  Alert,
 } from "@chakra-ui/react";
-import { FiEdit2 } from "react-icons/fi";
-import { supabase } from "@/lib/supabaseClient";
-import { saveAs } from "file-saver";
+import { FiSearch, FiPlus, FiEdit3, FiTrash2, FiEye, FiFilter } from "react-icons/fi";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useScholarships } from "@/hooks/useScholarships";
+import { Scholarship } from "@/types/database";
 
-interface Scholarship {
-  id: string;
-  applicant_name: string;
-  email: string;
-  status: string;
-  award_amount: number | null;
-  award_date: string | null;
-  created_at: string;
+function ScholarshipTableSkeleton() {
+  return (
+    <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
+      <CardBody>
+        <VStack spacing={4}>
+          {[...Array(5)].map((_, i) => (
+            <HStack key={i} w="full" spacing={4}>
+              <Skeleton height="20px" width="200px" />
+              <Skeleton height="20px" width="100px" />
+              <Skeleton height="20px" width="150px" />
+              <Skeleton height="20px" width="100px" />
+              <Skeleton height="20px" width="120px" />
+            </HStack>
+          ))}
+        </VStack>
+      </CardBody>
+    </Card>
+  );
 }
 
-const showToast = (message: string, type: 'success' | 'error') => {
-  console.log(`${type.toUpperCase()}: ${message}`);
-  if (type === 'error') {
-    alert(`Error: ${message}`);
-  }
-};
-
-export default function ScholarshipsPage() {
-  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Scholarship | null>(null);
-  const [form, setForm] = useState({ status: '', award_amount: '', award_date: '' });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const fetchScholarships = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from("scholarships").select("*").order("created_at", { ascending: false });
-    if (error) {
-      showToast("Error fetching scholarships", "error");
-    } else {
-      setScholarships(data || []);
-    }
-    setLoading(false);
+function ScholarshipBadge({ status }: { status: string }) {
+  const colorMap = {
+    active: { bg: "rgb(9,76,9)", color: "white" },
+    inactive: { bg: "rgb(146,169,129)", color: "white" },
+    closed: { bg: "rgb(78,61,30)", color: "white" }
   };
 
-  useEffect(() => {
-    fetchScholarships();
-  }, []);
-
-  const handleOpenEdit = (sch: Scholarship) => {
-    setForm({
-      status: sch.status || '',
-      award_amount: sch.award_amount?.toString() || '',
-      award_date: sch.award_date || ''
-    });
-    setSelected(sch);
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selected) return;
-    const { error } = await supabase.from("scholarships").update({
-      status: form.status,
-      award_amount: form.award_amount ? Number(form.award_amount) : null,
-      award_date: form.award_date || null
-    }).eq("id", selected.id);
-    if (error) {
-      showToast("Error updating scholarship", "error");
-    } else {
-      showToast("Scholarship updated", "success");
-      fetchScholarships();
-      setIsModalOpen(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelected(null);
-  };
-
-  // CSV export utility
-  const exportCSV = () => {
-    const csvRows = [
-      ["Applicant", "Email", "Status", "Award Amount", "Award Date", "Created"],
-      ...scholarships.map(s => [s.applicant_name, s.email, s.status, s.award_amount || '', s.award_date || '', s.created_at])
-    ];
-    const csvContent = csvRows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    saveAs(blob, `scholarships-${new Date().toISOString().slice(0,10)}.csv`);
-  };
-
-  // Basic stats
-  const totalApplications = scholarships.length;
-  const receivedCount = scholarships.filter(s => s.status === 'received').length;
-  const totalAwarded = scholarships.reduce((sum, s) => sum + (s.award_amount || 0), 0);
+  const colors = colorMap[status as keyof typeof colorMap] || colorMap.inactive;
 
   return (
-    <Box maxW="6xl" mx="auto" mt={10} p={8} borderWidth={1} borderRadius="lg" boxShadow="md" bg="white" borderColor="gray.300">
-      <Heading mb={2} color="black">Scholarship Management</Heading>
-      <Box mb={6} color="gray.700" fontWeight="medium">
-        Total applications: {totalApplications} | Received: {receivedCount} | Total awarded: ${totalAwarded.toLocaleString()}
-      </Box>
-      <Button colorScheme="gray" size="sm" mb={4} onClick={exportCSV} mr={2}>Export CSV</Button>
-      {loading ? (
-        <Box display="flex" justifyContent="center" mt={10}>
-          <Spinner size="xl" />
-        </Box>
-      ) : (
-        <Box overflowX="auto">
-          <Box border="1px" borderColor="gray.300" borderRadius="md" bg="white">
-            <Box bg="gray.100" p={4} borderBottom="1px" borderColor="gray.300">
-              <Stack direction="row" align="center" fontSize="sm" fontWeight="semibold">
-                <Box flex="2" color="black">Applicant</Box>
-                <Box flex="3" color="black">Email</Box>
-                <Box flex="1" color="black">Status</Box>
-                <Box flex="2" color="black">Award Amount</Box>
-                <Box flex="2" color="black">Award Date</Box>
-                <Box flex="1" color="black">Actions</Box>
-              </Stack>
-            </Box>
-            {scholarships.map((sch, idx) => (
-              <Box
-                key={sch.id}
-                p={4}
-                borderBottom={idx < scholarships.length - 1 ? "1px" : "none"}
-                borderColor="gray.300"
-                _hover={{ bg: "gray.50" }}
-                bg="white"
+    <Badge
+      bg={colors.bg}
+      color={colors.color}
+      px={3}
+      py={1}
+      borderRadius="full"
+      textTransform="capitalize"
+      fontWeight="medium"
+    >
+      {status}
+    </Badge>
+  );
+}
+
+
+function ScholarshipManagementContent() {
+  const { scholarships, loading, deleteScholarship } = useScholarships();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Filter scholarships based on search query
+  const filteredScholarships = scholarships.filter(scholarship =>
+    scholarship.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    scholarship.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    ""
+  );
+
+  const handleDelete = async (scholarship: Scholarship) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the scholarship "${scholarship.name}"? This action will set it to inactive and it can be reactivated later.`
+    );
+    
+    if (!confirmed) return;
+
+    setDeletingId(scholarship.id);
+    try {
+      await deleteScholarship(scholarship.id);
+      alert("Scholarship deleted successfully.");
+    } catch (error) {
+      alert("Failed to delete scholarship. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const formatCurrency = (amount: number | null) => {
+    if (!amount) return "Not specified";
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatDate = (date: string | null) => {
+    if (!date) return "No deadline";
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <Box
+      minHeight="100vh"
+      bg="rgb(193,212,178)"
+      p={6}
+    >
+      <Box maxW="7xl" mx="auto">
+        <VStack spacing={8} align="stretch">
+          {/* Header */}
+          <HStack justify="space-between" align="center">
+            <Box>
+              <Heading
+                size="2xl"
+                color="rgb(61,84,44)"
+                mb={2}
               >
-                <Stack direction="row" align="center" fontSize="sm">
-                  <Box flex="2">{sch.applicant_name}</Box>
-                  <Box flex="3">{sch.email}</Box>
-                  <Box flex="1">
-                    <Text px={2} py={1} bg={sch.status === 'received' ? 'green.100' : 'yellow.100'} color={sch.status === 'received' ? 'green.800' : 'yellow.800'} borderRadius="md" fontSize="xs" fontWeight="medium" display="inline-block">
-                      {sch.status}
-                    </Text>
-                  </Box>
-                  <Box flex="2">{sch.award_amount ? `$${sch.award_amount}` : '-'}</Box>
-                  <Box flex="2">{sch.award_date ? new Date(sch.award_date).toLocaleDateString() : '-'}</Box>
-                  <Box flex="1">
-                    <IconButton aria-label="Edit" size="sm" onClick={() => handleOpenEdit(sch)} variant="ghost" colorScheme="blue">
-                      <FiEdit2 />
-                    </IconButton>
-                  </Box>
-                </Stack>
-              </Box>
-            ))}
-            {scholarships.length === 0 && (
-              <Box p={8} textAlign="center" color="gray.500" bg="white">
-                No scholarship applications found.
-              </Box>
-            )}
-          </Box>
-        </Box>
-      )}
-      {/* Edit Modal */}
-      {isModalOpen && selected && (
-        <Box
-          position="fixed"
-          top="0"
-          left="0"
-          right="0"
-          bottom="0"
-          bg="blackAlpha.600"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          zIndex="modal"
-        >
-          <Box
-            bg="white"
-            borderRadius="lg"
-            boxShadow="xl"
-            maxW="md"
-            w="full"
-            mx={4}
-            maxH="90vh"
-            overflowY="auto"
-            border="1px"
-            borderColor="gray.300"
-          >
-            <Box p={6} borderBottom="1px" borderColor="gray.300" bg="gray.100">
-              <Stack direction="row" align="center" justify="space-between">
-                <Heading size="lg">Edit Scholarship</Heading>
-                <CloseButton onClick={handleCloseModal} />
-              </Stack>
+                Scholarship Management
+              </Heading>
+              <Text
+                fontSize="lg"
+                color="rgb(78,61,30)"
+              >
+                Manage all scholarship opportunities
+              </Text>
             </Box>
-            <form onSubmit={handleSubmit}>
-              <Box p={6} bg="white">
-                <Stack gap={4}>
-                  <Box>
-                    <Text mb={2} fontSize="sm" fontWeight="medium">Status</Text>
-                    <select
-                      value={form.status}
-                      onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '14px', backgroundColor: 'white', color: '#374151' }}
-                    >
-                      <option value="applied">Applied</option>
-                      <option value="received">Received</option>
-                    </select>
+            
+            <Link href="/admin/scholarships/new">
+              <Button
+                leftIcon={<FiPlus />}
+                bg="rgb(9,76,9)"
+                color="white"
+                size="lg"
+                _hover={{ bg: "rgb(92,127,66)" }}
+                boxShadow="md"
+                _active={{ transform: "translateY(1px)" }}
+              >
+                Create Scholarship
+              </Button>
+            </Link>
+          </HStack>
+
+          {/* Search and Filters */}
+          <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
+            <CardBody>
+              <HStack spacing={4}>
+                <Input
+                  placeholder="🔍 Search scholarships..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  maxW="400px"
+                  borderColor="rgb(146,169,129)"
+                  _hover={{ borderColor: "rgb(92,127,66)" }}
+                  _focus={{
+                    borderColor: "rgb(9,76,9)",
+                    boxShadow: "0 0 0 1px rgb(9,76,9)"
+                  }}
+                />
+                
+                <Button
+                  leftIcon={<FiFilter />}
+                  variant="outline"
+                  borderColor="rgb(146,169,129)"
+                  color="rgb(78,61,30)"
+                  _hover={{ borderColor: "rgb(92,127,66)", bg: "rgb(193,212,178)" }}
+                >
+                  Filters
+                </Button>
+              </HStack>
+            </CardBody>
+          </Card>
+
+
+          {/* Table */}
+          {loading ? (
+            <ScholarshipTableSkeleton />
+          ) : (
+            <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
+              <CardBody p={0}>
+                {filteredScholarships.length === 0 ? (
+                  <Box textAlign="center" py={12}>
+                    <Text color="rgb(78,61,30)" fontSize="lg" mb={4}>
+                      {searchQuery ? "No scholarships found matching your search." : "No scholarships created yet."}
+                    </Text>
+                    {!searchQuery && (
+                      <Link href="/admin/scholarships/new">
+                        <Button
+                          bg="rgb(9,76,9)"
+                          color="white"
+                          _hover={{ bg: "rgb(92,127,66)" }}
+                        >
+                          Create Your First Scholarship
+                        </Button>
+                      </Link>
+                    )}
                   </Box>
-                  <Box>
-                    <Text mb={2} fontSize="sm" fontWeight="medium">Award Amount</Text>
-                    <Input type="number" value={form.award_amount} onChange={e => setForm(f => ({ ...f, award_amount: e.target.value }))} placeholder="Enter award amount" min={0} bg="white" borderColor="gray.300" />
-                  </Box>
-                  <Box>
-                    <Text mb={2} fontSize="sm" fontWeight="medium">Award Date</Text>
-                    <Input type="date" value={form.award_date} onChange={e => setForm(f => ({ ...f, award_date: e.target.value }))} bg="white" borderColor="gray.300" />
-                  </Box>
-                </Stack>
-              </Box>
-              <Box p={6} borderTop="1px" borderColor="gray.300" bg="gray.100">
-                <Stack direction="row" gap={3} justify="flex-end">
-                  <Button onClick={handleCloseModal} variant="ghost">Cancel</Button>
-                  <Button colorScheme="teal" type="submit">Update</Button>
-                </Stack>
-              </Box>
-            </form>
-          </Box>
-        </Box>
-      )}
+                ) : (
+                  <VStack spacing={4} align="stretch">
+                    {filteredScholarships.map((scholarship) => (
+                      <Card
+                        key={scholarship.id}
+                        bg="white"
+                        border="1px"
+                        borderColor="rgb(146,169,129)"
+                        _hover={{
+                          borderColor: "rgb(92,127,66)",
+                          boxShadow: "md",
+                          transform: "translateY(-1px)"
+                        }}
+                        transition="all 0.2s"
+                      >
+                        <CardBody>
+                          <HStack justify="space-between" align="start">
+                            {/* Scholarship Info */}
+                            <VStack align="start" spacing={2} flex={1}>
+                              <HStack justify="space-between" w="full">
+                                <Heading size="md" color="rgb(61,84,44)">
+                                  {scholarship.name}
+                                </Heading>
+                                <ScholarshipBadge status={scholarship.status} />
+                              </HStack>
+                              
+                              {scholarship.description && (
+                                <Text
+                                  color="rgb(78,61,30)"
+                                  opacity={0.8}
+                                >
+                                  {scholarship.description}
+                                </Text>
+                              )}
+                              
+                              <HStack spacing={6}>
+                                <VStack align="start" spacing={1}>
+                                  <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
+                                    Award Amount
+                                  </Text>
+                                  <Text fontWeight="bold" color="rgb(9,76,9)" fontSize="lg">
+                                    {formatCurrency(scholarship.amount)}
+                                  </Text>
+                                </VStack>
+                                
+                                <VStack align="start" spacing={1}>
+                                  <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
+                                    Deadline
+                                  </Text>
+                                  <Text color="rgb(78,61,30)">
+                                    {formatDate(scholarship.deadline)}
+                                  </Text>
+                                </VStack>
+                              </HStack>
+                            </VStack>
+                            
+                            {/* Actions */}
+                            <HStack spacing={2}>
+                              <Link href={`/admin/scholarships/${scholarship.id}`}>
+                                <IconButton
+                                  aria-label="View scholarship"
+                                  icon={<FiEye />}
+                                  size="sm"
+                                  variant="ghost"
+                                  color="rgb(9,76,9)"
+                                  _hover={{ bg: "rgb(193,212,178)" }}
+                                />
+                              </Link>
+                              <Link href={`/admin/scholarships/${scholarship.id}/edit`}>
+                                <IconButton
+                                  aria-label="Edit scholarship"
+                                  icon={<FiEdit3 />}
+                                  size="sm"
+                                  variant="ghost"
+                                  color="rgb(255,211,88)"
+                                  _hover={{ bg: "rgb(193,212,178)" }}
+                                />
+                              </Link>
+                              <IconButton
+                                aria-label="Delete scholarship"
+                                icon={<FiTrash2 />}
+                                size="sm"
+                                variant="ghost"
+                                color="rgb(94,60,23)"
+                                _hover={{ bg: "rgb(193,212,178)" }}
+                                onClick={() => handleDelete(scholarship)}
+                                isLoading={deletingId === scholarship.id}
+                              />
+                            </HStack>
+                          </HStack>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </VStack>
+                )}
+              </CardBody>
+            </Card>
+          )}
+        </VStack>
+      </Box>
     </Box>
+  );
+}
+
+export default function ScholarshipManagementPage() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <ScholarshipManagementContent />
+    </ProtectedRoute>
   );
 } 
