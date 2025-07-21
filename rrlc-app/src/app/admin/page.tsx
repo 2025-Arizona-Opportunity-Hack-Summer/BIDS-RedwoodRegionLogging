@@ -1,44 +1,209 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Box, Button, Heading, Spinner } from "@chakra-ui/react";
-import { supabase } from "@/lib/supabaseClient";
+import { 
+  Box, 
+  Button, 
+  Heading, 
+  VStack, 
+  Text, 
+  Grid, 
+  GridItem,
+  Card,
+  CardBody,
+  CardHeader
+} from "@chakra-ui/react";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
-export default function AdminPage() {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) {
-        router.replace("/login");
-      } else {
-        setUser(data.user);
-      }
-      setLoading(false);
-    };
-    getUser();
-  }, [router]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
-  if (loading) return <Spinner size="xl" mt={20} />;
+function AdminDashboardContent() {
+  const { profile } = useAuth();
 
   return (
-    <Box maxW="lg" mx="auto" mt={20} p={8} borderWidth={1} borderRadius="lg" boxShadow="md">
-      <Heading mb={6}>Admin Dashboard</Heading>
-      <Box mb={4}>Welcome, {user?.email}!</Box>
-      <Link href="/admin/users"><Button colorScheme="teal" mb={4} mr={2}>User Management</Button></Link>
-      <Link href="/admin/scholarships"><Button colorScheme="purple" mb={4} mr={2}>Scholarship Management</Button></Link>
-      <Link href="/admin/events"><Button colorScheme="orange" mb={4} mr={2}>Event Management</Button></Link>
-      <Button colorScheme="red" onClick={handleLogout}>Logout</Button>
+    <Box 
+      minHeight="100vh" 
+      bg="rgb(193,212,178)" // Light sage background
+      p={6}
+    >
+      <Box maxW="7xl" mx="auto">
+        <VStack spacing={8} align="stretch">
+          {/* Header */}
+          <Box>
+            <Heading 
+              size="2xl" 
+              color="rgb(61,84,44)" // Dark forest green
+              mb={2}
+            >
+              Admin Dashboard
+            </Heading>
+            <Text 
+              fontSize="lg" 
+              color="rgb(78,61,30)" // Primary text color
+            >
+              Welcome back, {profile?.full_name || "Administrator"}!
+            </Text>
+          </Box>
+
+          {/* Stats Overview */}
+          <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
+            <GridItem>
+              <Card 
+                bg="white"
+                border="2px"
+                borderColor="rgb(146,169,129)" // Medium sage
+                _hover={{ borderColor: "rgb(92,127,66)" }}
+              >
+                <CardBody textAlign="center">
+                  <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Total Applications</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">0</Text>
+                  <Text fontSize="sm" color="rgb(78,61,30)">This month</Text>
+                </CardBody>
+              </Card>
+            </GridItem>
+            
+            <GridItem>
+              <Card 
+                bg="white"
+                border="2px"
+                borderColor="rgb(146,169,129)"
+                _hover={{ borderColor: "rgb(92,127,66)" }}
+              >
+                <CardBody textAlign="center">
+                  <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Active Scholarships</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">0</Text>
+                  <Text fontSize="sm" color="rgb(78,61,30)">Currently open</Text>
+                </CardBody>
+              </Card>
+            </GridItem>
+            
+            <GridItem>
+              <Card 
+                bg="white"
+                border="2px"
+                borderColor="rgb(146,169,129)"
+                _hover={{ borderColor: "rgb(92,127,66)" }}
+              >
+                <CardBody textAlign="center">
+                  <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Awards Pending</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="rgb(255,211,88)">0</Text>
+                  <Text fontSize="sm" color="rgb(78,61,30)">Awaiting approval</Text>
+                </CardBody>
+              </Card>
+            </GridItem>
+            
+            <GridItem>
+              <Card 
+                bg="white"
+                border="2px"
+                borderColor="rgb(146,169,129)"
+                _hover={{ borderColor: "rgb(92,127,66)" }}
+              >
+                <CardBody textAlign="center">
+                  <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Total Awarded</Text>
+                  <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">$0</Text>
+                  <Text fontSize="sm" color="rgb(78,61,30)">This year</Text>
+                </CardBody>
+              </Card>
+            </GridItem>
+          </Grid>
+
+          {/* Quick Actions */}
+          <Card 
+            bg="white"
+            border="2px"
+            borderColor="rgb(146,169,129)"
+          >
+            <CardHeader>
+              <Heading 
+                size="lg" 
+                color="rgb(61,84,44)"
+              >
+                Quick Actions
+              </Heading>
+            </CardHeader>
+            <CardBody>
+              <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
+                <Link href="/admin/scholarships">
+                  <Button 
+                    size="lg"
+                    w="full"
+                    bg="rgb(9,76,9)" // Deep green
+                    color="white"
+                    _hover={{ bg: "rgb(92,127,66)" }}
+                  >
+                    Manage Scholarships
+                  </Button>
+                </Link>
+                
+                <Link href="/admin/applications">
+                  <Button 
+                    size="lg"
+                    w="full"
+                    bg="rgb(94,60,23)" // Rich brown
+                    color="white"
+                    _hover={{ bg: "rgb(78,61,30)" }}
+                  >
+                    Review Applications
+                  </Button>
+                </Link>
+                
+                <Link href="/admin/users">
+                  <Button 
+                    size="lg"
+                    w="full"
+                    bg="rgb(255,211,88)" // Golden yellow
+                    color="rgb(78,61,30)"
+                    _hover={{ bg: "rgb(197,155,60)" }}
+                  >
+                    User Management
+                  </Button>
+                </Link>
+                
+                <Link href="/admin/reports">
+                  <Button 
+                    size="lg"
+                    w="full"
+                    bg="rgb(146,169,129)" // Medium sage
+                    color="white"
+                    _hover={{ bg: "rgb(92,127,66)" }}
+                  >
+                    Generate Reports
+                  </Button>
+                </Link>
+              </Grid>
+            </CardBody>
+          </Card>
+
+          {/* Recent Activity */}
+          <Card 
+            bg="white"
+            border="2px"
+            borderColor="rgb(146,169,129)"
+          >
+            <CardHeader>
+              <Heading 
+                size="lg" 
+                color="rgb(61,84,44)"
+              >
+                Recent Activity
+              </Heading>
+            </CardHeader>
+            <CardBody>
+              <Text color="rgb(78,61,30)" textAlign="center" py={8}>
+                No recent activity to display.
+              </Text>
+            </CardBody>
+          </Card>
+        </VStack>
+      </Box>
     </Box>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
   );
 } 
