@@ -1,37 +1,105 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Box, Flex, Spacer, Button } from "@chakra-ui/react";
-import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { Box, Flex, Spacer, Button, Text, HStack, Badge } from "@chakra-ui/react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
-  const [user, setUser] = useState<any>(null);
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  const { user, profile, signOut, isAuthenticated, isAdmin } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
+    await signOut();
+    router.push("/login");
   };
 
   return (
-    <Box as="nav" p={4} borderBottomWidth={1} mb={4}>
+    <Box 
+      as="nav" 
+      p={4} 
+      bg="rgb(61,84,44)" // Dark forest green
+      color="white"
+      borderBottomWidth={2}
+      borderBottomColor="rgb(255,211,88)" // Golden yellow accent
+    >
       <Flex align="center">
-        <Box fontWeight="bold">RRLC App</Box>
+        <Link href="/">
+          <Text 
+            fontWeight="bold" 
+            fontSize="xl"
+            color="white"
+            _hover={{ color: "rgb(255,211,88)" }}
+            cursor="pointer"
+          >
+            RRLC Scholarship Portal
+          </Text>
+        </Link>
+        
         <Spacer />
-        {user ? (
-          <Button colorScheme="red" size="sm" onClick={handleLogout}>Logout</Button>
-        ) : (
-          <Link href="/login"><Button colorScheme="teal" size="sm">Login</Button></Link>
-        )}
+        
+        <HStack spacing={4}>
+          {isAuthenticated() ? (
+            <>
+              {isAdmin() && (
+                <Link href="/admin">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    color="white"
+                    _hover={{ 
+                      bg: "rgb(92,127,66)",
+                      color: "white"
+                    }}
+                  >
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
+              
+              <Box textAlign="right">
+                <Text fontSize="sm" color="rgb(255,211,88)">
+                  {profile?.full_name || user?.email}
+                </Text>
+                {profile?.role && (
+                  <Badge 
+                    size="sm" 
+                    bg="rgb(255,211,88)"
+                    color="rgb(78,61,30)"
+                    textTransform="capitalize"
+                  >
+                    {profile.role}
+                  </Badge>
+                )}
+              </Box>
+              
+              <Button 
+                size="sm" 
+                onClick={handleLogout}
+                bg="rgb(94,60,23)" // Rich brown
+                color="white"
+                _hover={{ 
+                  bg: "rgb(78,61,30)" // Darker brown on hover
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Link href="/login">
+              <Button 
+                size="sm"
+                bg="rgb(9,76,9)" // Deep green
+                color="white"
+                _hover={{ 
+                  bg: "rgb(92,127,66)" // Forest accent on hover
+                }}
+              >
+                Login
+              </Button>
+            </Link>
+          )}
+        </HStack>
       </Flex>
     </Box>
   );

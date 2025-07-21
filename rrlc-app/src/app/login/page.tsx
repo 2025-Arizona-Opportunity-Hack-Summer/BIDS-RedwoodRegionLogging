@@ -1,89 +1,209 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Box, 
   Button, 
   Input, 
-  Heading, 
-  Stack,
-  Text 
+  Heading,
+  Text,
+  VStack,
+  Link
 } from "@chakra-ui/react";
-import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { signIn, signUp, isAuthenticated, isAdmin } = useAuth();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.push(isAdmin() ? "/admin" : "/");
+    }
+  }, [isAuthenticated, isAdmin, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push("/admin");
+    try {
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          setError(error.message);
+        } else {
+          router.push("/admin");
+        }
+      } else {
+        const { error } = await signUp(email, password, fullName);
+        if (error) {
+          setError(error.message);
+        } else {
+          setError("Please check your email to verify your account.");
+        }
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
     }
+    
+    setLoading(false);
   };
 
   return (
-    <Box maxW="sm" mx="auto" mt={20} p={8} borderWidth={1} borderRadius="lg" boxShadow="md">
-      <Heading mb={6} size="lg" textAlign="center">
-        Admin Login
-      </Heading>
-      <form onSubmit={handleLogin}>
-        <Stack gap={4}>
-          <Box>
-            <Text mb={2} fontSize="sm" fontWeight="medium">
-              Email address <Text as="span" color="red.500">*</Text>
-            </Text>
-            <Input 
-              type="email" 
-              value={email} 
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
-            />
-          </Box>
-          
-          <Box>
-            <Text mb={2} fontSize="sm" fontWeight="medium">
-              Password <Text as="span" color="red.500">*</Text>
-            </Text>
-            <Input 
-              type="password" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-            />
-          </Box>
-          
-          {error && (
-            <Box p={3} bg="red.50" border="1px" borderColor="red.200" borderRadius="md">
-              <Text color="red.700" fontSize="sm">
-                {error}
-              </Text>
-            </Box>
-          )}
-          
-          <Button 
-            colorScheme="teal" 
-            type="submit" 
-            loading={loading}
-            w="full"
+    <Box
+      minHeight="100vh"
+      bg="rgb(193,212,178)" // Light sage background
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      p={4}
+    >
+      <Box 
+        maxW="md" 
+        w="full"
+        bg="white"
+        p={8} 
+        borderRadius="lg" 
+        boxShadow="lg"
+        border="2px"
+        borderColor="rgb(146,169,129)" // Medium sage border
+      >
+        <VStack spacing={6}>
+          <Heading 
+            size="xl" 
+            textAlign="center"
+            color="rgb(61,84,44)" // Dark forest green
           >
-            Login
-          </Button>
-        </Stack>
-      </form>
+            RRLC Scholarship Portal
+          </Heading>
+          
+          <Text 
+            textAlign="center" 
+            color="rgb(78,61,30)" // Primary text color
+            fontSize="md"
+          >
+            {isLogin ? "Sign in to your account" : "Create your account"}
+          </Text>
+
+          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+            <VStack spacing={4}>
+              {!isLogin && (
+                <Box w="full">
+                  <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                    Full Name <Text as="span" color="red.500">*</Text>
+                  </Text>
+                  <Input 
+                    type="text" 
+                    value={fullName} 
+                    onChange={e => setFullName(e.target.value)}
+                    required
+                    placeholder="Enter your full name"
+                    borderColor="rgb(146,169,129)"
+                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                    _focus={{ 
+                      borderColor: "rgb(9,76,9)",
+                      boxShadow: "0 0 0 1px rgb(9,76,9)"
+                    }}
+                  />
+                </Box>
+              )}
+              
+              <Box w="full">
+                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                  Email Address <Text as="span" color="red.500">*</Text>
+                </Text>
+                <Input 
+                  type="email" 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  placeholder="Enter your email"
+                  borderColor="rgb(146,169,129)"
+                  _hover={{ borderColor: "rgb(92,127,66)" }}
+                  _focus={{ 
+                    borderColor: "rgb(9,76,9)",
+                    boxShadow: "0 0 0 1px rgb(9,76,9)"
+                  }}
+                />
+              </Box>
+              
+              <Box w="full">
+                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                  Password <Text as="span" color="red.500">*</Text>
+                </Text>
+                <Input 
+                  type="password" 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  borderColor="rgb(146,169,129)"
+                  _hover={{ borderColor: "rgb(92,127,66)" }}
+                  _focus={{ 
+                    borderColor: "rgb(9,76,9)",
+                    boxShadow: "0 0 0 1px rgb(9,76,9)"
+                  }}
+                />
+              </Box>
+              
+              {error && (
+                <Box 
+                  p={3} 
+                  bg="red.50" 
+                  border="1px" 
+                  borderColor="red.200" 
+                  borderRadius="md"
+                  w="full"
+                >
+                  <Text color="red.700" fontSize="sm">
+                    {error}
+                  </Text>
+                </Box>
+              )}
+              
+              <Button 
+                type="submit" 
+                loading={loading}
+                w="full"
+                bg="rgb(9,76,9)" // Deep green
+                color="white"
+                _hover={{ 
+                  bg: "rgb(92,127,66)" // Forest accent on hover
+                }}
+                _active={{ 
+                  bg: "rgb(9,76,9)" 
+                }}
+                size="lg"
+              >
+                {isLogin ? "Sign In" : "Create Account"}
+              </Button>
+            </VStack>
+          </form>
+
+          <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
+            <Text color="rgb(78,61,30)" fontSize="sm">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            </Text>
+            <Link 
+              onClick={() => setIsLogin(!isLogin)}
+              color="rgb(9,76,9)"
+              fontWeight="medium"
+              _hover={{ color: "rgb(92,127,66)" }}
+              cursor="pointer"
+            >
+              {isLogin ? "Sign up here" : "Sign in here"}
+            </Link>
+          </Box>
+        </VStack>
+      </Box>
     </Box>
   );
 }

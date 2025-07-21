@@ -1,11 +1,12 @@
 import './globals.css'
 import { Provider } from '@/components/ui/provider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import type { Metadata } from 'next'
 import Navbar from '@/components/navbar'
 
 export const metadata: Metadata = {
-  title: 'RRLC App',
-  description: 'Redwood Region Logging Conference App',
+  title: 'RRLC Scholarship Portal',
+  description: 'Redwood Region Logging Conference Scholarship Management System',
 }
 
 export default function RootLayout({
@@ -18,8 +19,10 @@ export default function RootLayout({
       <head />
       <body>
         <Provider>
-          <Navbar />
-          {children}
+          <AuthProvider>
+            <Navbar />
+            {children}
+          </AuthProvider>
         </Provider>
       </body>
     </html>
