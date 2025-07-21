@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(timeout 10 curl http://localhost:3000)",
+      "Bash(/dev/null)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

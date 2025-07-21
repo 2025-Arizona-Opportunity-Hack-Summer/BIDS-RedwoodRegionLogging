@@ -23,13 +23,20 @@ export function usePublicScholarships() {
     setLoading(true);
     setError(null);
     
-    const { data, error: fetchError } = await scholarshipService.getActiveScholarships();
-    
-    if (fetchError) {
-      setError('Failed to load scholarships');
-      console.error('Error fetching active scholarships:', fetchError);
-    } else {
-      setScholarships(data || []);
+    try {
+      const { data, error: fetchError } = await scholarshipService.getActiveScholarships();
+      
+      if (fetchError) {
+        setError('Failed to load scholarships. Please ensure the database is configured.');
+        console.error('Error fetching active scholarships:', fetchError);
+        setScholarships([]);
+      } else {
+        setScholarships(data || []);
+      }
+    } catch (err) {
+      setError('Unable to connect to database. Please check your configuration.');
+      console.error('Unexpected error:', err);
+      setScholarships([]);
     }
     
     setLoading(false);

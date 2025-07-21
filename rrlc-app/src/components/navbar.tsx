@@ -39,6 +39,21 @@ export default function Navbar() {
         <Spacer />
         
         <HStack spacing={4}>
+          {/* Browse Scholarships - Always visible */}
+          <Link href="/scholarships">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              color="white"
+              _hover={{ 
+                bg: "rgb(92,127,66)",
+                color: "white"
+              }}
+            >
+              Browse Scholarships
+            </Button>
+          </Link>
+
           {isAuthenticated() ? (
             <>
               {isAdmin() && (

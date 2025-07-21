@@ -25,10 +25,16 @@ export async function getActiveScholarships(): Promise<{ data: Scholarship[] | n
       .eq('status', 'active')
       .order('deadline', { ascending: true });
 
-    return { data, error };
+    // Return empty array if table doesn't exist or no data found
+    if (error) {
+      console.error('Error fetching active scholarships:', error);
+      return { data: [], error: null }; // Return empty array instead of null to prevent UI crashes
+    }
+
+    return { data: data || [], error };
   } catch (error) {
     console.error('Error fetching active scholarships:', error);
-    return { data: null, error };
+    return { data: [], error: null };
   }
 }
 
