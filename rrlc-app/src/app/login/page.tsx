@@ -77,7 +77,7 @@ export default function LoginPage() {
         border="2px"
         borderColor="rgb(146,169,129)" // Medium sage border
       >
-        <VStack spacing={6}>
+        <VStack gap={6}>
           <Heading 
             size="xl" 
             textAlign="center"
@@ -95,7 +95,7 @@ export default function LoginPage() {
           </Text>
 
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            <VStack spacing={4}>
+            <VStack gap={4}>
               {!isLogin && (
                 <Box w="full">
                   <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">

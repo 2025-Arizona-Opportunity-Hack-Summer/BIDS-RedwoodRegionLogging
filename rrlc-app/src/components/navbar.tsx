@@ -10,10 +10,8 @@ import {
   Text, 
   HStack, 
   VStack,
-  Badge, 
-  IconButton
+  Badge
 } from "@chakra-ui/react";
-import { FiMenu, FiX } from "react-icons/fi";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
@@ -49,7 +47,7 @@ export default function Navbar() {
         <Spacer />
         
         {/* Desktop Navigation */}
-        <HStack spacing={4} display={{ base: "none", md: "flex" }}>
+        <HStack gap={4} display={{ base: "none", md: "flex" }}>
           <Link href="/scholarships">
             <Button 
               variant="ghost" 
@@ -128,7 +126,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation - Simplified */}
         <VStack 
-          spacing={2} 
+          gap={2} 
           display={{ base: "flex", md: "none" }}
           position="absolute"
           top="100%"

@@ -29,7 +29,7 @@ export function ProtectedRoute({
         minHeight="200px"
         bg="rgb(193,212,178)" // Light sage background
       >
-        <VStack spacing={4}>
+        <VStack gap={4}>
           <Spinner 
             size="lg" 
             color="rgb(9,76,9)" // Deep green
@@ -72,7 +72,7 @@ export function ProtectedRoute({
         bg="rgb(193,212,178)"
         p={8}
       >
-        <VStack spacing={4} textAlign="center">
+        <VStack gap={4} textAlign="center">
           <Text 
             fontSize="xl" 
             fontWeight="bold" 

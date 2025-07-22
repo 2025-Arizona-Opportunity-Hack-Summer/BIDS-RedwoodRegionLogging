@@ -2,22 +2,22 @@ import { supabase } from '@/lib/supabaseClient';
 import { Scholarship, CreateScholarshipData, UpdateScholarshipData } from '@/types/database';
 
 // Get all scholarships (admin view)
-export async function getAllScholarships(): Promise<{ data: Scholarship[] | null; error: any }> {
+export async function getAllScholarships(): Promise<{ data: Scholarship[] | null; error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('scholarships')
       .select('*')
       .order('created_at', { ascending: false });
 
-    return { data, error };
+    return { data, error: error?.message || null };
   } catch (error) {
     console.error('Error fetching scholarships:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Get active scholarships (public view)
-export async function getActiveScholarships(): Promise<{ data: Scholarship[] | null; error: any }> {
+export async function getActiveScholarships(): Promise<{ data: Scholarship[] | null; error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('scholarships')
@@ -39,7 +39,7 @@ export async function getActiveScholarships(): Promise<{ data: Scholarship[] | n
 }
 
 // Get single scholarship by ID
-export async function getScholarshipById(id: string): Promise<{ data: Scholarship | null; error: any }> {
+export async function getScholarshipById(id: string): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('scholarships')
@@ -47,15 +47,15 @@ export async function getScholarshipById(id: string): Promise<{ data: Scholarshi
       .eq('id', id)
       .single();
 
-    return { data, error };
+    return { data, error: error?.message || null };
   } catch (error) {
     console.error('Error fetching scholarship:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Create new scholarship
-export async function createScholarship(scholarshipData: CreateScholarshipData): Promise<{ data: Scholarship | null; error: any }> {
+export async function createScholarship(scholarshipData: CreateScholarshipData): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -73,15 +73,15 @@ export async function createScholarship(scholarshipData: CreateScholarshipData):
       .select()
       .single();
 
-    return { data, error };
+    return { data, error: error?.message || null };
   } catch (error) {
     console.error('Error creating scholarship:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Update existing scholarship
-export async function updateScholarship(scholarshipData: UpdateScholarshipData): Promise<{ data: Scholarship | null; error: any }> {
+export async function updateScholarship(scholarshipData: UpdateScholarshipData): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
     const { id, ...updateData } = scholarshipData;
     
@@ -92,45 +92,45 @@ export async function updateScholarship(scholarshipData: UpdateScholarshipData):
       .select()
       .single();
 
-    return { data, error };
+    return { data, error: error?.message || null };
   } catch (error) {
     console.error('Error updating scholarship:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Soft delete scholarship (set status to inactive)
-export async function deleteScholarship(id: string): Promise<{ success: boolean; error: any }> {
+export async function deleteScholarship(id: string): Promise<{ success: boolean; error: string | null }> {
   try {
     const { error } = await supabase
       .from('scholarships')
       .update({ status: 'inactive' })
       .eq('id', id);
 
-    return { success: !error, error };
+    return { success: !error, error: error?.message || null };
   } catch (error) {
     console.error('Error deleting scholarship:', error);
-    return { success: false, error };
+    return { success: false, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Hard delete scholarship (only for testing - remove in production)
-export async function hardDeleteScholarship(id: string): Promise<{ success: boolean; error: any }> {
+export async function hardDeleteScholarship(id: string): Promise<{ success: boolean; error: string | null }> {
   try {
     const { error } = await supabase
       .from('scholarships')
       .delete()
       .eq('id', id);
 
-    return { success: !error, error };
+    return { success: !error, error: error?.message || null };
   } catch (error) {
     console.error('Error hard deleting scholarship:', error);
-    return { success: false, error };
+    return { success: false, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
 // Search scholarships
-export async function searchScholarships(query: string): Promise<{ data: Scholarship[] | null; error: any }> {
+export async function searchScholarships(query: string): Promise<{ data: Scholarship[] | null; error: string | null }> {
   try {
     const { data, error } = await supabase
       .from('scholarships')
@@ -139,10 +139,10 @@ export async function searchScholarships(query: string): Promise<{ data: Scholar
       .eq('status', 'active')
       .order('deadline', { ascending: true });
 
-    return { data, error };
+    return { data, error: error?.message || null };
   } catch (error) {
     console.error('Error searching scholarships:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
 
@@ -154,14 +154,14 @@ export async function getScholarshipStats(): Promise<{
     inactive: number;
     totalAmount: number;
   } | null; 
-  error: any 
+  error: string | null 
 }> {
   try {
     const { data, error } = await supabase
       .from('scholarships')
       .select('status, amount');
 
-    if (error) return { data: null, error };
+    if (error) return { data: null, error: error.message || 'Unknown error' };
 
     const stats = {
       total: data.length,
@@ -173,6 +173,6 @@ export async function getScholarshipStats(): Promise<{
     return { data: stats, error: null };
   } catch (error) {
     console.error('Error fetching scholarship stats:', error);
-    return { data: null, error };
+    return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }

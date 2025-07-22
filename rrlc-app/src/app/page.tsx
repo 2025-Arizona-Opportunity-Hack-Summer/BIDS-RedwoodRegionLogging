@@ -39,8 +39,8 @@ function FeatureCard({ icon, title, description }: { icon: React.ElementType; ti
       }}
       transition="all 0.3s ease"
     >
-      <VStack align="start" spacing={4}>
-        <Icon as={icon} size={8} color="rgb(9,76,9)" />
+      <VStack align="start" gap={4}>
+        <Icon as={icon} size="2xl" color="rgb(9,76,9)" />
         <Heading size="md" color="rgb(61,84,44)">
           {title}
         </Heading>
@@ -90,7 +90,7 @@ export default function HomePage() {
         />
         
         <Container maxW="6xl" position="relative">
-          <VStack spacing={8} textAlign="center">
+          <VStack gap={8} textAlign="center">
             <Badge
               bg="rgba(255,255,255,0.2)"
               color="white"
@@ -115,7 +115,7 @@ export default function HomePage() {
               educational scholarships and career development opportunities.
             </Text>
             
-            <HStack spacing={6} flexWrap="wrap" justify="center">
+            <HStack gap={6} flexWrap="wrap" justify="center">
               <Link href="/scholarships">
                 <Button
                   size="lg"
@@ -125,11 +125,11 @@ export default function HomePage() {
                     bg: "rgb(193,212,178)",
                     transform: "translateY(-2px)"
                   }}
-                  rightIcon={<FiArrowRight />}
                   fontWeight="bold"
                   px={8}
                 >
                   Explore Scholarships
+                  <FiArrowRight style={{ marginLeft: '8px' }} />
                 </Button>
               </Link>
               
@@ -156,7 +156,7 @@ export default function HomePage() {
       {/* Stats Section */}
       <Box bg="rgb(9,76,9)" py={16}>
         <Container maxW="6xl">
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={8}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} gap={8}>
             <StatCard number="$250K+" label="Awarded Annually" />
             <StatCard number="150+" label="Students Supported" />
             <StatCard number="25+" label="Partner Organizations" />
@@ -168,8 +168,8 @@ export default function HomePage() {
       {/* Features Section */}
       <Box py={24} px={6}>
         <Container maxW="6xl">
-          <VStack spacing={16}>
-            <VStack spacing={4} textAlign="center" pb={8}>
+          <VStack gap={16}>
+            <VStack gap={4} textAlign="center" pb={8}>
               <Heading size="2xl" color="rgb(61,84,44)">
                 Why Choose RRLC Scholarships?
               </Heading>
@@ -223,8 +223,8 @@ export default function HomePage() {
       {/* CTA Section */}
       <Box bg="white" py={20} px={6}>
         <Container maxW="4xl" textAlign="center">
-          <VStack spacing={8}>
-            <VStack spacing={4}>
+          <VStack gap={8}>
+            <VStack gap={4}>
               <Heading size="2xl" color="rgb(61,84,44)">
                 Ready to Invest in Your Future?
               </Heading>
@@ -234,17 +234,17 @@ export default function HomePage() {
               </Text>
             </VStack>
             
-            <HStack spacing={4} flexWrap="wrap" justify="center">
+            <HStack gap={4} flexWrap="wrap" justify="center">
               <Link href="/scholarships">
                 <Button
                   size="lg"
                   bg="rgb(9,76,9)"
                   color="white"
                   _hover={{ bg: "rgb(92,127,66)" }}
-                  rightIcon={<FiArrowRight />}
                   px={8}
                 >
                   View Available Scholarships
+                  <FiArrowRight style={{ marginLeft: '8px' }} />
                 </Button>
               </Link>
               

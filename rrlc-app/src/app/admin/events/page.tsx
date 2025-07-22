@@ -13,7 +13,7 @@ import {
   CloseButton,
   Badge
 } from "@chakra-ui/react";
-import { FiPlus, FiEdit2, FiUsers, FiCalendar } from "react-icons/fi";
+import { FiPlus, FiEdit2, FiUsers } from "react-icons/fi";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
@@ -148,8 +148,8 @@ export default function EventsPage() {
         mb={4} 
         onClick={handleOpenAdd}
         size="md"
-        leftIcon={<FiPlus />}
       >
+        <FiPlus style={{ marginRight: '8px' }} />
         Add Event
       </Button>
 

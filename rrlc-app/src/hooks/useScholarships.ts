@@ -52,7 +52,7 @@ export function useScholarships() {
   };
 
   const deleteScholarship = async (id: string) => {
-    const { success, error: deleteError } = await scholarshipService.deleteScholarship(id);
+    const { success } = await scholarshipService.deleteScholarship(id);
     
     if (!success) {
       throw new Error('Failed to delete scholarship');

@@ -25,9 +25,9 @@ function ScholarshipTableSkeleton() {
   return (
     <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
       <CardBody>
-        <VStack spacing={4}>
+        <VStack gap={4}>
           {[...Array(5)].map((_, i) => (
-            <HStack key={i} w="full" spacing={4}>
+            <HStack key={i} w="full" gap={4}>
               <Skeleton height="20px" width="200px" />
               <Skeleton height="20px" width="100px" />
               <Skeleton height="20px" width="150px" />
@@ -120,7 +120,7 @@ function ScholarshipManagementContent() {
       p={6}
     >
       <Box maxW="7xl" mx="auto">
-        <VStack spacing={8} align="stretch">
+        <VStack gap={8} align="stretch">
           {/* Header */}
           <HStack justify="space-between" align="center">
             <Box>
@@ -157,7 +157,7 @@ function ScholarshipManagementContent() {
           {/* Search and Filters */}
           <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
             <CardBody>
-              <HStack spacing={4}>
+              <HStack gap={4}>
                 <Input
                   placeholder="🔍 Search scholarships..."
                   value={searchQuery}
@@ -200,7 +200,7 @@ function ScholarshipManagementContent() {
                     )}
                   </Box>
                 ) : (
-                  <VStack spacing={4} align="stretch">
+                  <VStack gap={4} align="stretch">
                     {filteredScholarships.map((scholarship) => (
                       <Card
                         key={scholarship.id}
@@ -217,7 +217,7 @@ function ScholarshipManagementContent() {
                         <CardBody>
                           <HStack justify="space-between" align="start">
                             {/* Scholarship Info */}
-                            <VStack align="start" spacing={2} flex={1}>
+                            <VStack align="start" gap={2} flex={1}>
                               <HStack justify="space-between" w="full">
                                 <Heading size="md" color="rgb(61,84,44)">
                                   {scholarship.name}
@@ -234,8 +234,8 @@ function ScholarshipManagementContent() {
                                 </Text>
                               )}
                               
-                              <HStack spacing={6}>
-                                <VStack align="start" spacing={1}>
+                              <HStack gap={6}>
+                                <VStack align="start" gap={1}>
                                   <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
                                     Award Amount
                                   </Text>
@@ -244,7 +244,7 @@ function ScholarshipManagementContent() {
                                   </Text>
                                 </VStack>
                                 
-                                <VStack align="start" spacing={1}>
+                                <VStack align="start" gap={1}>
                                   <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
                                     Deadline
                                   </Text>
@@ -256,7 +256,7 @@ function ScholarshipManagementContent() {
                             </VStack>
                             
                             {/* Actions */}
-                            <HStack spacing={2}>
+                            <HStack gap={2}>
                               <Link href={`/admin/scholarships/${scholarship.id}`}>
                                 <IconButton
                                   aria-label="View scholarship"

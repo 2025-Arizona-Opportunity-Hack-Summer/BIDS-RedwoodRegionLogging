@@ -69,7 +69,7 @@ export function useApplicationForm(scholarshipId: string) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const updateFormData = useCallback((field: keyof CreateApplicationData, value: any) => {
+  const updateFormData = useCallback((field: keyof CreateApplicationData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error when user starts typing

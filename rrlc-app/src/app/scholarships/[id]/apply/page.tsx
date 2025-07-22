@@ -11,6 +11,7 @@ import {
   Text,
   Input,
   Textarea,
+  Select,
   Card,
   CardBody,
   CardHeader,
@@ -30,6 +31,13 @@ import {
 import { useApplicationForm } from "@/hooks/useApplicationForm";
 import { getScholarshipById } from "@/services/scholarships";
 import { Scholarship } from "@/types/database";
+import { CreateApplicationData } from "@/services/applications";
+
+interface StepComponentProps {
+  formData: CreateApplicationData;
+  updateFormData: (field: keyof CreateApplicationData, value: string | number) => void;
+  errors: Record<string, string>;
+}
 
 function ProgressBar({ progress }: { progress: number }) {
   return (
@@ -45,12 +53,18 @@ function ProgressBar({ progress }: { progress: number }) {
   );
 }
 
-function StepIndicator({ steps, currentStep, goToStep }: any) {
+interface StepIndicatorProps {
+  steps: { id: string; title: string; description: string }[];
+  currentStep: number;
+  goToStep: (step: number) => void;
+}
+
+function StepIndicator({ steps, currentStep, goToStep }: StepIndicatorProps) {
   const icons = [FiUser, FiBook, FiEdit3, FiPlus, FiCheckCircle];
   
   return (
-    <HStack spacing={{ base: 2, md: 4 }} justify="center" wrap="wrap">
-      {steps.map((step: any, index: number) => {
+    <HStack gap={{ base: 2, md: 4 }} justify="center" wrap="wrap">
+      {steps.map((step, index: number) => {
         const Icon = icons[index];
         const isActive = index === currentStep;
         const isCompleted = index < currentStep;
@@ -59,7 +73,7 @@ function StepIndicator({ steps, currentStep, goToStep }: any) {
         return (
           <VStack
             key={step.id}
-            spacing={2}
+            gap={2}
             cursor={isClickable ? "pointer" : "default"}
             onClick={isClickable ? () => goToStep(index) : undefined}
             opacity={isClickable ? 1 : 0.5}
@@ -97,10 +111,10 @@ function StepIndicator({ steps, currentStep, goToStep }: any) {
   );
 }
 
-function PersonalInfoStep({ formData, updateFormData, errors }: any) {
+function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack spacing={6} align="stretch">
-      <HStack spacing={4}>
+    <VStack gap={6} align="stretch">
+      <HStack gap={4}>
         <Box flex={1}>
           <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
             First Name *
@@ -144,7 +158,7 @@ function PersonalInfoStep({ formData, updateFormData, errors }: any) {
         </Box>
       </HStack>
 
-      <HStack spacing={4}>
+      <HStack gap={4}>
         <Box flex={1}>
           <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
             Email Address *
@@ -211,7 +225,7 @@ function PersonalInfoStep({ formData, updateFormData, errors }: any) {
         )}
       </Box>
 
-      <HStack spacing={4}>
+      <HStack gap={4}>
         <Box flex={2}>
           <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
             City *
@@ -296,9 +310,9 @@ function PersonalInfoStep({ formData, updateFormData, errors }: any) {
   );
 }
 
-function AcademicInfoStep({ formData, updateFormData, errors }: any) {
+function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack spacing={6} align="stretch">
+    <VStack gap={6} align="stretch">
       <Box>
         <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
           School/Institution *
@@ -321,32 +335,29 @@ function AcademicInfoStep({ formData, updateFormData, errors }: any) {
         )}
       </Box>
 
-      <HStack spacing={4}>
+      <HStack gap={4}>
         <Box flex={1}>
           <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
             Academic Level *
           </Text>
-          <Box
-            as="select"
+          <select
             value={formData.academic_level}
-            onChange={(e) => updateFormData('academic_level', e.target.value)}
-            p={3}
-            borderWidth="1px"
-            borderColor="rgb(146,169,129)"
-            borderRadius="md"
-            width="full"
-            bg="white"
-            _hover={{ borderColor: "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: "rgb(9,76,9)",
-              boxShadow: "0 0 0 1px rgb(9,76,9)"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateFormData('academic_level', e.target.value)}
+            style={{
+              padding: '12px',
+              borderWidth: '1px',
+              borderColor: 'rgb(146,169,129)',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              fontSize: '18px',
+              width: '100%'
             }}
           >
             <option value="high_school">High School</option>
             <option value="undergraduate">Undergraduate</option>
             <option value="graduate">Graduate</option>
             <option value="other">Other</option>
-          </Box>
+          </select>
         </Box>
         
         <Box flex={1}>
@@ -374,7 +385,7 @@ function AcademicInfoStep({ formData, updateFormData, errors }: any) {
         </Box>
       </HStack>
 
-      <HStack spacing={4}>
+      <HStack gap={4}>
         <Box flex={2}>
           <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
             Major/Field of Study *
@@ -407,7 +418,7 @@ function AcademicInfoStep({ formData, updateFormData, errors }: any) {
             min="0"
             max="4"
             value={formData.gpa || ''}
-            onChange={(e) => updateFormData('gpa', e.target.value ? parseFloat(e.target.value) : undefined)}
+            onChange={(e) => updateFormData('gpa', e.target.value ? parseFloat(e.target.value) : 0)}
             placeholder="e.g., 3.5"
             borderColor={errors.gpa ? "red.300" : "rgb(146,169,129)"}
             _hover={{ borderColor: errors.gpa ? "red.400" : "rgb(92,127,66)" }}
@@ -427,9 +438,9 @@ function AcademicInfoStep({ formData, updateFormData, errors }: any) {
   );
 }
 
-function EssayStep({ formData, updateFormData, errors }: any) {
+function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack spacing={6} align="stretch">
+    <VStack gap={6} align="stretch">
       <Box>
         <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
           Career Goals and Aspirations * (minimum 50 characters)
@@ -549,9 +560,9 @@ function EssayStep({ formData, updateFormData, errors }: any) {
   );
 }
 
-function AdditionalInfoStep({ formData, updateFormData }: any) {
+function AdditionalInfoStep({ formData, updateFormData }: StepComponentProps) {
   return (
-    <VStack spacing={6} align="stretch">
+    <VStack gap={6} align="stretch">
       <Box>
         <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
           Work Experience (optional)
@@ -612,7 +623,7 @@ function AdditionalInfoStep({ formData, updateFormData }: any) {
   );
 }
 
-function ReviewStep({ formData, scholarship }: { formData: any; scholarship: Scholarship }) {
+function ReviewStep({ formData, scholarship }: { formData: CreateApplicationData; scholarship: Scholarship }) {
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "Amount varies";
     return new Intl.NumberFormat('en-US', {
@@ -622,11 +633,11 @@ function ReviewStep({ formData, scholarship }: { formData: any; scholarship: Sch
   };
 
   return (
-    <VStack spacing={6} align="stretch">
+    <VStack gap={6} align="stretch">
       {/* Scholarship Info */}
-      <Card bg="rgb(193,212,178)" border="2px" borderColor="rgb(146,169,129)">
+      <Box bg="rgb(193,212,178)" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
         <CardBody>
-          <VStack spacing={3} align="start">
+          <VStack gap={3} align="start">
             <Heading size="md" color="rgb(61,84,44)">
               Scholarship: {scholarship.name}
             </Heading>
@@ -643,68 +654,68 @@ function ReviewStep({ formData, scholarship }: { formData: any; scholarship: Sch
             </HStack>
           </VStack>
         </CardBody>
-      </Card>
+      </Box>
 
       {/* Application Review */}
-      <VStack spacing={4} align="stretch">
+      <VStack gap={4} align="stretch">
         <Heading size="md" color="rgb(61,84,44)">
           Your Application Summary
         </Heading>
         
-        <Card>
-          <CardHeader pb={2}>
+        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
+          <Box pb={2}>
             <Heading size="sm" color="rgb(61,84,44)">Personal Information</Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <VStack spacing={2} align="start" fontSize="sm">
+          </Box>
+          <Box pt={0}>
+            <VStack gap={2} align="start" fontSize="sm">
               <Text><strong>Name:</strong> {formData.first_name} {formData.last_name}</Text>
               <Text><strong>Email:</strong> {formData.email}</Text>
               <Text><strong>Phone:</strong> {formData.phone}</Text>
               <Text><strong>Address:</strong> {formData.address}, {formData.city}, {formData.state} {formData.zip}</Text>
             </VStack>
-          </CardBody>
-        </Card>
+          </Box>
+        </Box>
 
-        <Card>
-          <CardHeader pb={2}>
+        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
+          <Box pb={2}>
             <Heading size="sm" color="rgb(61,84,44)">Academic Information</Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <VStack spacing={2} align="start" fontSize="sm">
+          </Box>
+          <Box pt={0}>
+            <VStack gap={2} align="start" fontSize="sm">
               <Text><strong>School:</strong> {formData.school}</Text>
               <Text><strong>Major:</strong> {formData.major}</Text>
               <Text><strong>Academic Level:</strong> {formData.academic_level.replace('_', ' ')}</Text>
               <Text><strong>Graduation Year:</strong> {formData.graduation_year}</Text>
               {formData.gpa && <Text><strong>GPA:</strong> {formData.gpa}</Text>}
             </VStack>
-          </CardBody>
-        </Card>
+          </Box>
+        </Box>
 
-        <Card>
-          <CardHeader pb={2}>
+        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
+          <Box pb={2}>
             <Heading size="sm" color="rgb(61,84,44)">Essay Responses</Heading>
-          </CardHeader>
-          <CardBody pt={0}>
-            <VStack spacing={3} align="start" fontSize="sm">
+          </Box>
+          <Box pt={0}>
+            <VStack gap={3} align="start" fontSize="sm">
               <Box>
                 <Text fontWeight="bold">Career Goals:</Text>
-                <Text noOfLines={3}>{formData.career_goals}</Text>
+                <Text>{formData.career_goals}</Text>
               </Box>
               <Box>
                 <Text fontWeight="bold">Financial Need:</Text>
-                <Text noOfLines={3}>{formData.financial_need}</Text>
+                <Text>{formData.financial_need}</Text>
               </Box>
               <Box>
                 <Text fontWeight="bold">Community Involvement:</Text>
-                <Text noOfLines={3}>{formData.community_involvement}</Text>
+                <Text>{formData.community_involvement}</Text>
               </Box>
               <Box>
                 <Text fontWeight="bold">Why You Deserve This Scholarship:</Text>
-                <Text noOfLines={3}>{formData.why_deserve_scholarship}</Text>
+                <Text>{formData.why_deserve_scholarship}</Text>
               </Box>
             </VStack>
-          </CardBody>
-        </Card>
+          </Box>
+        </Box>
       </VStack>
     </VStack>
   );
@@ -781,7 +792,7 @@ export default function ScholarshipApplicationPage() {
     return (
       <Box minHeight="100vh" bg="rgb(193,212,178)" p={6}>
         <Box maxW="4xl" mx="auto">
-          <VStack spacing={8}>
+          <VStack gap={8}>
             <Skeleton height="60px" width="300px" />
             <Skeleton height="400px" width="100%" />
           </VStack>
@@ -794,7 +805,7 @@ export default function ScholarshipApplicationPage() {
     return (
       <Box minHeight="100vh" bg="rgb(193,212,178)" p={6}>
         <Box maxW="4xl" mx="auto" textAlign="center" py={20}>
-          <VStack spacing={4}>
+          <VStack gap={4}>
             <Heading color="rgb(61,84,44)">Scholarship Not Found</Heading>
             <Text color="rgb(78,61,30)">
               {error || "The scholarship you're looking for doesn't exist or may have been removed."}
@@ -820,30 +831,31 @@ export default function ScholarshipApplicationPage() {
       {/* Header */}
       <Box bg="white" borderBottom="2px" borderColor="rgb(146,169,129)" p={6}>
         <Box maxW="6xl" mx="auto">
-          <VStack spacing={6}>
+          <VStack gap={6}>
             <HStack justify="space-between" w="full">
               <Button
-                leftIcon={<FiArrowLeft />}
                 variant="ghost"
                 color="rgb(78,61,30)"
                 onClick={() => router.push('/scholarships')}
                 _hover={{ bg: "rgb(193,212,178)" }}
               >
+                <FiArrowLeft style={{ marginRight: '8px' }} />
                 Back to Scholarships
               </Button>
               
               <Button
-                leftIcon={<FiSave />}
+                
                 variant="ghost"
                 color="rgb(9,76,9)"
                 onClick={handleSaveDraft}
                 _hover={{ bg: "rgb(193,212,178)" }}
               >
+                <FiSave style={{ marginRight: '8px' }} />
                 Save Draft
               </Button>
             </HStack>
             
-            <VStack spacing={4} w="full">
+            <VStack gap={4} w="full">
               <Heading size="xl" color="rgb(61,84,44)" textAlign="center">
                 Apply for {scholarship.name}
               </Heading>
@@ -862,9 +874,9 @@ export default function ScholarshipApplicationPage() {
 
       {/* Form Content */}
       <Box maxW="4xl" mx="auto" p={{ base: 4, md: 6 }}>
-        <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="xl">
-          <CardHeader bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)">
-            <VStack spacing={2} align="start">
+        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="xl" borderRadius="md">
+          <Box bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)" p={4}>
+            <VStack gap={2} align="start">
               <Heading size={{ base: "md", md: "lg" }} color="rgb(61,84,44)">
                 {currentStepData.title}
               </Heading>
@@ -872,7 +884,7 @@ export default function ScholarshipApplicationPage() {
                 {currentStepData.description}
               </Text>
             </VStack>
-          </CardHeader>
+          </Box>
 
           <CardBody p={8}>
             <Box minH="400px">
@@ -901,6 +913,7 @@ export default function ScholarshipApplicationPage() {
                 <AdditionalInfoStep 
                   formData={formData} 
                   updateFormData={updateFormData} 
+                  errors={errors}
                 />
               )}
               {currentStep === 4 && (
@@ -914,37 +927,39 @@ export default function ScholarshipApplicationPage() {
             {/* Navigation */}
             <Box mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
               {/* Mobile Layout - Stacked */}
-              <VStack spacing={3} display={{ base: "flex", md: "none" }}>
-                <HStack spacing={3} w="full">
+              <VStack gap={3} display={{ base: "flex", md: "none" }}>
+                <HStack gap={3} w="full">
                   <Button
-                    leftIcon={<FiArrowLeft />}
+                    
                     variant="ghost"
                     onClick={prevStep}
-                    isDisabled={isFirstStep}
+                    disabled={isFirstStep}
                     color="rgb(78,61,30)"
                     _hover={{ bg: "rgb(193,212,178)" }}
                     flex="1"
                     size="sm"
                   >
+                    <FiArrowLeft style={{ marginRight: '8px' }} />
                     Previous
                   </Button>
                   {isReviewStep ? (
                     <Button
-                      rightIcon={<FiSend />}
+                      
                       bg="rgb(9,76,9)"
                       color="white"
                       onClick={handleSubmit}
-                      isLoading={submitting}
+                      loading={submitting}
                       loadingText="Submitting..."
                       _hover={{ bg: "rgb(92,127,66)" }}
                       flex="1"
                       size="sm"
                     >
                       Submit
+                      <FiSend style={{ marginLeft: '8px' }} />
                     </Button>
                   ) : (
                     <Button
-                      rightIcon={<FiArrowRight />}
+                      
                       bg="rgb(9,76,9)"
                       color="white"
                       onClick={nextStep}
@@ -953,6 +968,7 @@ export default function ScholarshipApplicationPage() {
                       size="sm"
                     >
                       {isLastStep ? "Review" : "Continue"}
+                      <FiArrowRight style={{ marginLeft: '8px' }} />
                     </Button>
                   )}
                 </HStack>
@@ -961,45 +977,48 @@ export default function ScholarshipApplicationPage() {
               {/* Desktop Layout - Horizontal */}
               <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
                 <Button
-                  leftIcon={<FiArrowLeft />}
+                  
                   variant="ghost"
                   onClick={prevStep}
-                  isDisabled={isFirstStep}
+                  disabled={isFirstStep}
                   color="rgb(78,61,30)"
                   _hover={{ bg: "rgb(193,212,178)" }}
                 >
+                  <FiArrowLeft style={{ marginRight: '8px' }} />
                   Previous
                 </Button>
 
                 {isReviewStep ? (
                   <Button
-                    rightIcon={<FiSend />}
+                    
                     bg="rgb(9,76,9)"
                     color="white"
                     size="lg"
                     onClick={handleSubmit}
-                    isLoading={submitting}
+                    loading={submitting}
                     loadingText="Submitting..."
                     _hover={{ bg: "rgb(92,127,66)" }}
                     _active={{ transform: "scale(0.98)" }}
                   >
                     Submit Application
+                    <FiSend style={{ marginLeft: '8px' }} />
                   </Button>
                 ) : (
                   <Button
-                    rightIcon={<FiArrowRight />}
+                    
                     bg="rgb(9,76,9)"
                     color="white"
                     onClick={nextStep}
                     _hover={{ bg: "rgb(92,127,66)" }}
                   >
                     {isLastStep ? "Review Application" : "Continue"}
+                    <FiArrowRight style={{ marginLeft: '8px' }} />
                   </Button>
                 )}
               </HStack>
             </Box>
           </CardBody>
-        </Card>
+        </Box>
       </Box>
     </Box>
   );

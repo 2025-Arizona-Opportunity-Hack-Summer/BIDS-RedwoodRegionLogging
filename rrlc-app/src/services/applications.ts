@@ -131,7 +131,7 @@ export async function checkExistingApplication(scholarshipId: string, email: str
       .single();
 
     return { data, error };
-  } catch (error) {
+  } catch {
     // No existing application found is expected, so we return null
     return { data: null, error: null };
   }

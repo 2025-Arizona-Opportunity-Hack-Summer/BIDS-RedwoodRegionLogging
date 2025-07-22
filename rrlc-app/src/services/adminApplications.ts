@@ -71,7 +71,7 @@ export async function updateApplicationStatus(
   notes?: string
 ) {
   try {
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       status,
       updated_at: new Date().toISOString()
     };
@@ -139,7 +139,7 @@ export async function getApplicationStats() {
 }
 
 // Bulk update applications
-export async function bulkUpdateApplications(applicationIds: string[], updates: any) {
+export async function bulkUpdateApplications(applicationIds: string[], updates: Record<string, unknown>) {
   try {
     const { data, error } = await supabase
       .from('applications')

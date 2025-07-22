@@ -12,9 +12,6 @@ import {
   Text,
   Input,
   Textarea,
-  Card,
-  CardBody,
-  CardHeader,
 } from "@chakra-ui/react";
 import { FiSave, FiArrowLeft } from "react-icons/fi";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
@@ -99,13 +96,17 @@ function CreateScholarshipContent() {
     }
   };
 
-  const handleInputChange = (field: keyof CreateScholarshipData, value: any) => {
+  const handleInputChange = (field: keyof CreateScholarshipData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    handleInputChange("status", e.target.value as "active" | "inactive");
   };
 
   return (
@@ -115,16 +116,16 @@ function CreateScholarshipContent() {
       p={6}
     >
       <Box maxW="4xl" mx="auto">
-        <VStack spacing={8} align="stretch">
+        <VStack gap={8} align="stretch">
           {/* Header */}
-          <HStack spacing={4}>
+          <HStack gap={4}>
             <Link href="/admin/scholarships">
               <Button
-                leftIcon={<FiArrowLeft />}
                 variant="ghost"
                 color="rgb(78,61,30)"
                 _hover={{ bg: "rgb(146,169,129)" }}
               >
+                <FiArrowLeft style={{ marginRight: '8px' }} />
                 Back to Scholarships
               </Button>
             </Link>
@@ -147,14 +148,14 @@ function CreateScholarshipContent() {
           </HStack>
 
           {/* Form */}
-          <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="lg">
-            <CardHeader bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)">
+          <Box bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="lg" borderRadius="md">
+            <Box bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)" p={4} borderTopRadius="md">
               <Heading size="lg" color="rgb(61,84,44)">
                 Scholarship Details
               </Heading>
-            </CardHeader>
+            </Box>
             
-            <CardBody p={8}>
+            <Box p={8}>
               {/* Success Message */}
               {successMessage && (
                 <Box
@@ -172,9 +173,9 @@ function CreateScholarshipContent() {
               )}
 
               <form onSubmit={handleSubmit}>
-                <VStack spacing={8} align="stretch">
+                <VStack gap={8} align="stretch">
                   {/* Basic Information */}
-                  <VStack spacing={6} align="stretch">
+                  <VStack gap={6} align="stretch">
                     <Heading size="md" color="rgb(61,84,44)">
                       Basic Information
                     </Heading>
@@ -232,12 +233,12 @@ function CreateScholarshipContent() {
                   <Box height="1px" bg="rgb(146,169,129)" />
 
                   {/* Financial & Timeline Details */}
-                  <VStack spacing={6} align="stretch">
+                  <VStack gap={6} align="stretch">
                     <Heading size="md" color="rgb(61,84,44)">
                       Financial & Timeline Details
                     </Heading>
                     
-                    <HStack spacing={6} align="start">
+                    <HStack gap={6} align="start">
                       <Box flex={1}>
                         <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
                           Award Amount
@@ -247,7 +248,7 @@ function CreateScholarshipContent() {
                           value={formData.amount || ""}
                           onChange={(e) => {
                             const value = e.target.value ? parseFloat(e.target.value) : undefined;
-                            handleInputChange("amount", value);
+                            handleInputChange("amount", value || 0);
                           }}
                           placeholder="Enter amount (e.g., 5000)"
                           size="lg"
@@ -297,7 +298,7 @@ function CreateScholarshipContent() {
                   <Box height="1px" bg="rgb(146,169,129)" />
 
                   {/* Requirements & Settings */}
-                  <VStack spacing={6} align="stretch">
+                  <VStack gap={6} align="stretch">
                     <Heading size="md" color="rgb(61,84,44)">
                       Requirements & Settings
                     </Heading>
@@ -331,31 +332,27 @@ function CreateScholarshipContent() {
                       <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
                         Initial Status
                       </Text>
-                      <Box
-                        as="select"
+                      <select
                         value={formData.status}
-                        onChange={(e: any) => handleInputChange("status", e.target.value as "active" | "inactive")}
-                        p={3}
-                        borderWidth="1px"
-                        borderColor="rgb(146,169,129)"
-                        borderRadius="md"
-                        width="full"
-                        bg="white"
-                        fontSize="lg"
-                        _hover={{ borderColor: "rgb(92,127,66)" }}
-                        _focus={{
-                          borderColor: "rgb(9,76,9)",
-                          boxShadow: "0 0 0 1px rgb(9,76,9)"
+                        onChange={handleStatusChange}
+                        style={{
+                          padding: '12px',
+                          borderWidth: '1px',
+                          borderColor: 'rgb(146,169,129)',
+                          borderRadius: '8px',
+                          backgroundColor: 'white',
+                          fontSize: '18px',
+                          width: '100%'
                         }}
                       >
                         <option value="active">Active (Open for Applications)</option>
                         <option value="inactive">Inactive (Draft)</option>
-                      </Box>
+                      </select>
                     </Box>
                   </VStack>
 
                   {/* Action Buttons */}
-                  <HStack spacing={4} justify="flex-end" pt={4}>
+                  <HStack gap={4} justify="flex-end" pt={4}>
                     <Link href="/admin/scholarships">
                       <Button
                         variant="ghost"
@@ -369,23 +366,23 @@ function CreateScholarshipContent() {
                     
                     <Button
                       type="submit"
-                      leftIcon={<FiSave />}
                       bg="rgb(9,76,9)"
                       color="white"
                       size="lg"
                       _hover={{ bg: "rgb(92,127,66)" }}
-                      isLoading={loading}
+                      loading={loading}
                       loadingText="Creating..."
                       boxShadow="md"
                       _active={{ transform: "translateY(1px)" }}
                     >
+                      <FiSave style={{ marginRight: '8px' }} />
                       Create Scholarship
                     </Button>
                   </HStack>
                 </VStack>
               </form>
-            </CardBody>
-          </Card>
+            </Box>
+          </Box>
         </VStack>
       </Box>
     </Box>

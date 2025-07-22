@@ -6,7 +6,16 @@ export function useAdminApplications() {
   const [applications, setApplications] = useState<ApplicationWithScholarship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    total: number;
+    submitted: number;
+    under_review: number;
+    approved: number;
+    rejected: number;
+    awarded: number;
+    totalAwarded: number;
+    thisMonth: number;
+  } | null>(null);
   const [filters, setFilters] = useState<ApplicationFilters>({});
 
   const fetchApplications = useCallback(async (currentFilters?: ApplicationFilters) => {
@@ -83,7 +92,7 @@ export function useAdminApplications() {
 
   const bulkUpdateApplications = useCallback(async (
     applicationIds: string[],
-    updates: any
+    updates: Record<string, unknown>
   ) => {
     try {
       const { data, error } = await adminApplicationService.bulkUpdateApplications(

@@ -11,9 +11,7 @@ import {
   Input,
   Skeleton,
 } from "@chakra-ui/react";
-import { Select as ChakraSelect } from "@chakra-ui/react";
 import { 
-  FiDownload, 
   FiEye, 
   FiCheck, 
   FiX, 
@@ -25,7 +23,15 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAdminApplications } from "@/hooks/useAdminApplications";
 import { ApplicationWithScholarship } from "@/services/adminApplications";
 
-function StatsCard({ icon, title, value, subtitle, color = "rgb(9,76,9)" }: any) {
+interface StatsCardProps {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  color?: string;
+}
+
+function StatsCard({ icon, title, value, subtitle, color = "rgb(9,76,9)" }: StatsCardProps) {
   const Icon = icon;
   return (
     <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4} boxShadow="sm">
@@ -60,7 +66,7 @@ function StatsCard({ icon, title, value, subtitle, color = "rgb(9,76,9)" }: any)
 }
 
 function ApplicationStatusBadge({ status }: { status: string }) {
-  const statusConfig: any = {
+  const statusConfig: Record<string, { bg: string; color: string; label: string }> = {
     draft: { bg: "gray.400", color: "white", label: "Draft" },
     submitted: { bg: "rgb(255,211,88)", color: "rgb(78,61,30)", label: "Submitted" },
     under_review: { bg: "rgb(146,169,129)", color: "white", label: "Under Review" },
