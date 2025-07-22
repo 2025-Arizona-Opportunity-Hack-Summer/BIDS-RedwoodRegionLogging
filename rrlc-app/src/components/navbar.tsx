@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Box, Flex, Spacer, Button, Text, HStack, Badge } from "@chakra-ui/react";
+import { 
+  Box, 
+  Flex, 
+  Spacer, 
+  Button, 
+  Text, 
+  HStack, 
+  VStack,
+  Badge
+} from "@chakra-ui/react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
@@ -17,17 +26,16 @@ export default function Navbar() {
   return (
     <Box 
       as="nav" 
-      p={4} 
       bg="rgb(61,84,44)" // Dark forest green
       color="white"
       borderBottomWidth={2}
       borderBottomColor="rgb(255,211,88)" // Golden yellow accent
     >
-      <Flex align="center">
+      <Flex align="center" p={4}>
         <Link href="/">
           <Text 
             fontWeight="bold" 
-            fontSize="xl"
+            fontSize={{ base: "lg", md: "xl" }}
             color="white"
             _hover={{ color: "rgb(255,211,88)" }}
             cursor="pointer"
@@ -38,7 +46,22 @@ export default function Navbar() {
         
         <Spacer />
         
-        <HStack spacing={4}>
+        {/* Desktop Navigation */}
+        <HStack gap={4} display={{ base: "none", md: "flex" }}>
+          <Link href="/scholarships">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              color="white"
+              _hover={{ 
+                bg: "rgb(92,127,66)",
+                color: "white"
+              }}
+            >
+              Browse Scholarships
+            </Button>
+          </Link>
+
           {isAuthenticated() ? (
             <>
               {isAdmin() && (
@@ -100,6 +123,84 @@ export default function Navbar() {
             </Link>
           )}
         </HStack>
+
+        {/* Mobile Navigation - Simplified */}
+        <VStack 
+          gap={2} 
+          display={{ base: "flex", md: "none" }}
+          position="absolute"
+          top="100%"
+          left={0}
+          right={0}
+          bg="rgb(61,84,44)"
+          p={4}
+          borderTopWidth={1}
+          borderTopColor="rgb(92,127,66)"
+          zIndex={10}
+        >
+          <Link href="/scholarships">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              color="white"
+              w="100%"
+              _hover={{ 
+                bg: "rgb(92,127,66)",
+                color: "white"
+              }}
+            >
+              Browse Scholarships
+            </Button>
+          </Link>
+
+          {isAuthenticated() ? (
+            <>
+              {isAdmin() && (
+                <Link href="/admin">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    color="white"
+                    w="100%"
+                    _hover={{ 
+                      bg: "rgb(92,127,66)",
+                      color: "white"
+                    }}
+                  >
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
+              
+              <Button 
+                size="sm" 
+                onClick={handleLogout}
+                bg="rgb(94,60,23)"
+                color="white"
+                w="100%"
+                _hover={{ 
+                  bg: "rgb(78,61,30)"
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <Link href="/login">
+              <Button 
+                size="sm"
+                bg="rgb(9,76,9)"
+                color="white"
+                w="100%"
+                _hover={{ 
+                  bg: "rgb(92,127,66)"
+                }}
+              >
+                Login
+              </Button>
+            </Link>
+          )}
+        </VStack>
       </Flex>
     </Box>
   );

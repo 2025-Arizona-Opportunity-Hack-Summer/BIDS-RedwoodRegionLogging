@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
   Box,
@@ -60,16 +60,16 @@ export default function EventRegistrationsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const fetchEvent = async () => {
+  const fetchEvent = useCallback(async () => {
     const { data, error } = await supabase.from("events").select("*").eq("id", eventId).single();
     if (error) {
       showToast("Error fetching event", "error");
     } else {
       setEvent(data);
     }
-  };
+  }, [eventId]);
 
-  const fetchRegistrations = async () => {
+  const fetchRegistrations = useCallback(async () => {
     setLoading(true);
     // For now, using mock data until we create the event_registrations table
     const mockRegistrations: EventRegistration[] = [
@@ -96,14 +96,14 @@ export default function EventRegistrationsPage() {
     ];
     setRegistrations(mockRegistrations);
     setLoading(false);
-  };
+  }, [eventId]);
 
   useEffect(() => {
     if (eventId) {
       fetchEvent();
       fetchRegistrations();
     }
-  }, [eventId]);
+  }, [eventId, fetchEvent, fetchRegistrations]);
 
   const handleOpenAdd = () => {
     setForm({ user_name: '', user_email: '', attendance_status: 'registered' });
@@ -164,7 +164,7 @@ export default function EventRegistrationsPage() {
     <Box maxW="6xl" mx="auto" mt={10} p={8} borderWidth={1} borderRadius="lg" boxShadow="md" bg="white" borderColor="gray.300">
       <Stack direction="row" align="center" mb={4}>
         <Link href="/admin/events">
-          <IconButton aria-label="Back to events" icon={<FiArrowLeft />} variant="ghost" size="sm" />
+          <IconButton aria-label="Back to events" variant="ghost" size="sm"><FiArrowLeft /></IconButton>
         </Link>
         <Heading size="lg" color="black">{event.name} - Registrations</Heading>
       </Stack>
@@ -181,8 +181,8 @@ export default function EventRegistrationsPage() {
         mb={4} 
         onClick={handleOpenAdd}
         size="md"
-        leftIcon={<FiPlus />}
       >
+        <FiPlus style={{ marginRight: '8px' }} />
         Add Registration
       </Button>
 

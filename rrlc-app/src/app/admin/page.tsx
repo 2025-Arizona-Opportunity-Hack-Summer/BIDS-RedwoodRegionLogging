@@ -9,9 +9,7 @@ import {
   Text, 
   Grid, 
   GridItem,
-  Card,
-  CardBody,
-  CardHeader
+  Card
 } from "@chakra-ui/react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,7 +24,7 @@ function AdminDashboardContent() {
       p={6}
     >
       <Box maxW="7xl" mx="auto">
-        <VStack spacing={8} align="stretch">
+        <VStack gap={8} align="stretch">
           {/* Header */}
           <Box>
             <Heading 
