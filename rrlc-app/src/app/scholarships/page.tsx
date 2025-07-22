@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -201,11 +202,49 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
 }
 
 interface FilterSectionProps {
-  filters: { search: string; deadline: 'week' | 'month' | 'quarter' | 'all' };
-  updateFilters: (updates: Partial<{ search: string; deadline: 'week' | 'month' | 'quarter' | 'all' }>) => void;
+  filters: { 
+    search: string; 
+    deadline: 'week' | 'month' | 'quarter' | 'all';
+    minAmount?: number;
+    maxAmount?: number;
+  };
+  updateFilters: (updates: Partial<{ 
+    search: string; 
+    deadline: 'week' | 'month' | 'quarter' | 'all';
+    minAmount?: number;
+    maxAmount?: number;
+  }>) => void;
 }
 
 function FilterSection({ filters, updateFilters }: FilterSectionProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [localFilters, setLocalFilters] = useState(filters);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      updateFilters(localFilters);
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [localFilters, updateFilters]);
+
+  const handleLocalFilterChange = (updates: Partial<typeof filters>) => {
+    setLocalFilters(prev => ({ ...prev, ...updates }));
+  };
+
+  const clearAllFilters = () => {
+    const cleared = { 
+      search: '', 
+      deadline: 'all' as const,
+      minAmount: undefined,
+      maxAmount: undefined
+    };
+    setLocalFilters(cleared);
+    updateFilters(cleared);
+  };
+
+  const hasActiveFilters = filters.search || filters.deadline !== 'all' || filters.minAmount || filters.maxAmount;
+
   return (
     <Box 
       bg="white" 
@@ -216,13 +255,14 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
       p={6}
     >
       <Stack direction="column" gap={4} align="stretch">
+        {/* Primary Filter Row */}
         <Stack direction="row" gap={4} align="center" flexWrap="wrap">
           {/* Search */}
           <Box flex={1} minW="300px">
             <Input
-              placeholder="🔍 Search scholarships..."
-              value={filters.search}
-              onChange={(e) => updateFilters({ search: e.target.value })}
+              placeholder="🔍 Search scholarships by name, description, or requirements..."
+              value={localFilters.search}
+              onChange={(e) => handleLocalFilterChange({ search: e.target.value })}
               borderColor="rgb(146,169,129)"
               _hover={{ borderColor: "rgb(92,127,66)" }}
               _focus={{
@@ -236,8 +276,8 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
           {/* Deadline filter */}
           <Box minW="150px">
             <select
-              value={filters.deadline}
-              onChange={(e) => updateFilters({ deadline: e.target.value as 'week' | 'month' | 'quarter' | 'all' })}
+              value={localFilters.deadline}
+              onChange={(e) => handleLocalFilterChange({ deadline: e.target.value as 'week' | 'month' | 'quarter' | 'all' })}
               style={{
                 padding: '12px',
                 borderWidth: '1px',
@@ -266,7 +306,163 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
               <option value="quarter">Next 3 months</option>
             </select>
           </Box>
+
+          {/* Advanced Filters Toggle */}
+          <Button
+            variant="outline"
+            borderColor="rgb(146,169,129)"
+            color="rgb(78,61,30)"
+            _hover={{ borderColor: "rgb(92,127,66)", bg: "rgb(193,212,178)" }}
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            size="lg"
+          >
+            {showAdvanced ? 'Hide' : 'More'} Filters
+          </Button>
+
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              color="rgb(94,60,23)"
+              _hover={{ bg: "rgb(193,212,178)" }}
+              onClick={clearAllFilters}
+              size="lg"
+            >
+              Clear All
+            </Button>
+          )}
         </Stack>
+
+        {/* Advanced Filters Section */}
+        {showAdvanced && (
+          <Box
+            bg="rgb(193,212,178)"
+            border="1px"
+            borderColor="rgb(146,169,129)"
+            borderRadius="md"
+            p={4}
+            mt={2}
+          >
+            <Stack direction="column" gap={4}>
+              <Text fontSize="sm" fontWeight="medium" color="rgb(61,84,44)">
+                Advanced Filters
+              </Text>
+              
+              <Stack direction="row" gap={4} align="end" flexWrap="wrap">
+                {/* Amount Range */}
+                <Stack direction="column" gap={1} minW="120px">
+                  <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                    Min Amount ($)
+                  </Text>
+                  <Input
+                    type="number"
+                    placeholder="1000"
+                    value={localFilters.minAmount || ''}
+                    onChange={(e) => handleLocalFilterChange({ 
+                      minAmount: e.target.value ? Number(e.target.value) : undefined 
+                    })}
+                    size="sm"
+                    bg="white"
+                    borderColor="rgb(146,169,129)"
+                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                    _focus={{
+                      borderColor: "rgb(9,76,9)",
+                      boxShadow: "0 0 0 1px rgb(9,76,9)"
+                    }}
+                  />
+                </Stack>
+
+                <Stack direction="column" gap={1} minW="120px">
+                  <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                    Max Amount ($)
+                  </Text>
+                  <Input
+                    type="number"
+                    placeholder="10000"
+                    value={localFilters.maxAmount || ''}
+                    onChange={(e) => handleLocalFilterChange({ 
+                      maxAmount: e.target.value ? Number(e.target.value) : undefined 
+                    })}
+                    size="sm"
+                    bg="white"
+                    borderColor="rgb(146,169,129)"
+                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                    _focus={{
+                      borderColor: "rgb(9,76,9)",
+                      boxShadow: "0 0 0 1px rgb(9,76,9)"
+                    }}
+                  />
+                </Stack>
+
+                {/* Quick Amount Filters */}
+                <Stack direction="column" gap={1}>
+                  <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                    Quick Amount
+                  </Text>
+                  <Stack direction="row" gap={2}>
+                    <Button
+                      size="sm"
+                      variant={(!localFilters.minAmount && !localFilters.maxAmount) ? "solid" : "outline"}
+                      bg={(!localFilters.minAmount && !localFilters.maxAmount) ? "rgb(9,76,9)" : "transparent"}
+                      color={(!localFilters.minAmount && !localFilters.maxAmount) ? "white" : "rgb(78,61,30)"}
+                      borderColor="rgb(146,169,129)"
+                      _hover={{ bg: (!localFilters.minAmount && !localFilters.maxAmount) ? "rgb(92,127,66)" : "rgb(193,212,178)" }}
+                      onClick={() => handleLocalFilterChange({ minAmount: undefined, maxAmount: undefined })}
+                    >
+                      All
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={(localFilters.minAmount === 1000 && localFilters.maxAmount === 5000) ? "solid" : "outline"}
+                      bg={(localFilters.minAmount === 1000 && localFilters.maxAmount === 5000) ? "rgb(9,76,9)" : "transparent"}
+                      color={(localFilters.minAmount === 1000 && localFilters.maxAmount === 5000) ? "white" : "rgb(78,61,30)"}
+                      borderColor="rgb(146,169,129)"
+                      _hover={{ bg: (localFilters.minAmount === 1000 && localFilters.maxAmount === 5000) ? "rgb(92,127,66)" : "rgb(193,212,178)" }}
+                      onClick={() => handleLocalFilterChange({ minAmount: 1000, maxAmount: 5000 })}
+                    >
+                      $1K-$5K
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={(localFilters.minAmount === 5000) ? "solid" : "outline"}
+                      bg={(localFilters.minAmount === 5000) ? "rgb(9,76,9)" : "transparent"}
+                      color={(localFilters.minAmount === 5000) ? "white" : "rgb(78,61,30)"}
+                      borderColor="rgb(146,169,129)"
+                      _hover={{ bg: (localFilters.minAmount === 5000) ? "rgb(92,127,66)" : "rgb(193,212,178)" }}
+                      onClick={() => handleLocalFilterChange({ minAmount: 5000, maxAmount: undefined })}
+                    >
+                      $5K+
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Stack>
+            </Stack>
+          </Box>
+        )}
+
+        {/* Active Filters Display */}
+        {hasActiveFilters && (
+          <Stack direction="row" gap={2} wrap="wrap" align="center">
+            <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+              Active filters:
+            </Text>
+            {filters.search && (
+              <Badge bg="rgb(255,211,88)" color="rgb(78,61,30)" px={2} py={1} borderRadius="md">
+                Search: "{filters.search}"
+              </Badge>
+            )}
+            {filters.deadline !== 'all' && (
+              <Badge bg="rgb(9,76,9)" color="white" px={2} py={1} borderRadius="md">
+                Deadline: {filters.deadline}
+              </Badge>
+            )}
+            {(localFilters.minAmount || localFilters.maxAmount) && (
+              <Badge bg="rgb(146,169,129)" color="white" px={2} py={1} borderRadius="md">
+                Amount: {localFilters.minAmount ? `$${localFilters.minAmount.toLocaleString()}` : '$0'} - {localFilters.maxAmount ? `$${localFilters.maxAmount.toLocaleString()}` : 'max'}
+              </Badge>
+            )}
+          </Stack>
+        )}
       </Stack>
     </Box>
   );
@@ -285,16 +481,23 @@ export default function PublicScholarshipsPage() {
 
   // Enhanced error handling for better user experience
   const hasScholarships = scholarships && scholarships.length > 0;
-  const hasFilters = filters.search || filters.deadline !== 'all';
+  const hasFilters = filters.search || filters.deadline !== 'all' || filters.minAmount || filters.maxAmount;
   const showEmptyState = !loading && !hasScholarships;
 
   // Type-safe filter props
   const filterProps = {
     search: filters.search || '',
-    deadline: (filters.deadline as 'week' | 'month' | 'quarter' | 'all') || 'all'
+    deadline: (filters.deadline as 'week' | 'month' | 'quarter' | 'all') || 'all',
+    minAmount: filters.minAmount,
+    maxAmount: filters.maxAmount
   };
 
-  const handleUpdateFilters = (updates: Partial<{ search: string; deadline: 'week' | 'month' | 'quarter' | 'all' }>) => {
+  const handleUpdateFilters = (updates: Partial<{ 
+    search: string; 
+    deadline: 'week' | 'month' | 'quarter' | 'all';
+    minAmount?: number;
+    maxAmount?: number;
+  }>) => {
     updateFilters(updates);
   };
 
@@ -419,7 +622,12 @@ export default function PublicScholarshipsPage() {
                   </Text>
                   {hasFilters && (
                     <Button
-                      onClick={() => updateFilters({ search: '', deadline: 'all' })}
+                      onClick={() => updateFilters({ 
+                        search: '', 
+                        deadline: 'all', 
+                        minAmount: undefined, 
+                        maxAmount: undefined 
+                      })}
                       bg="rgb(9,76,9)"
                       color="white"
                       _hover={{ bg: "rgb(92,127,66)" }}

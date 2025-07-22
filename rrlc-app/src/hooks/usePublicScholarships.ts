@@ -6,7 +6,7 @@ export interface ScholarshipFilters {
   search: string;
   minAmount?: number;
   maxAmount?: number;
-  deadline?: 'week' | 'month' | 'quarter' | 'all';
+  deadline: 'week' | 'month' | 'quarter' | 'all';
 }
 
 // Hook for public scholarship listing (applicant view)
@@ -14,9 +14,29 @@ export function usePublicScholarships() {
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<ScholarshipFilters>({
-    search: '',
-    deadline: 'all'
+  const [filters, setFilters] = useState<ScholarshipFilters>(() => {
+    // Load filters from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('scholarshipFilters');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return {
+            search: parsed.search || '',
+            deadline: parsed.deadline || 'all',
+            minAmount: parsed.minAmount,
+            maxAmount: parsed.maxAmount
+          };
+        }
+      } catch (error) {
+        console.warn('Failed to load saved filters:', error);
+      }
+    }
+    
+    return {
+      search: '',
+      deadline: 'all'
+    };
   });
 
   const fetchScholarships = useCallback(async () => {
@@ -92,7 +112,20 @@ export function usePublicScholarships() {
   });
 
   const updateFilters = (newFilters: Partial<ScholarshipFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters(prev => {
+      const updated = { ...prev, ...newFilters };
+      
+      // Save to localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('scholarshipFilters', JSON.stringify(updated));
+        } catch (error) {
+          console.warn('Failed to save filters to localStorage:', error);
+        }
+      }
+      
+      return updated;
+    });
   };
 
   // Calculate days until deadline
