@@ -16,7 +16,6 @@ import {
   Skeleton,
 } from "@chakra-ui/react";
 import { 
-  FiFilter, 
   FiDownload, 
   FiEye, 
   FiCheck, 
@@ -260,6 +259,7 @@ function ApplicationsContent() {
     stats,
     filters,
     updateFilters,
+    applyFilters,
     updateApplicationStatus,
     exportApplications,
     totalCount
@@ -349,53 +349,163 @@ function ApplicationsContent() {
             </Box>
           )}
 
-          {/* Filters */}
+          {/* Enhanced Filters */}
           <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
             <CardBody>
-              <HStack spacing={4} wrap="wrap">
-                <Input
-                  placeholder="🔍 Search applications..."
-                  value={filters.search || ''}
-                  onChange={(e) => updateFilters({ search: e.target.value })}
-                  maxW="300px"
-                  borderColor="rgb(146,169,129)"
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                  _focus={{
-                    borderColor: "rgb(9,76,9)",
-                    boxShadow: "0 0 0 1px rgb(9,76,9)"
-                  }}
-                />
+              <VStack spacing={4} align="stretch">
+                {/* Primary Search Row */}
+                <HStack spacing={4} wrap="wrap">
+                  <Input
+                    placeholder="🔍 Search by name, email, school, or major..."
+                    value={filters.search || ''}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      updateFilters({ search: newValue });
+                      // Auto-apply search after a brief delay (debounce effect)
+                      setTimeout(() => {
+                        if (newValue === filters.search) {
+                          // Value hasn't changed, apply the search
+                          applyFilters();
+                        }
+                      }, 300);
+                    }}
+                    maxW="400px"
+                    borderColor="rgb(146,169,129)"
+                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                    _focus={{
+                      borderColor: "rgb(9,76,9)",
+                      boxShadow: "0 0 0 1px rgb(9,76,9)"
+                    }}
+                  />
 
-                <Box
-                  as="select"
-                  value={filters.status || ''}
-                  onChange={(e) => updateFilters({ status: e.target.value || undefined })}
-                  p={2}
-                  borderWidth="1px"
-                  borderColor="rgb(146,169,129)"
-                  borderRadius="md"
-                  bg="white"
-                  minW="150px"
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                >
-                  <option value="">All Statuses</option>
-                  <option value="submitted">Submitted</option>
-                  <option value="under_review">Under Review</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                  <option value="awarded">Awarded</option>
-                </Box>
+                  <Box
+                    as="select"
+                    value={filters.status || ''}
+                    onChange={(e) => {
+                      updateFilters({ status: e.target.value || undefined });
+                      setTimeout(() => applyFilters(), 100);
+                    }}
+                    p={2}
+                    borderWidth="1px"
+                    borderColor="rgb(146,169,129)"
+                    borderRadius="md"
+                    bg="white"
+                    minW="150px"
+                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="under_review">Under Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="awarded">Awarded</option>
+                  </Box>
 
-                <Button
-                  leftIcon={<FiFilter />}
-                  variant="outline"
-                  borderColor="rgb(146,169,129)"
-                  color="rgb(78,61,30)"
-                  _hover={{ borderColor: "rgb(92,127,66)", bg: "rgb(193,212,178)" }}
-                >
-                  More Filters
-                </Button>
-              </HStack>
+                  <Button
+                    bg="rgb(9,76,9)"
+                    color="white"
+                    size="md"
+                    _hover={{ bg: "rgb(92,127,66)" }}
+                    onClick={applyFilters}
+                  >
+                    Apply Filters
+                  </Button>
+                </HStack>
+
+                {/* Advanced Filters Row */}
+                <HStack spacing={4} wrap="wrap">
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                      Application Date From
+                    </Text>
+                    <Input
+                      type="date"
+                      value={filters.dateFrom || ''}
+                      onChange={(e) => updateFilters({ dateFrom: e.target.value || undefined })}
+                      size="sm"
+                      maxW="160px"
+                      borderColor="rgb(146,169,129)"
+                      _hover={{ borderColor: "rgb(92,127,66)" }}
+                      _focus={{
+                        borderColor: "rgb(9,76,9)",
+                        boxShadow: "0 0 0 1px rgb(9,76,9)"
+                      }}
+                    />
+                  </VStack>
+
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                      Application Date To
+                    </Text>
+                    <Input
+                      type="date"
+                      value={filters.dateTo || ''}
+                      onChange={(e) => updateFilters({ dateTo: e.target.value || undefined })}
+                      size="sm"
+                      maxW="160px"
+                      borderColor="rgb(146,169,129)"
+                      _hover={{ borderColor: "rgb(92,127,66)" }}
+                      _focus={{
+                        borderColor: "rgb(9,76,9)",
+                        boxShadow: "0 0 0 1px rgb(9,76,9)"
+                      }}
+                    />
+                  </VStack>
+
+                  <VStack align="start" spacing={1} justify="end">
+                    <Text fontSize="xs" color="transparent">
+                      Clear
+                    </Text>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      borderColor="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _hover={{ borderColor: "rgb(92,127,66)", bg: "rgb(193,212,178)" }}
+                      onClick={() => {
+                        updateFilters({ 
+                          search: undefined, 
+                          status: undefined, 
+                          dateFrom: undefined, 
+                          dateTo: undefined 
+                        });
+                        setTimeout(() => applyFilters(), 100);
+                      }}
+                    >
+                      Clear All
+                    </Button>
+                  </VStack>
+                </HStack>
+
+                {/* Active Filters Display */}
+                {(filters.search || filters.status || filters.dateFrom || filters.dateTo) && (
+                  <HStack spacing={2} wrap="wrap">
+                    <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
+                      Active Filters:
+                    </Text>
+                    {filters.search && (
+                      <Badge bg="rgb(255,211,88)" color="rgb(78,61,30)" px={2} py={1}>
+                        Search: &quot;{filters.search}&quot;
+                      </Badge>
+                    )}
+                    {filters.status && (
+                      <Badge bg="rgb(9,76,9)" color="white" px={2} py={1}>
+                        Status: {filters.status.replace('_', ' ')}
+                      </Badge>
+                    )}
+                    {filters.dateFrom && (
+                      <Badge bg="rgb(146,169,129)" color="white" px={2} py={1}>
+                        From: {new Date(filters.dateFrom).toLocaleDateString()}
+                      </Badge>
+                    )}
+                    {filters.dateTo && (
+                      <Badge bg="rgb(146,169,129)" color="white" px={2} py={1}>
+                        To: {new Date(filters.dateTo).toLocaleDateString()}
+                      </Badge>
+                    )}
+                  </HStack>
+                )}
+              </VStack>
             </CardBody>
           </Card>
 

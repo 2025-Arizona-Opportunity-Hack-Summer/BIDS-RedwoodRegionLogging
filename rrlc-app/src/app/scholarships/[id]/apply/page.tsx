@@ -49,7 +49,7 @@ function StepIndicator({ steps, currentStep, goToStep }: any) {
   const icons = [FiUser, FiBook, FiEdit3, FiPlus, FiCheckCircle];
   
   return (
-    <HStack spacing={4} justify="center" wrap="wrap">
+    <HStack spacing={{ base: 2, md: 4 }} justify="center" wrap="wrap">
       {steps.map((step: any, index: number) => {
         const Icon = icons[index];
         const isActive = index === currentStep;
@@ -63,10 +63,11 @@ function StepIndicator({ steps, currentStep, goToStep }: any) {
             cursor={isClickable ? "pointer" : "default"}
             onClick={isClickable ? () => goToStep(index) : undefined}
             opacity={isClickable ? 1 : 0.5}
+            flex={{ base: "0 0 auto", md: "unset" }}
           >
             <Box
-              w="50px"
-              h="50px"
+              w={{ base: "40px", md: "50px" }}
+              h={{ base: "40px", md: "50px" }}
               borderRadius="full"
               bg={isCompleted ? "rgb(9,76,9)" : isActive ? "rgb(92,127,66)" : "rgb(193,212,178)"}
               color={isCompleted || isActive ? "white" : "rgb(78,61,30)"}
@@ -860,11 +861,11 @@ export default function ScholarshipApplicationPage() {
       </Box>
 
       {/* Form Content */}
-      <Box maxW="4xl" mx="auto" p={6}>
+      <Box maxW="4xl" mx="auto" p={{ base: 4, md: 6 }}>
         <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="xl">
           <CardHeader bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)">
             <VStack spacing={2} align="start">
-              <Heading size="lg" color="rgb(61,84,44)">
+              <Heading size={{ base: "md", md: "lg" }} color="rgb(61,84,44)">
                 {currentStepData.title}
               </Heading>
               <Text color="rgb(78,61,30)">
@@ -911,44 +912,92 @@ export default function ScholarshipApplicationPage() {
             </Box>
 
             {/* Navigation */}
-            <HStack justify="space-between" mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
-              <Button
-                leftIcon={<FiArrowLeft />}
-                variant="ghost"
-                onClick={prevStep}
-                isDisabled={isFirstStep}
-                color="rgb(78,61,30)"
-                _hover={{ bg: "rgb(193,212,178)" }}
-              >
-                Previous
-              </Button>
+            <Box mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
+              {/* Mobile Layout - Stacked */}
+              <VStack spacing={3} display={{ base: "flex", md: "none" }}>
+                <HStack spacing={3} w="full">
+                  <Button
+                    leftIcon={<FiArrowLeft />}
+                    variant="ghost"
+                    onClick={prevStep}
+                    isDisabled={isFirstStep}
+                    color="rgb(78,61,30)"
+                    _hover={{ bg: "rgb(193,212,178)" }}
+                    flex="1"
+                    size="sm"
+                  >
+                    Previous
+                  </Button>
+                  {isReviewStep ? (
+                    <Button
+                      rightIcon={<FiSend />}
+                      bg="rgb(9,76,9)"
+                      color="white"
+                      onClick={handleSubmit}
+                      isLoading={submitting}
+                      loadingText="Submitting..."
+                      _hover={{ bg: "rgb(92,127,66)" }}
+                      flex="1"
+                      size="sm"
+                    >
+                      Submit
+                    </Button>
+                  ) : (
+                    <Button
+                      rightIcon={<FiArrowRight />}
+                      bg="rgb(9,76,9)"
+                      color="white"
+                      onClick={nextStep}
+                      _hover={{ bg: "rgb(92,127,66)" }}
+                      flex="1"
+                      size="sm"
+                    >
+                      {isLastStep ? "Review" : "Continue"}
+                    </Button>
+                  )}
+                </HStack>
+              </VStack>
 
-              {isReviewStep ? (
+              {/* Desktop Layout - Horizontal */}
+              <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
                 <Button
-                  rightIcon={<FiSend />}
-                  bg="rgb(9,76,9)"
-                  color="white"
-                  size="lg"
-                  onClick={handleSubmit}
-                  isLoading={submitting}
-                  loadingText="Submitting..."
-                  _hover={{ bg: "rgb(92,127,66)" }}
-                  _active={{ transform: "scale(0.98)" }}
+                  leftIcon={<FiArrowLeft />}
+                  variant="ghost"
+                  onClick={prevStep}
+                  isDisabled={isFirstStep}
+                  color="rgb(78,61,30)"
+                  _hover={{ bg: "rgb(193,212,178)" }}
                 >
-                  Submit Application
+                  Previous
                 </Button>
-              ) : (
-                <Button
-                  rightIcon={<FiArrowRight />}
-                  bg="rgb(9,76,9)"
-                  color="white"
-                  onClick={nextStep}
-                  _hover={{ bg: "rgb(92,127,66)" }}
-                >
-                  {isLastStep ? "Review Application" : "Continue"}
-                </Button>
-              )}
-            </HStack>
+
+                {isReviewStep ? (
+                  <Button
+                    rightIcon={<FiSend />}
+                    bg="rgb(9,76,9)"
+                    color="white"
+                    size="lg"
+                    onClick={handleSubmit}
+                    isLoading={submitting}
+                    loadingText="Submitting..."
+                    _hover={{ bg: "rgb(92,127,66)" }}
+                    _active={{ transform: "scale(0.98)" }}
+                  >
+                    Submit Application
+                  </Button>
+                ) : (
+                  <Button
+                    rightIcon={<FiArrowRight />}
+                    bg="rgb(9,76,9)"
+                    color="white"
+                    onClick={nextStep}
+                    _hover={{ bg: "rgb(92,127,66)" }}
+                  >
+                    {isLastStep ? "Review Application" : "Continue"}
+                  </Button>
+                )}
+              </HStack>
+            </Box>
           </CardBody>
         </Card>
       </Box>

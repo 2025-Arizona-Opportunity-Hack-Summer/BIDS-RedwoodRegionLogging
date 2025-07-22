@@ -42,7 +42,8 @@ export async function getAllApplications(filters?: ApplicationFilters) {
     }
     
     if (filters?.search) {
-      query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+      // Enhanced multi-field search including school, major, and combined name search
+      query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,school.ilike.%${filters.search}%,major.ilike.%${filters.search}%`);
     }
     
     if (filters?.dateFrom) {

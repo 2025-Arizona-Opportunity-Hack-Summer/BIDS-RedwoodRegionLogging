@@ -9,21 +9,14 @@ import {
   VStack,
   HStack,
   Text,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
   Badge,
   IconButton,
   Input,
   Card,
   CardBody,
   Skeleton,
-  Alert,
 } from "@chakra-ui/react";
-import { FiSearch, FiPlus, FiEdit3, FiTrash2, FiEye, FiFilter } from "react-icons/fi";
+import { FiPlus, FiEdit3, FiTrash2, FiEye } from "react-icons/fi";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useScholarships } from "@/hooks/useScholarships";
 import { Scholarship } from "@/types/database";
@@ -96,7 +89,7 @@ function ScholarshipManagementContent() {
     try {
       await deleteScholarship(scholarship.id);
       alert("Scholarship deleted successfully.");
-    } catch (error) {
+    } catch {
       alert("Failed to delete scholarship. Please try again.");
     } finally {
       setDeletingId(null);
@@ -178,15 +171,6 @@ function ScholarshipManagementContent() {
                   }}
                 />
                 
-                <Button
-                  leftIcon={<FiFilter />}
-                  variant="outline"
-                  borderColor="rgb(146,169,129)"
-                  color="rgb(78,61,30)"
-                  _hover={{ borderColor: "rgb(92,127,66)", bg: "rgb(193,212,178)" }}
-                >
-                  Filters
-                </Button>
               </HStack>
             </CardBody>
           </Card>
