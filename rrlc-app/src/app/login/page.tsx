@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState<'admin' | 'applicant'>('applicant');
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function LoginPage() {
           router.push("/admin");
         }
       } else {
-        const { error } = await signUp(email, password, fullName);
+        const { error } = await signUp(email, password, fullName, role);
         if (error) {
           setError(error.message);
         } else {
@@ -107,12 +108,37 @@ export default function LoginPage() {
                     required
                     placeholder="Enter your full name"
                     borderColor="rgb(146,169,129)"
+                    color="black"
                     _hover={{ borderColor: "rgb(92,127,66)" }}
                     _focus={{ 
                       borderColor: "rgb(9,76,9)",
                       boxShadow: "0 0 0 1px rgb(9,76,9)"
                     }}
                   />
+                </Box>
+              )}
+              {/* Role selector for sign up */}
+              {!isLogin && (
+                <Box w="full">
+                  <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                    Role <Text as="span" color="red.500">*</Text>
+                  </Text>
+                  <select
+                    value={role}
+                    onChange={e => setRole(e.target.value as 'admin' | 'applicant')}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid rgb(146,169,129)',
+                      borderRadius: '6px',
+                      fontSize: '16px',
+                      backgroundColor: 'white',
+                      color: 'black',
+                    }}
+                  >
+                    <option value="applicant">Applicant</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </Box>
               )}
               
@@ -127,6 +153,7 @@ export default function LoginPage() {
                   required
                   placeholder="Enter your email"
                   borderColor="rgb(146,169,129)"
+                  color="black"
                   _hover={{ borderColor: "rgb(92,127,66)" }}
                   _focus={{ 
                     borderColor: "rgb(9,76,9)",
@@ -146,6 +173,7 @@ export default function LoginPage() {
                   required
                   placeholder="Enter your password"
                   borderColor="rgb(146,169,129)"
+                  color="black"
                   _hover={{ borderColor: "rgb(92,127,66)" }}
                   _focus={{ 
                     borderColor: "rgb(9,76,9)",

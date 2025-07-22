@@ -9,9 +9,7 @@ import {
   Text, 
   Grid, 
   GridItem,
-  Card,
-  CardBody,
-  CardHeader
+  Card
 } from "@chakra-ui/react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,81 +45,81 @@ function AdminDashboardContent() {
           {/* Stats Overview */}
           <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
             <GridItem>
-              <Card 
+              <Card.Root 
                 bg="white"
                 border="2px"
                 borderColor="rgb(146,169,129)" // Medium sage
                 _hover={{ borderColor: "rgb(92,127,66)" }}
               >
-                <CardBody textAlign="center">
+                <Card.Body textAlign="center">
                   <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Total Applications</Text>
                   <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">0</Text>
                   <Text fontSize="sm" color="rgb(78,61,30)">This month</Text>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             </GridItem>
             
             <GridItem>
-              <Card 
+              <Card.Root 
                 bg="white"
                 border="2px"
                 borderColor="rgb(146,169,129)"
                 _hover={{ borderColor: "rgb(92,127,66)" }}
               >
-                <CardBody textAlign="center">
+                <Card.Body textAlign="center">
                   <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Active Scholarships</Text>
                   <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">0</Text>
                   <Text fontSize="sm" color="rgb(78,61,30)">Currently open</Text>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             </GridItem>
             
             <GridItem>
-              <Card 
+              <Card.Root 
                 bg="white"
                 border="2px"
                 borderColor="rgb(146,169,129)"
                 _hover={{ borderColor: "rgb(92,127,66)" }}
               >
-                <CardBody textAlign="center">
+                <Card.Body textAlign="center">
                   <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Awards Pending</Text>
                   <Text fontSize="3xl" fontWeight="bold" color="rgb(255,211,88)">0</Text>
                   <Text fontSize="sm" color="rgb(78,61,30)">Awaiting approval</Text>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             </GridItem>
             
             <GridItem>
-              <Card 
+              <Card.Root 
                 bg="white"
                 border="2px"
                 borderColor="rgb(146,169,129)"
                 _hover={{ borderColor: "rgb(92,127,66)" }}
               >
-                <CardBody textAlign="center">
+                <Card.Body textAlign="center">
                   <Text fontSize="sm" color="rgb(78,61,30)" mb={2}>Total Awarded</Text>
                   <Text fontSize="3xl" fontWeight="bold" color="rgb(9,76,9)">$0</Text>
                   <Text fontSize="sm" color="rgb(78,61,30)">This year</Text>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             </GridItem>
           </Grid>
 
           {/* Quick Actions */}
-          <Card 
+          <Card.Root 
             bg="white"
             border="2px"
             borderColor="rgb(146,169,129)"
           >
-            <CardHeader>
+            <Card.Header>
               <Heading 
                 size="lg" 
                 color="rgb(61,84,44)"
               >
                 Quick Actions
               </Heading>
-            </CardHeader>
-            <CardBody>
+            </Card.Header>
+            <Card.Body>
               <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
                 <Link href="/admin/scholarships">
                   <Button 
@@ -171,29 +169,29 @@ function AdminDashboardContent() {
                   </Button>
                 </Link>
               </Grid>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
           {/* Recent Activity */}
-          <Card 
+          <Card.Root 
             bg="white"
             border="2px"
             borderColor="rgb(146,169,129)"
           >
-            <CardHeader>
+            <Card.Header>
               <Heading 
                 size="lg" 
                 color="rgb(61,84,44)"
               >
                 Recent Activity
               </Heading>
-            </CardHeader>
-            <CardBody>
+            </Card.Header>
+            <Card.Body>
               <Text color="rgb(78,61,30)" textAlign="center" py={8}>
                 No recent activity to display.
               </Text>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         </VStack>
       </Box>
     </Box>

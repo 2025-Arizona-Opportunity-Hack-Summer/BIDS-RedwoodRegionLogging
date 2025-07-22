@@ -291,10 +291,10 @@ export default function PublicScholarshipsPage() {
   // Type-safe filter props
   const filterProps = {
     search: filters.search || '',
-    deadline: filters.deadline || 'all'
+    deadline: (filters.deadline as 'week' | 'month' | 'quarter' | 'all') || 'all'
   };
 
-  const handleUpdateFilters = (updates: Partial<{ search: string; deadline: string }>) => {
+  const handleUpdateFilters = (updates: Partial<{ search: string; deadline: 'week' | 'month' | 'quarter' | 'all' }>) => {
     updateFilters(updates);
   };
 
@@ -304,30 +304,33 @@ export default function PublicScholarshipsPage() {
       <Box
         bg="linear-gradient(135deg, rgb(61,84,44) 0%, rgb(92,127,66) 100%)"
         color="white"
-        py={20}
+        py={16}
         px={6}
+        borderBottomLeftRadius="2xl"
+        borderBottomRightRadius="2xl"
+        boxShadow="lg"
       >
-        <Box maxW="6xl" mx="auto" textAlign="center">
-          <Stack direction="column" gap={6}>
-            <Heading size="3xl" fontWeight="bold">
+        <Box maxW="5xl" mx="auto" textAlign="center">
+          <Stack direction="column" gap={4}>
+            <Heading size="2xl" fontWeight="bold" letterSpacing="tight">
               Discover Your Future
             </Heading>
-            <Text fontSize="xl" opacity={0.9} maxW="2xl">
+            <Text fontSize="lg" opacity={0.95} maxW="2xl" mx="auto">
               Explore scholarship opportunities from the Redwood Region Logging Conference. 
               Find funding to support your education and career in forestry and sustainable logging.
             </Text>
-            <Stack direction="row" gap={4} fontSize="lg" justify="center">
-              <Stack direction="row">
+            <Stack direction="row" gap={6} fontSize="md" justify="center" align="center">
+              <Stack direction="row" align="center">
                 <FiDollarSign />
                 <Text>Financial Support</Text>
               </Stack>
               <Text>•</Text>
-              <Stack direction="row">
+              <Stack direction="row" align="center">
                 <FiClock />
                 <Text>Multiple Deadlines</Text>
               </Stack>
               <Text>•</Text>
-              <Stack direction="row">
+              <Stack direction="row" align="center">
                 <FiFileText />
                 <Text>Easy Application</Text>
               </Stack>
@@ -337,13 +340,15 @@ export default function PublicScholarshipsPage() {
       </Box>
 
       {/* Main Content */}
-      <Box maxW="7xl" mx="auto" p={6}>
-        <Stack direction="column" gap={8} align="stretch">
+      <Box maxW="6xl" mx="auto" p={{ base: 4, md: 8 }}>
+        <Stack direction="column" gap={10} align="stretch">
           {/* Filters */}
-          <FilterSection filters={filterProps} updateFilters={handleUpdateFilters} />
+          <Box mb={2}>
+            <FilterSection filters={filterProps} updateFilters={handleUpdateFilters} />
+          </Box>
 
           {/* Results Header */}
-          <Stack direction="row" justify="space-between" align="center">
+          <Stack direction="row" justify="space-between" align="center" mb={2}>
             <Box>
               <Heading size="lg" color="rgb(61,84,44)">
                 Available Scholarships
@@ -360,8 +365,8 @@ export default function PublicScholarshipsPage() {
 
           {/* Error State */}
           {error && (
-            <Box p={8} bg="orange.50" border="2px" borderColor="orange.200" borderRadius="md">
-              <Stack direction="column" gap={4}>
+            <Box p={8} bg="orange.50" border="2px" borderColor="orange.200" borderRadius="md" boxShadow="sm">
+              <Stack direction="column" gap={4} align="center">
                 <Text color="orange.800" textAlign="center" fontSize="lg" fontWeight="medium">
                   {error}
                 </Text>
@@ -382,66 +387,68 @@ export default function PublicScholarshipsPage() {
           )}
 
           {/* Scholarship Grid */}
-          {loading ? (
-            <Box
-              display="grid"
-              gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
-              gap={6}
-            >
-              {[...Array(6)].map((_, i) => (
-                <ScholarshipCardSkeleton key={i} />
-              ))}
-            </Box>
-          ) : showEmptyState ? (
-            <Box textAlign="center" py={16}>
-              <Stack direction="column" gap={6}>
-                <Text fontSize="2xl" color="rgb(78,61,30)" fontWeight="medium">
-                  {hasFilters
-                    ? "No scholarships match your search criteria"
-                    : error 
-                      ? "Database Not Connected"
-                      : "No scholarships available yet"
-                  }
-                </Text>
-                <Text color="rgb(78,61,30)" opacity={0.8} maxW="md">
-                  {hasFilters
-                    ? "Try adjusting your search terms or deadline filters to find more opportunities."
-                    : error
-                      ? "The scholarship database is not configured yet. This is normal for a new installation."
-                      : "Scholarship opportunities will appear here once they are added by administrators."
-                  }
-                </Text>
-                {hasFilters && (
-                  <Button
-                    onClick={() => updateFilters({ search: '', deadline: 'all' })}
-                    bg="rgb(9,76,9)"
-                    color="white"
-                    _hover={{ bg: "rgb(92,127,66)" }}
-                    size="lg"
-                  >
-                    Clear all filters
-                  </Button>
-                )}
-                {!hasFilters && !error && (
-                  <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
-                    <Text fontSize="sm" color="blue.800">
-                      💡 Administrators can add scholarships through the admin panel
-                    </Text>
-                  </Box>
-                )}
-              </Stack>
-            </Box>
-          ) : (
-            <Box
-              display="grid"
-              gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
-              gap={6}
-            >
-              {scholarships.map((scholarship) => (
-                <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
-              ))}
-            </Box>
-          )}
+          <Box>
+            {loading ? (
+              <Box
+                display="grid"
+                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
+                gap={8}
+              >
+                {[...Array(6)].map((_, i) => (
+                  <ScholarshipCardSkeleton key={i} />
+                ))}
+              </Box>
+            ) : showEmptyState ? (
+              <Box textAlign="center" py={16}>
+                <Stack direction="column" gap={6} align="center">
+                  <Text fontSize="2xl" color="rgb(78,61,30)" fontWeight="medium">
+                    {hasFilters
+                      ? "No scholarships match your search criteria"
+                      : error 
+                        ? "Database Not Connected"
+                        : "No scholarships available yet"
+                    }
+                  </Text>
+                  <Text color="rgb(78,61,30)" opacity={0.8} maxW="md">
+                    {hasFilters
+                      ? "Try adjusting your search terms or deadline filters to find more opportunities."
+                      : error
+                        ? "The scholarship database is not configured yet. This is normal for a new installation."
+                        : "Scholarship opportunities will appear here once they are added by administrators."
+                    }
+                  </Text>
+                  {hasFilters && (
+                    <Button
+                      onClick={() => updateFilters({ search: '', deadline: 'all' })}
+                      bg="rgb(9,76,9)"
+                      color="white"
+                      _hover={{ bg: "rgb(92,127,66)" }}
+                      size="lg"
+                    >
+                      Clear all filters
+                    </Button>
+                  )}
+                  {!hasFilters && !error && (
+                    <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
+                      <Text fontSize="sm" color="blue.800">
+                        💡 Administrators can add scholarships through the admin panel
+                      </Text>
+                    </Box>
+                  )}
+                </Stack>
+              </Box>
+            ) : (
+              <Box
+                display="grid"
+                gridTemplateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
+                gap={8}
+              >
+                {scholarships.map((scholarship) => (
+                  <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
+                ))}
+              </Box>
+            )}
+          </Box>
         </Stack>
       </Box>
     </Box>

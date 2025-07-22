@@ -13,7 +13,7 @@ interface AuthContextType {
   loading: boolean;
   
   // Auth methods
-  signUp: (email: string, password: string, fullName: string) => Promise<{ user: User | null; error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string, role: 'admin' | 'applicant') => Promise<{ user: User | null; error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ user: User | null; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Sign up new user
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'applicant') => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -109,8 +109,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         }
       });
-
-      return { user: data.user, error };
+      if (error || !data.user) {
+        return { user: null, error };
+      }
+      // Insert profile with role
+      const { error: profileError } = await supabase.from('profiles').insert([
+        {
+          id: data.user.id,
+          email,
+          full_name: fullName,
+          role,
+        }
+      ]);
+      if (profileError) {
+        return { user: data.user, error: profileError };
+      }
+      return { user: data.user, error: null };
     } catch (error) {
       return { user: null, error: error as AuthError };
     }

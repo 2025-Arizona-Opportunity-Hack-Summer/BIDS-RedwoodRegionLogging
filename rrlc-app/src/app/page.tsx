@@ -12,6 +12,7 @@ import {
   SimpleGrid,
   Icon,
   Badge,
+  Grid
 } from "@chakra-ui/react";
 import { 
   FiAward, 
@@ -27,7 +28,7 @@ function FeatureCard({ icon, title, description }: { icon: React.ElementType; ti
   return (
     <Box
       bg="white"
-      p={6}
+      p={10}
       borderRadius="xl"
       border="2px"
       borderColor="rgb(146,169,129)"
@@ -71,7 +72,7 @@ export default function HomePage() {
       <Box
         bg="linear-gradient(135deg, rgb(61,84,44) 0%, rgb(92,127,66) 100%)"
         color="white"
-        py={20}
+        py={56}
         px={6}
         position="relative"
         overflow="hidden"
@@ -168,7 +169,7 @@ export default function HomePage() {
       <Box py={24} px={6}>
         <Container maxW="6xl">
           <VStack spacing={16}>
-            <VStack spacing={4} textAlign="center">
+            <VStack spacing={4} textAlign="center" pb={8}>
               <Heading size="2xl" color="rgb(61,84,44)">
                 Why Choose RRLC Scholarships?
               </Heading>
@@ -178,7 +179,7 @@ export default function HomePage() {
               </Text>
             </VStack>
 
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={12}>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap="48px">
               <FeatureCard
                 icon={FiDollarSign}
                 title="Financial Support"
@@ -214,7 +215,7 @@ export default function HomePage() {
                 title="Rolling Applications"
                 description="Multiple application deadlines throughout the year, giving you flexibility in when to apply."
               />
-            </SimpleGrid>
+            </Grid>
           </VStack>
         </Container>
       </Box>

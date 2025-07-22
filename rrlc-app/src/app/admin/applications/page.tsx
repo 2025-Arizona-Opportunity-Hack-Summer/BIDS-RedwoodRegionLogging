@@ -5,16 +5,13 @@ import {
   Box,
   Button,
   Heading,
-  VStack,
-  HStack,
+  Stack,
   Text,
   Badge,
   Input,
-  Card,
-  CardBody,
-  CardHeader,
   Skeleton,
 } from "@chakra-ui/react";
+import { Select as ChakraSelect } from "@chakra-ui/react";
 import { 
   FiDownload, 
   FiEye, 
@@ -30,38 +27,35 @@ import { ApplicationWithScholarship } from "@/services/adminApplications";
 
 function StatsCard({ icon, title, value, subtitle, color = "rgb(9,76,9)" }: any) {
   const Icon = icon;
-  
   return (
-    <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
-      <CardBody>
-        <HStack spacing={4}>
-          <Box
-            w="50px"
-            h="50px"
-            borderRadius="lg"
-            bg={color}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Icon size={24} color="white" />
-          </Box>
-          <VStack align="start" spacing={1}>
-            <Text fontSize="2xl" fontWeight="bold" color="rgb(61,84,44)">
-              {value}
+    <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4} boxShadow="sm">
+      <Stack direction="row" gap={4} align="center">
+        <Box
+          w="50px"
+          h="50px"
+          borderRadius="lg"
+          bg={color}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Icon size={24} color="white" />
+        </Box>
+        <Stack direction="column" gap={1} align="start">
+          <Text fontSize="2xl" fontWeight="bold" color="rgb(61,84,44)">
+            {value}
+          </Text>
+          <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
+            {title}
+          </Text>
+          {subtitle && (
+            <Text fontSize="xs" color="rgb(78,61,30)" opacity={0.8}>
+              {subtitle}
             </Text>
-            <Text fontSize="sm" color="rgb(78,61,30)" fontWeight="medium">
-              {title}
-            </Text>
-            {subtitle && (
-              <Text fontSize="xs" color="rgb(78,61,30)" opacity={0.8}>
-                {subtitle}
-              </Text>
-            )}
-          </VStack>
-        </HStack>
-      </CardBody>
-    </Card>
+          )}
+        </Stack>
+      </Stack>
+    </Box>
   );
 }
 
@@ -113,141 +107,123 @@ function ApplicationCard({ application, onStatusUpdate }: {
   };
 
   return (
-    <Card
-      bg="white"
-      border="2px"
-      borderColor="rgb(146,169,129)"
-      _hover={{
-        borderColor: "rgb(92,127,66)",
-        boxShadow: "md"
-      }}
-      transition="all 0.2s"
-    >
-      <CardBody>
-        <VStack spacing={4} align="stretch">
-          {/* Header */}
-          <HStack justify="space-between" align="start">
-            <VStack align="start" spacing={1}>
-              <Heading size="md" color="rgb(61,84,44)">
-                {application.first_name} {application.last_name}
-              </Heading>
-              <Text fontSize="sm" color="rgb(78,61,30)" opacity={0.8}>
-                {application.scholarships?.name || 'Unknown Scholarship'}
-              </Text>
-            </VStack>
-            <ApplicationStatusBadge status={application.status} />
-          </HStack>
-
-          {/* Application Details */}
-          <VStack spacing={2} align="stretch">
-            <HStack justify="space-between">
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>Email:</strong> {application.email}
-              </Text>
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>Phone:</strong> {application.phone}
-              </Text>
-            </HStack>
-            
-            <HStack justify="space-between">
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>School:</strong> {application.school}
-              </Text>
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>Major:</strong> {application.major}
-              </Text>
-            </HStack>
-            
-            <HStack justify="space-between">
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>GPA:</strong> {application.gpa || 'N/A'}
-              </Text>
-              <Text fontSize="sm" color="rgb(78,61,30)">
-                <strong>Graduation:</strong> {application.graduation_year}
-              </Text>
-            </HStack>
-
-            <Text fontSize="sm" color="rgb(78,61,30)">
-              <strong>Applied:</strong> {new Date(application.created_at).toLocaleDateString()}
+    <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={6} boxShadow="sm">
+      <Stack direction="column" gap={4} align="stretch">
+        {/* Header */}
+        <Stack direction="row" gap={4} justify="space-between" align="start">
+          <Stack direction="column" align="start" gap={1}>
+            <Heading size="md" color="rgb(61,84,44)">
+              {application.first_name} {application.last_name}
+            </Heading>
+            <Text fontSize="sm" color="rgb(78,61,30)" opacity={0.8}>
+              {application.scholarships?.name || 'Unknown Scholarship'}
             </Text>
+          </Stack>
+          <ApplicationStatusBadge status={application.status || ''} />
+        </Stack>
 
-            {application.awarded_amount && (
-              <Text fontSize="sm" color="rgb(9,76,9)" fontWeight="bold">
-                <strong>Awarded:</strong> {formatCurrency(application.awarded_amount)}
-              </Text>
-            )}
-          </VStack>
+        {/* Application Details */}
+        <Stack direction="column" gap={2} align="stretch">
+          <Stack direction="row" gap={4} justify="space-between">
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>Email:</strong> {application.email}
+            </Text>
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>Phone:</strong> {application.phone}
+            </Text>
+          </Stack>
+          <Stack direction="row" gap={4} justify="space-between">
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>School:</strong> {application.school}
+            </Text>
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>Major:</strong> {application.major}
+            </Text>
+          </Stack>
+          <Stack direction="row" gap={4} justify="space-between">
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>GPA:</strong> {application.gpa || 'N/A'}
+            </Text>
+            <Text fontSize="sm" color="rgb(78,61,30)">
+              <strong>Graduation:</strong> {application.graduation_year}
+            </Text>
+          </Stack>
+          <Text fontSize="sm" color="rgb(78,61,30)">
+            <strong>Applied:</strong> {new Date(application.created_at).toLocaleDateString()}
+          </Text>
+          {application.awarded_amount && (
+            <Text fontSize="sm" color="rgb(9,76,9)" fontWeight="bold">
+              <strong>Awarded:</strong> {formatCurrency(application.awarded_amount)}
+            </Text>
+          )}
+        </Stack>
 
-          {/* Action Buttons */}
-          <HStack spacing={2} justify="flex-end">
+        {/* Action Buttons */}
+        <Stack direction="row" gap={2} justify="flex-end">
+          <Button
+            size="sm"
+            variant="ghost"
+            color="rgb(9,76,9)"
+            _hover={{ bg: "rgb(193,212,178)" }}
+          >
+            <Box as={FiEye} mr={2} />
+            View Details
+          </Button>
+          {application.status === 'submitted' && (
             <Button
-              leftIcon={<FiEye />}
               size="sm"
-              variant="ghost"
-              color="rgb(9,76,9)"
-              _hover={{ bg: "rgb(193,212,178)" }}
+              bg="rgb(146,169,129)"
+              color="white"
+              _hover={{ bg: "rgb(92,127,66)" }}
+              onClick={() => handleStatusUpdate('under_review')}
+              loading={updating}
             >
-              View Details
+              <Box as={FiClock} mr={2} />
+              Review
             </Button>
-
-            {application.status === 'submitted' && (
+          )}
+          {String(application.status) === 'under_review' && (
+            <>
               <Button
-                leftIcon={<FiClock />}
                 size="sm"
-                bg="rgb(146,169,129)"
+                bg="rgb(9,76,9)"
                 color="white"
                 _hover={{ bg: "rgb(92,127,66)" }}
-                onClick={() => handleStatusUpdate('under_review')}
-                isLoading={updating}
+                onClick={() => handleStatusUpdate('approved')}
+                loading={updating}
               >
-                Review
+                <Box as={FiCheck} mr={2} />
+                Approve
               </Button>
-            )}
-
-            {application.status === 'under_review' && (
-              <>
-                <Button
-                  leftIcon={<FiCheck />}
-                  size="sm"
-                  bg="rgb(9,76,9)"
-                  color="white"
-                  _hover={{ bg: "rgb(92,127,66)" }}
-                  onClick={() => handleStatusUpdate('approved')}
-                  isLoading={updating}
-                >
-                  Approve
-                </Button>
-                <Button
-                  leftIcon={<FiX />}
-                  size="sm"
-                  bg="rgb(94,60,23)"
-                  color="white"
-                  _hover={{ bg: "rgb(78,61,30)" }}
-                  onClick={() => handleStatusUpdate('rejected')}
-                  isLoading={updating}
-                >
-                  Reject
-                </Button>
-              </>
-            )}
-
-            {application.status === 'approved' && (
               <Button
-                leftIcon={<FiDollarSign />}
                 size="sm"
-                bg="rgb(218,165,32)"
+                bg="rgb(94,60,23)"
                 color="white"
-                _hover={{ bg: "rgb(184,134,11)" }}
-                onClick={() => handleStatusUpdate('awarded')}
-                isLoading={updating}
+                _hover={{ bg: "rgb(78,61,30)" }}
+                onClick={() => handleStatusUpdate('rejected')}
+                loading={updating}
               >
-                Award
+                <Box as={FiX} mr={2} />
+                Reject
               </Button>
-            )}
-          </HStack>
-        </VStack>
-      </CardBody>
-    </Card>
+            </>
+          )}
+          {String(application.status) === 'approved' && (
+            <Button
+              size="sm"
+              bg="rgb(218,165,32)"
+              color="white"
+              _hover={{ bg: "rgb(184,134,11)" }}
+              onClick={() => handleStatusUpdate('awarded')}
+              loading={updating}
+            >
+              <Box as={FiDollarSign} mr={2} />
+              Award
+            </Button>
+          )}
+        </Stack>
+      </Stack>
+    </Box>
   );
 }
 
@@ -286,9 +262,9 @@ function ApplicationsContent() {
   return (
     <Box minHeight="100vh" bg="rgb(193,212,178)" p={6}>
       <Box maxW="7xl" mx="auto">
-        <VStack spacing={8} align="stretch">
+        <Stack direction="column" gap={8} align="stretch">
           {/* Header */}
-          <HStack justify="space-between" align="center">
+          <Stack direction="row" gap={4} justify="space-between" align="center">
             <Box>
               <Heading size="2xl" color="rgb(61,84,44)" mb={2}>
                 Application Management
@@ -299,18 +275,16 @@ function ApplicationsContent() {
             </Box>
             
             <Button
-              leftIcon={<FiDownload />}
               bg="rgb(9,76,9)"
               color="white"
               size="lg"
               _hover={{ bg: "rgb(92,127,66)" }}
               onClick={handleExport}
-              isLoading={exporting}
-              loadingText="Exporting..."
+              loading={exporting}
             >
               Export CSV
             </Button>
-          </HStack>
+          </Stack>
 
           {/* Stats Cards */}
           {stats && (
@@ -350,11 +324,10 @@ function ApplicationsContent() {
           )}
 
           {/* Enhanced Filters */}
-          <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
-            <CardBody>
-              <VStack spacing={4} align="stretch">
+          <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={6} boxShadow="sm">
+            <Stack direction="column" gap={4} align="stretch">
                 {/* Primary Search Row */}
-                <HStack spacing={4} wrap="wrap">
+                <Stack direction="row" gap={4} wrap="wrap">
                   <Input
                     placeholder="🔍 Search by name, email, school, or major..."
                     value={filters.search || ''}
@@ -378,20 +351,22 @@ function ApplicationsContent() {
                     }}
                   />
 
-                  <Box
-                    as="select"
-                    value={filters.status || ''}
+                  <select
+                    value={typeof filters.status === 'string' ? filters.status : ''}
                     onChange={(e) => {
                       updateFilters({ status: e.target.value || undefined });
                       setTimeout(() => applyFilters(), 100);
                     }}
-                    p={2}
-                    borderWidth="1px"
-                    borderColor="rgb(146,169,129)"
-                    borderRadius="md"
-                    bg="white"
-                    minW="150px"
-                    _hover={{ borderColor: "rgb(92,127,66)" }}
+                    style={{
+                      padding: '8px',
+                      borderWidth: '1px',
+                      borderColor: 'rgb(146,169,129)',
+                      borderRadius: '8px',
+                      backgroundColor: 'white',
+                      minWidth: '150px',
+                      maxWidth: '200px',
+                      fontSize: '16px',
+                    }}
                   >
                     <option value="">All Statuses</option>
                     <option value="submitted">Submitted</option>
@@ -399,7 +374,7 @@ function ApplicationsContent() {
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                     <option value="awarded">Awarded</option>
-                  </Box>
+                  </select>
 
                   <Button
                     bg="rgb(9,76,9)"
@@ -410,11 +385,11 @@ function ApplicationsContent() {
                   >
                     Apply Filters
                   </Button>
-                </HStack>
+                </Stack>
 
                 {/* Advanced Filters Row */}
-                <HStack spacing={4} wrap="wrap">
-                  <VStack align="start" spacing={1}>
+                <Stack direction="row" gap={4} wrap="wrap">
+                  <Stack direction="column" align="start" gap={1}>
                     <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
                       Application Date From
                     </Text>
@@ -431,9 +406,9 @@ function ApplicationsContent() {
                         boxShadow: "0 0 0 1px rgb(9,76,9)"
                       }}
                     />
-                  </VStack>
+                  </Stack>
 
-                  <VStack align="start" spacing={1}>
+                  <Stack direction="column" align="start" gap={1}>
                     <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
                       Application Date To
                     </Text>
@@ -450,9 +425,9 @@ function ApplicationsContent() {
                         boxShadow: "0 0 0 1px rgb(9,76,9)"
                       }}
                     />
-                  </VStack>
+                  </Stack>
 
-                  <VStack align="start" spacing={1} justify="end">
+                  <Stack direction="column" align="start" gap={1} justify="end">
                     <Text fontSize="xs" color="transparent">
                       Clear
                     </Text>
@@ -474,12 +449,12 @@ function ApplicationsContent() {
                     >
                       Clear All
                     </Button>
-                  </VStack>
-                </HStack>
+                  </Stack>
+                </Stack>
 
                 {/* Active Filters Display */}
                 {(filters.search || filters.status || filters.dateFrom || filters.dateTo) && (
-                  <HStack spacing={2} wrap="wrap">
+                  <Stack direction="row" gap={2} wrap="wrap">
                     <Text fontSize="xs" color="rgb(78,61,30)" fontWeight="medium">
                       Active Filters:
                     </Text>
@@ -503,22 +478,21 @@ function ApplicationsContent() {
                         To: {new Date(filters.dateTo).toLocaleDateString()}
                       </Badge>
                     )}
-                  </HStack>
+                  </Stack>
                 )}
-              </VStack>
-            </CardBody>
-          </Card>
+              </Stack>
+            </Box>
 
           {/* Applications List */}
-          <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
-            <CardHeader>
-              <HStack justify="space-between">
+          <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={6} boxShadow="sm">
+            <Box mb={4}>
+              <Stack direction="row" gap={4} justify="space-between">
                 <Heading size="md" color="rgb(61,84,44)">
                   Applications ({totalCount})
                 </Heading>
-              </HStack>
-            </CardHeader>
-            <CardBody pt={0}>
+              </Stack>
+            </Box>
+            <Box pt={0}>
               {error && (
                 <Box p={4} bg="red.50" border="1px" borderColor="red.200" borderRadius="md" mb={4}>
                   <Text color="red.800">{error}</Text>
@@ -526,11 +500,11 @@ function ApplicationsContent() {
               )}
 
               {loading ? (
-                <VStack spacing={4}>
+                <Stack direction="column" gap={4}>
                   {[...Array(5)].map((_, i) => (
                     <Skeleton key={i} height="200px" width="100%" />
                   ))}
-                </VStack>
+                </Stack>
               ) : applications.length === 0 ? (
                 <Box textAlign="center" py={12}>
                   <Text color="rgb(78,61,30)" fontSize="lg">
@@ -541,7 +515,7 @@ function ApplicationsContent() {
                   </Text>
                 </Box>
               ) : (
-                <VStack spacing={4} align="stretch">
+                <Stack direction="column" gap={4} align="stretch">
                   {applications.map((application) => (
                     <ApplicationCard
                       key={application.id}
@@ -549,11 +523,11 @@ function ApplicationsContent() {
                       onStatusUpdate={handleStatusUpdate}
                     />
                   ))}
-                </VStack>
+                </Stack>
               )}
-            </CardBody>
-          </Card>
-        </VStack>
+            </Box>
+          </Box>
+        </Stack>
       </Box>
     </Box>
   );
