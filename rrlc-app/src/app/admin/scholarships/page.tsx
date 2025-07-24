@@ -13,7 +13,6 @@ import {
   IconButton,
   Input,
   Card,
-  CardBody,
   Skeleton,
 } from "@chakra-ui/react";
 import { FiPlus, FiEdit3, FiTrash2, FiEye } from "react-icons/fi";
@@ -23,8 +22,8 @@ import { Scholarship } from "@/types/database";
 
 function ScholarshipTableSkeleton() {
   return (
-    <Card bg="white" border="2px" borderColor="rgb(146,169,129)">
-      <CardBody>
+    <Card.Root bg="white" border="2px" borderColor="rgb(146,169,129)">
+      <Card.Body>
         <VStack gap={4}>
           {[...Array(5)].map((_, i) => (
             <HStack key={i} w="full" gap={4}>
@@ -36,8 +35,8 @@ function ScholarshipTableSkeleton() {
             </HStack>
           ))}
         </VStack>
-      </CardBody>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   );
 }
 
@@ -141,7 +140,6 @@ function ScholarshipManagementContent() {
             
             <Link href="/admin/scholarships/new">
               <Button
-                leftIcon={<FiPlus />}
                 bg="rgb(9,76,9)"
                 color="white"
                 size="lg"
@@ -149,14 +147,15 @@ function ScholarshipManagementContent() {
                 boxShadow="md"
                 _active={{ transform: "translateY(1px)" }}
               >
+                <FiPlus style={{ marginRight: '8px' }} />
                 Create Scholarship
               </Button>
             </Link>
           </HStack>
 
           {/* Search and Filters */}
-          <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
-            <CardBody>
+          <Card.Root bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
+            <Card.Body>
               <HStack gap={4}>
                 <Input
                   placeholder="🔍 Search scholarships..."
@@ -172,16 +171,16 @@ function ScholarshipManagementContent() {
                 />
                 
               </HStack>
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
 
           {/* Table */}
           {loading ? (
             <ScholarshipTableSkeleton />
           ) : (
-            <Card bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
-              <CardBody p={0}>
+            <Card.Root bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="md">
+              <Card.Body p={0}>
                 {filteredScholarships.length === 0 ? (
                   <Box textAlign="center" py={12}>
                     <Text color="rgb(78,61,30)" fontSize="lg" mb={4}>
@@ -202,7 +201,7 @@ function ScholarshipManagementContent() {
                 ) : (
                   <VStack gap={4} align="stretch">
                     {filteredScholarships.map((scholarship) => (
-                      <Card
+                      <Card.Root
                         key={scholarship.id}
                         bg="white"
                         border="1px"
@@ -214,7 +213,7 @@ function ScholarshipManagementContent() {
                         }}
                         transition="all 0.2s"
                       >
-                        <CardBody>
+                        <Card.Body>
                           <HStack justify="space-between" align="start">
                             {/* Scholarship Info */}
                             <VStack align="start" gap={2} flex={1}>
@@ -260,42 +259,45 @@ function ScholarshipManagementContent() {
                               <Link href={`/admin/scholarships/${scholarship.id}`}>
                                 <IconButton
                                   aria-label="View scholarship"
-                                  icon={<FiEye />}
                                   size="sm"
                                   variant="ghost"
                                   color="rgb(9,76,9)"
                                   _hover={{ bg: "rgb(193,212,178)" }}
-                                />
+                                >
+                                  <FiEye />
+                                </IconButton>
                               </Link>
                               <Link href={`/admin/scholarships/${scholarship.id}/edit`}>
                                 <IconButton
                                   aria-label="Edit scholarship"
-                                  icon={<FiEdit3 />}
                                   size="sm"
                                   variant="ghost"
                                   color="rgb(255,211,88)"
                                   _hover={{ bg: "rgb(193,212,178)" }}
-                                />
+                                >
+                                  <FiEdit3 />
+                                </IconButton>
                               </Link>
                               <IconButton
                                 aria-label="Delete scholarship"
-                                icon={<FiTrash2 />}
                                 size="sm"
                                 variant="ghost"
                                 color="rgb(94,60,23)"
                                 _hover={{ bg: "rgb(193,212,178)" }}
                                 onClick={() => handleDelete(scholarship)}
-                                isLoading={deletingId === scholarship.id}
-                              />
+                                loading={deletingId === scholarship.id}
+                              >
+                                <FiTrash2 />
+                              </IconButton>
                             </HStack>
                           </HStack>
-                        </CardBody>
-                      </Card>
+                        </Card.Body>
+                      </Card.Root>
                     ))}
                   </VStack>
                 )}
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
           )}
         </VStack>
       </Box>

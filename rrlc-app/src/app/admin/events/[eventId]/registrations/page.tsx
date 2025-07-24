@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Box,
@@ -12,111 +12,60 @@ import {
   Stack,
   Text,
   CloseButton,
-  Badge
+  Badge,
+  createToaster
 } from "@chakra-ui/react";
 import { FiPlus, FiEdit2, FiArrowLeft } from "react-icons/fi";
-import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-
-interface EventRegistration {
-  id: string;
-  event_id: string;
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  registration_date: string;
-  attendance_status: string;
-  created_at: string;
-}
-
-interface Event {
-  id: string;
-  name: string;
-  event_date: string;
-  capacity: number;
-  registered_count: number;
-}
-
-const showToast = (message: string, type: 'success' | 'error') => {
-  console.log(`${type.toUpperCase()}: ${message}`);
-  if (type === 'error') {
-    alert(`Error: ${message}`);
-  }
-};
+import { useEvent, useEventRegistrations } from "@/hooks/useEvents";
+import { CreateEventRegistrationData, UpdateEventRegistrationData } from "@/types/database";
 
 export default function EventRegistrationsPage() {
   const params = useParams();
   const eventId = params.eventId as string;
+  const toaster = createToaster({
+    placement: 'top',
+  });
   
-  const [event, setEvent] = useState<Event | null>(null);
-  const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<EventRegistration | null>(null);
-  const [form, setForm] = useState({ 
-    user_name: '', 
-    user_email: '', 
-    attendance_status: 'registered' 
+  const { event, loading: eventLoading } = useEvent(eventId);
+  const { 
+    registrations, 
+    loading: registrationsLoading, 
+    error, 
+    createRegistration, 
+    updateRegistration
+  } = useEventRegistrations(eventId);
+  
+  const [selected, setSelected] = useState<any>(null);
+  const [form, setForm] = useState<any>({ 
+    user_id: '', 
+    registration_status: 'registered',
+    payment_status: 'pending',
+    notes: ''
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
-  const fetchEvent = useCallback(async () => {
-    const { data, error } = await supabase.from("events").select("*").eq("id", eventId).single();
-    if (error) {
-      showToast("Error fetching event", "error");
-    } else {
-      setEvent(data);
-    }
-  }, [eventId]);
-
-  const fetchRegistrations = useCallback(async () => {
-    setLoading(true);
-    // For now, using mock data until we create the event_registrations table
-    const mockRegistrations: EventRegistration[] = [
-      {
-        id: '1',
-        event_id: eventId,
-        user_id: 'user1',
-        user_name: 'John Doe',
-        user_email: 'john@example.com',
-        registration_date: '2024-01-15',
-        attendance_status: 'registered',
-        created_at: '2024-01-15'
-      },
-      {
-        id: '2',
-        event_id: eventId,
-        user_id: 'user2',
-        user_name: 'Jane Smith',
-        user_email: 'jane@example.com',
-        registration_date: '2024-01-16',
-        attendance_status: 'attended',
-        created_at: '2024-01-16'
-      }
-    ];
-    setRegistrations(mockRegistrations);
-    setLoading(false);
-  }, [eventId]);
-
-  useEffect(() => {
-    if (eventId) {
-      fetchEvent();
-      fetchRegistrations();
-    }
-  }, [eventId, fetchEvent, fetchRegistrations]);
+  const loading = eventLoading || registrationsLoading;
 
   const handleOpenAdd = () => {
-    setForm({ user_name: '', user_email: '', attendance_status: 'registered' });
+    setForm({ 
+      user_id: '', 
+      registration_status: 'registered',
+      payment_status: 'pending',
+      notes: ''
+    });
     setIsEditing(false);
     setSelected(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (registration: EventRegistration) => {
+  const handleOpenEdit = (registration: any) => {
     setForm({
-      user_name: registration.user_name,
-      user_email: registration.user_email,
-      attendance_status: registration.attendance_status
+      user_id: registration.user_id,
+      registration_status: registration.registration_status,
+      payment_status: registration.payment_status,
+      notes: registration.notes || ''
     });
     setIsEditing(true);
     setSelected(registration);
@@ -125,16 +74,36 @@ export default function EventRegistrationsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isEditing && selected) {
-      // Update registration (mock for now)
-      showToast("Registration updated (mock)", "success");
+    
+    try {
+      if (isEditing && selected) {
+        const updateData: UpdateEventRegistrationData = {
+          id: selected.id,
+          ...form
+        };
+        await updateRegistration(updateData);
+        toaster.create({
+          title: "Registration updated successfully",
+          duration: 3000,
+        });
+      } else {
+        const createData: CreateEventRegistrationData = {
+          event_id: eventId,
+          ...form
+        };
+        await createRegistration(createData);
+        toaster.create({
+          title: "Registration created successfully",
+          duration: 3000,
+        });
+      }
       setIsModalOpen(false);
-      fetchRegistrations();
-    } else {
-      // Create registration (mock for now)
-      showToast("Registration created (mock)", "success");
-      setIsModalOpen(false);
-      fetchRegistrations();
+    } catch (error) {
+      toaster.create({
+        title: "Error",
+        description: (error as Error).message,
+        duration: 5000,
+      });
     }
   };
 
@@ -143,11 +112,12 @@ export default function EventRegistrationsPage() {
     setSelected(null);
   };
 
-  const getAttendanceColor = (status: string) => {
+  const getRegistrationStatusColor = (status: string) => {
     switch (status) {
       case 'attended': return 'green';
       case 'registered': return 'blue';
       case 'cancelled': return 'red';
+      case 'no_show': return 'orange';
       default: return 'gray';
     }
   };
@@ -173,8 +143,14 @@ export default function EventRegistrationsPage() {
         Event Date: {new Date(event.event_date).toLocaleDateString()} | 
         Capacity: {event.capacity} | 
         Registered: {registrations.length} | 
-        Attended: {registrations.filter(r => r.attendance_status === 'attended').length}
+        Attended: {registrations.filter(r => r.registration_status === 'attended').length}
       </Box>
+      
+      {error && (
+        <Box mb={4} p={4} bg="red.50" borderColor="red.200" borderWidth={1} borderRadius="md">
+          <Text color="red.600">{error}</Text>
+        </Box>
+      )}
       
       <Button 
         colorScheme="teal" 
@@ -214,17 +190,17 @@ export default function EventRegistrationsPage() {
               >
                 <Stack direction="row" align="center" fontSize="sm">
                   <Box flex="2">
-                    <Text fontWeight="medium">{registration.user_name}</Text>
+                    <Text fontWeight="medium">{registration.user?.full_name || 'Unknown User'}</Text>
                   </Box>
                   <Box flex="3">
-                    <Text>{registration.user_email}</Text>
+                    <Text>{registration.user?.email || 'No email'}</Text>
                   </Box>
                   <Box flex="2">
                     <Text>{new Date(registration.registration_date).toLocaleDateString()}</Text>
                   </Box>
                   <Box flex="1">
-                    <Badge colorScheme={getAttendanceColor(registration.attendance_status)}>
-                      {registration.attendance_status}
+                    <Badge colorScheme={getRegistrationStatusColor(registration.registration_status)}>
+                      {registration.registration_status}
                     </Badge>
                   </Box>
                   <Box flex="1">
@@ -290,7 +266,7 @@ export default function EventRegistrationsPage() {
                     <Text mb={2} fontSize="sm" fontWeight="medium">Name</Text>
                     <Input 
                       value={form.user_name} 
-                      onChange={e => setForm(f => ({ ...f, user_name: e.target.value }))}
+                      onChange={e => setForm((f: any) => ({ ...f, user_name: e.target.value }))}
                       placeholder="Enter full name"
                       required
                       bg="white"
@@ -302,7 +278,7 @@ export default function EventRegistrationsPage() {
                     <Input 
                       type="email" 
                       value={form.user_email} 
-                      onChange={e => setForm(f => ({ ...f, user_email: e.target.value }))}
+                      onChange={e => setForm((f: any) => ({ ...f, user_email: e.target.value }))}
                       placeholder="Enter email address"
                       required
                       bg="white"
@@ -313,7 +289,7 @@ export default function EventRegistrationsPage() {
                     <Text mb={2} fontSize="sm" fontWeight="medium">Attendance Status</Text>
                     <select
                       value={form.attendance_status}
-                      onChange={e => setForm(f => ({ ...f, attendance_status: e.target.value }))}
+                      onChange={e => setForm((f: any) => ({ ...f, attendance_status: e.target.value }))}
                       style={{ width: '100%', padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '14px', backgroundColor: 'white', color: '#374151' }}
                     >
                       <option value="registered">Registered</option>

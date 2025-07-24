@@ -212,3 +212,140 @@ CREATE TRIGGER update_scholarships_updated_at
 CREATE TRIGGER update_applications_updated_at
   BEFORE UPDATE ON applications
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Create events table for Event Management system
+CREATE TABLE events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  event_date DATE NOT NULL,
+  event_type TEXT DEFAULT 'conference' CHECK (event_type IN ('conference', 'workshop', 'networking', 'award_ceremony', 'other')),
+  capacity INTEGER DEFAULT 100,
+  current_registrations INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'cancelled', 'completed')),
+  location TEXT,
+  registration_fee DECIMAL(10,2) DEFAULT 0.00,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES profiles(id)
+);
+
+-- Create event registrations table
+CREATE TABLE event_registrations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  registration_status TEXT DEFAULT 'registered' CHECK (registration_status IN ('registered', 'cancelled', 'attended', 'no_show')),
+  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'refunded', 'waived')),
+  registration_date TIMESTAMPTZ DEFAULT NOW(),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(event_id, user_id)
+);
+
+-- Create indexes for events tables
+CREATE INDEX idx_events_event_date ON events(event_date);
+CREATE INDEX idx_events_status ON events(status);
+CREATE INDEX idx_events_event_type ON events(event_type);
+CREATE INDEX idx_event_registrations_event_id ON event_registrations(event_id);
+CREATE INDEX idx_event_registrations_user_id ON event_registrations(user_id);
+CREATE INDEX idx_event_registrations_status ON event_registrations(registration_status);
+
+-- Set up RLS for events table
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Active events are viewable by everyone" ON events
+  FOR SELECT USING (status = 'active');
+
+CREATE POLICY "Admins can do everything with events" ON events
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- Set up RLS for event registrations table
+ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own registrations" ON event_registrations
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own registrations" ON event_registrations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own registrations" ON event_registrations
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can view all registrations" ON event_registrations
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Admins can update all registrations" ON event_registrations
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM profiles 
+      WHERE profiles.id = auth.uid() 
+      AND profiles.role = 'admin'
+    )
+  );
+
+-- Create triggers for updated_at timestamps on events tables
+CREATE TRIGGER update_events_updated_at
+  BEFORE UPDATE ON events
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_event_registrations_updated_at
+  BEFORE UPDATE ON event_registrations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Create function to update event registration count
+CREATE OR REPLACE FUNCTION update_event_registration_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE events 
+    SET current_registrations = (
+      SELECT COUNT(*) 
+      FROM event_registrations 
+      WHERE event_id = NEW.event_id 
+      AND registration_status = 'registered'
+    )
+    WHERE id = NEW.event_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'UPDATE' THEN
+    UPDATE events 
+    SET current_registrations = (
+      SELECT COUNT(*) 
+      FROM event_registrations 
+      WHERE event_id = NEW.event_id 
+      AND registration_status = 'registered'
+    )
+    WHERE id = NEW.event_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE events 
+    SET current_registrations = (
+      SELECT COUNT(*) 
+      FROM event_registrations 
+      WHERE event_id = OLD.event_id 
+      AND registration_status = 'registered'
+    )
+    WHERE id = OLD.event_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to automatically update registration count
+CREATE TRIGGER update_event_registration_count_trigger
+  AFTER INSERT OR UPDATE OR DELETE ON event_registrations
+  FOR EACH ROW EXECUTE FUNCTION update_event_registration_count();

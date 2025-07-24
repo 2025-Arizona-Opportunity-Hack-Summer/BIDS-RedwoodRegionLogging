@@ -33,7 +33,6 @@ export function ProtectedRoute({
           <Spinner 
             size="lg" 
             color="rgb(9,76,9)" // Deep green
-            thickness="4px"
           />
           <Text color="rgb(78,61,30)">Loading...</Text>
         </VStack>

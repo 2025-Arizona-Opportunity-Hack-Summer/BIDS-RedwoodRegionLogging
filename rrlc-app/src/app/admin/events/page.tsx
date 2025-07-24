@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -11,35 +10,23 @@ import {
   Stack,
   Text,
   CloseButton,
-  Badge
+  Badge,
+  createToaster
 } from "@chakra-ui/react";
 import { FiPlus, FiEdit2, FiUsers } from "react-icons/fi";
-import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
-
-interface Event {
-  id: string;
-  name: string;
-  description: string;
-  event_date: string;
-  event_type: string;
-  capacity: number;
-  registered_count: number;
-  created_at: string;
-}
-
-const showToast = (message: string, type: 'success' | 'error') => {
-  console.log(`${type.toUpperCase()}: ${message}`);
-  if (type === 'error') {
-    alert(`Error: ${message}`);
-  }
-};
+import { useEvents, useEventStats } from "@/hooks/useEvents";
+import { CreateEventData, UpdateEventData } from "@/types/database";
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<Event | null>(null);
-  const [form, setForm] = useState({ 
+  const toaster = createToaster({
+    placement: 'top',
+  });
+  const { events, loading, error, createEvent, updateEvent } = useEvents();
+  const { stats } = useEventStats();
+  
+  const [selected, setSelected] = useState<any>(null);
+  const [form, setForm] = useState<CreateEventData>({ 
     name: '', 
     description: '', 
     event_date: '', 
@@ -48,21 +35,7 @@ export default function EventsPage() {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-
-  const fetchEvents = async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from("events").select("*").order("created_at", { ascending: false });
-    if (error) {
-      showToast("Error fetching events", "error");
-    } else {
-      setEvents(data || []);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleOpenAdd = () => {
     setForm({ name: '', description: '', event_date: '', event_type: 'conference', capacity: 100 });
@@ -71,10 +44,10 @@ export default function EventsPage() {
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (event: Event) => {
+  const handleOpenEdit = (event: any) => {
     setForm({
       name: event.name,
-      description: event.description,
+      description: event.description || '',
       event_date: event.event_date,
       event_type: event.event_type,
       capacity: event.capacity
@@ -86,39 +59,35 @@ export default function EventsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isEditing && selected) {
-      // Update event
-      const { error } = await supabase.from("events").update({
-        name: form.name,
-        description: form.description,
-        event_date: form.event_date,
-        event_type: form.event_type,
-        capacity: form.capacity
-      }).eq("id", selected.id);
-      if (error) {
-        showToast("Error updating event", "error");
+    setSubmitting(true);
+    
+    try {
+      if (isEditing && selected) {
+        const updateData: UpdateEventData = {
+          id: selected.id,
+          ...form
+        };
+        await updateEvent(updateData);
+        toaster.create({
+          title: "Event updated successfully",
+          duration: 3000,
+        });
       } else {
-        showToast("Event updated", "success");
-        setIsModalOpen(false);
-        fetchEvents();
+        await createEvent(form);
+        toaster.create({
+          title: "Event created successfully",
+          duration: 3000,
+        });
       }
-    } else {
-      // Create event
-      const { error } = await supabase.from("events").insert([{
-        name: form.name,
-        description: form.description,
-        event_date: form.event_date,
-        event_type: form.event_type,
-        capacity: form.capacity,
-        registered_count: 0
-      }]);
-      if (error) {
-        showToast("Error creating event", "error");
-      } else {
-        showToast("Event created", "success");
-        setIsModalOpen(false);
-        fetchEvents();
-      }
+      setIsModalOpen(false);
+    } catch (error) {
+      toaster.create({
+        title: "Error",
+        description: (error as Error).message,
+        duration: 5000,
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,8 +99,10 @@ export default function EventsPage() {
   const getEventTypeColor = (type: string) => {
     switch (type) {
       case 'conference': return 'blue';
-      case 'education': return 'green';
       case 'workshop': return 'purple';
+      case 'networking': return 'green';
+      case 'award_ceremony': return 'yellow';
+      case 'other': return 'gray';
       default: return 'gray';
     }
   };
@@ -140,8 +111,14 @@ export default function EventsPage() {
     <Box maxW="6xl" mx="auto" mt={10} p={8} borderWidth={1} borderRadius="lg" boxShadow="md" bg="white" borderColor="gray.300">
       <Heading mb={2} color="black">Event Management</Heading>
       <Box mb={6} color="gray.700" fontWeight="medium">
-        Total events: {events.length} | Total registrations: {events.reduce((sum, e) => sum + e.registered_count, 0)}
+        Total events: {events.length} | Total registrations: {stats ? stats.totalRegistrations : 0}
       </Box>
+      
+      {error && (
+        <Box mb={4} p={4} bg="red.50" borderColor="red.200" borderWidth={1} borderRadius="md">
+          <Text color="red.600">{error}</Text>
+        </Box>
+      )}
       
       <Button 
         colorScheme="teal" 
@@ -197,8 +174,8 @@ export default function EventsPage() {
                     <Text>{event.capacity}</Text>
                   </Box>
                   <Box flex="1">
-                    <Text color={event.registered_count >= event.capacity ? "red.600" : "green.600"}>
-                      {event.registered_count}/{event.capacity}
+                    <Text color={event.current_registrations >= event.capacity ? "red.600" : "green.600"}>
+                      {event.current_registrations}/{event.capacity}
                     </Text>
                   </Box>
                   <Box flex="1">
@@ -308,12 +285,14 @@ export default function EventsPage() {
                     <Text mb={2} fontSize="sm" fontWeight="medium">Event Type</Text>
                     <select
                       value={form.event_type}
-                      onChange={e => setForm(f => ({ ...f, event_type: e.target.value }))}
+                      onChange={e => setForm(f => ({ ...f, event_type: e.target.value as any }))}
                       style={{ width: '100%', padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '14px', backgroundColor: 'white', color: '#374151' }}
                     >
                       <option value="conference">Conference</option>
-                      <option value="education">Education Day</option>
                       <option value="workshop">Workshop</option>
+                      <option value="networking">Networking</option>
+                      <option value="award_ceremony">Award Ceremony</option>
+                      <option value="other">Other</option>
                     </select>
                   </Box>
                   <Box>
@@ -333,8 +312,8 @@ export default function EventsPage() {
               </Box>
               <Box p={6} borderTop="1px" borderColor="gray.300" bg="gray.100">
                 <Stack direction="row" gap={3} justify="flex-end">
-                  <Button onClick={handleCloseModal} variant="ghost">Cancel</Button>
-                  <Button colorScheme="teal" type="submit">
+                  <Button onClick={handleCloseModal} variant="ghost" disabled={submitting}>Cancel</Button>
+                  <Button colorScheme="teal" type="submit" loading={submitting}>
                     {isEditing ? "Update" : "Create"}
                   </Button>
                 </Stack>
