@@ -168,6 +168,18 @@ function AdminDashboardContent() {
                     Generate Reports
                   </Button>
                 </Link>
+                
+                <Link href="/admin/analytics">
+                  <Button 
+                    size="lg"
+                    w="full"
+                    bg="rgb(130,99,32)" // Deep gold
+                    color="white"
+                    _hover={{ bg: "rgb(197,155,60)" }}
+                  >
+                    Analytics Dashboard
+                  </Button>
+                </Link>
               </Grid>
             </Card.Body>
           </Card.Root>
