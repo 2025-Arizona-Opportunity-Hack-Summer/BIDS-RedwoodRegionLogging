@@ -122,7 +122,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       ]);
       if (profileError) {
-        return { user: data.user, error: profileError };
+        // Create a custom error that matches AuthError interface
+        const authError = new Error(profileError.message) as AuthError;
+        authError.name = 'AuthError';
+        authError.status = 500;
+        authError.code = profileError.code || 'profile_creation_failed';
+        return { user: null, error: authError };
       }
       return { user: data.user, error: null };
     } catch (error) {
