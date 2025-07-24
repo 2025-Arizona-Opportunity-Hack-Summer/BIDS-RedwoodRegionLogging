@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import { sendApplicationConfirmationEmail } from '@/services/emailClient';
 
 export interface CreateApplicationData {
   scholarship_id: string;
@@ -48,6 +49,7 @@ export interface Application extends CreateApplicationData {
 // Submit a new application
 export async function submitApplication(applicationData: CreateApplicationData) {
   try {
+    // First, submit the application
     const { data, error } = await supabase
       .from('applications')
       .insert([{
@@ -58,7 +60,32 @@ export async function submitApplication(applicationData: CreateApplicationData) 
       .select()
       .single();
 
-    return { data, error };
+    if (error) {
+      return { data: null, error };
+    }
+
+    // Then, fetch the scholarship details for the email
+    const { data: scholarship, error: scholarshipError } = await supabase
+      .from('scholarships')
+      .select('name')
+      .eq('id', applicationData.scholarship_id)
+      .single();
+
+    if (!scholarshipError && scholarship && data) {
+      // Send confirmation email (non-blocking)
+      const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
+      sendApplicationConfirmationEmail(
+        applicationData.email,
+        applicantName,
+        scholarship.name,
+        data.id
+      ).catch(emailError => {
+        // Log email error but don't fail the application submission
+        console.error('Failed to send confirmation email:', emailError);
+      });
+    }
+
+    return { data, error: null };
   } catch (error) {
     console.error('Error submitting application:', error);
     return { data: null, error };

@@ -70,6 +70,34 @@ export interface ApplicationDocument {
   uploaded_at: string;
 }
 
+export interface Event {
+  id: string;
+  name: string;
+  description: string | null;
+  event_date: string;
+  event_type: 'conference' | 'workshop' | 'networking' | 'award_ceremony' | 'other';
+  capacity: number;
+  current_registrations: number;
+  status: 'active' | 'inactive' | 'cancelled' | 'completed';
+  location: string | null;
+  registration_fee: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+}
+
+export interface EventRegistration {
+  id: string;
+  event_id: string;
+  user_id: string;
+  registration_status: 'registered' | 'cancelled' | 'attended' | 'no_show';
+  payment_status: 'pending' | 'paid' | 'refunded' | 'waived';
+  registration_date: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Extended types with relationships
 export interface ApplicationWithScholarship extends Application {
   scholarship: Scholarship;
@@ -83,6 +111,15 @@ export interface ApplicationWithDetails extends Application {
   scholarship: Scholarship;
   profile: Profile;
   documents: ApplicationDocument[];
+}
+
+export interface EventWithRegistrations extends Event {
+  registrations: EventRegistration[];
+}
+
+export interface EventRegistrationWithDetails extends EventRegistration {
+  event: Event;
+  user: Profile;
 }
 
 // Form types for creating/updating
@@ -126,6 +163,33 @@ export interface UpdateApplicationData extends Partial<CreateApplicationData> {
   admin_notes?: string;
 }
 
+export interface CreateEventData {
+  name: string;
+  description?: string;
+  event_date: string;
+  event_type?: Event['event_type'];
+  capacity?: number;
+  location?: string;
+  registration_fee?: number;
+  status?: 'active' | 'inactive';
+}
+
+export interface UpdateEventData extends Partial<CreateEventData> {
+  id: string;
+}
+
+export interface CreateEventRegistrationData {
+  event_id: string;
+  user_id: string;
+  registration_status?: EventRegistration['registration_status'];
+  payment_status?: EventRegistration['payment_status'];
+  notes?: string;
+}
+
+export interface UpdateEventRegistrationData extends Partial<CreateEventRegistrationData> {
+  id: string;
+}
+
 // Supabase Database Type Definition
 export interface Database {
   public: {
@@ -149,6 +213,16 @@ export interface Database {
         Row: ApplicationDocument;
         Insert: Omit<ApplicationDocument, 'id' | 'uploaded_at'>;
         Update: Partial<Omit<ApplicationDocument, 'id' | 'uploaded_at'>>;
+      };
+      events: {
+        Row: Event;
+        Insert: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'current_registrations'>;
+        Update: Partial<Omit<Event, 'id' | 'created_at' | 'updated_at' | 'current_registrations'>>;
+      };
+      event_registrations: {
+        Row: EventRegistration;
+        Insert: Omit<EventRegistration, 'id' | 'created_at' | 'updated_at' | 'registration_date'>;
+        Update: Partial<Omit<EventRegistration, 'id' | 'created_at' | 'updated_at' | 'registration_date'>>;
       };
     };
   };

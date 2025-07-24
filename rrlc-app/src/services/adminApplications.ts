@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { Application } from './applications';
+import { sendEmailForStatusChange } from '@/services/emailClient';
 
 export interface ApplicationWithScholarship extends Application {
   scholarships: {
@@ -88,14 +89,42 @@ export async function updateApplicationStatus(
       updateData.internal_notes = notes;
     }
 
+    // First, update the application
     const { data, error } = await supabase
       .from('applications')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        scholarships:scholarship_id (
+          name
+        )
+      `)
       .single();
 
-    return { data, error };
+    if (error) {
+      return { data: null, error };
+    }
+
+    // If successful, send status change email (non-blocking)
+    if (data && data.email && data.first_name && data.last_name) {
+      const applicantName = `${data.first_name} ${data.last_name}`;
+      const scholarshipName = data.scholarships?.name || 'Scholarship';
+      
+      sendEmailForStatusChange(
+        data.email,
+        applicantName,
+        scholarshipName,
+        status,
+        data.id,
+        awardedAmount
+      ).catch(emailError => {
+        // Log email error but don't fail the status update
+        console.error('Failed to send status change email:', emailError);
+      });
+    }
+
+    return { data, error: null };
   } catch (error) {
     console.error('Error updating application status:', error);
     return { data: null, error };
