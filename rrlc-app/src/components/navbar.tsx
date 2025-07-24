@@ -20,7 +20,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut();
-    router.push("/login");
+    router.push("/auth/login");
   };
 
   return (
@@ -109,7 +109,7 @@ export default function Navbar() {
               </Button>
             </>
           ) : (
-            <Link href="/login">
+            <Link href="/auth/login">
               <Button 
                 size="sm"
                 bg="rgb(9,76,9)" // Deep green
@@ -186,7 +186,7 @@ export default function Navbar() {
               </Button>
             </>
           ) : (
-            <Link href="/login">
+            <Link href="/auth/login">
               <Button 
                 size="sm"
                 bg="rgb(9,76,9)"

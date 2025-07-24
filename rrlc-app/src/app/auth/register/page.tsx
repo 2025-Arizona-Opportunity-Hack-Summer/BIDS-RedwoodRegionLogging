@@ -12,8 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
+export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -21,7 +20,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { signIn, signUp, isAuthenticated, isAdmin } = useAuth();
+  const { signUp, isAuthenticated, isAdmin } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -36,20 +35,11 @@ export default function LoginPage() {
     setError("");
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(error.message);
-        } else {
-          router.push("/admin");
-        }
+      const { error } = await signUp(email, password, fullName, role);
+      if (error) {
+        setError(error.message);
       } else {
-        const { error } = await signUp(email, password, fullName, role);
-        if (error) {
-          setError(error.message);
-        } else {
-          setError("Please check your email to verify your account.");
-        }
+        setError("Please check your email to verify your account.");
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -91,56 +81,52 @@ export default function LoginPage() {
             color="rgb(78,61,30)" // Primary text color
             fontSize="md"
           >
-            {isLogin ? "Sign in to your account" : "Create your account"}
+            Create your account
           </Text>
 
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <VStack gap={4}>
-              {!isLogin && (
-                <Box w="full">
-                  <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                    Full Name <Text as="span" color="red.500">*</Text>
-                  </Text>
-                  <Input 
-                    type="text" 
-                    value={fullName} 
-                    onChange={e => setFullName(e.target.value)}
-                    required
-                    placeholder="Enter your full name"
-                    borderColor="rgb(146,169,129)"
-                    color="black"
-                    _hover={{ borderColor: "rgb(92,127,66)" }}
-                    _focus={{ 
-                      borderColor: "rgb(9,76,9)",
-                      boxShadow: "0 0 0 1px rgb(9,76,9)"
-                    }}
-                  />
-                </Box>
-              )}
-              {/* Role selector for sign up */}
-              {!isLogin && (
-                <Box w="full">
-                  <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                    Role <Text as="span" color="red.500">*</Text>
-                  </Text>
-                  <select
-                    value={role}
-                    onChange={e => setRole(e.target.value as 'admin' | 'applicant')}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid rgb(146,169,129)',
-                      borderRadius: '6px',
-                      fontSize: '16px',
-                      backgroundColor: 'white',
-                      color: 'black',
-                    }}
-                  >
-                    <option value="applicant">Applicant</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </Box>
-              )}
+              <Box w="full">
+                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                  Full Name <Text as="span" color="red.500">*</Text>
+                </Text>
+                <Input 
+                  type="text" 
+                  value={fullName} 
+                  onChange={e => setFullName(e.target.value)}
+                  required
+                  placeholder="Enter your full name"
+                  borderColor="rgb(146,169,129)"
+                  color="black"
+                  _hover={{ borderColor: "rgb(92,127,66)" }}
+                  _focus={{ 
+                    borderColor: "rgb(9,76,9)",
+                    boxShadow: "0 0 0 1px rgb(9,76,9)"
+                  }}
+                />
+              </Box>
+
+              <Box w="full">
+                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                  Role <Text as="span" color="red.500">*</Text>
+                </Text>
+                <select
+                  value={role}
+                  onChange={e => setRole(e.target.value as 'admin' | 'applicant')}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid rgb(146,169,129)',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    backgroundColor: 'white',
+                    color: 'black',
+                  }}
+                >
+                  <option value="applicant">Applicant</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </Box>
               
               <Box w="full">
                 <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
@@ -211,23 +197,22 @@ export default function LoginPage() {
                 }}
                 size="lg"
               >
-                {isLogin ? "Sign In" : "Create Account"}
+                Create Account
               </Button>
             </VStack>
           </form>
 
           <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
             <Text color="rgb(78,61,30)" fontSize="sm">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
+              Already have an account?
             </Text>
             <Link 
-              onClick={() => setIsLogin(!isLogin)}
+              href="/auth/login"
               color="rgb(9,76,9)"
               fontWeight="medium"
               _hover={{ color: "rgb(92,127,66)" }}
-              cursor="pointer"
             >
-              {isLogin ? "Sign up here" : "Sign in here"}
+              Sign in here
             </Link>
           </Box>
         </VStack>
