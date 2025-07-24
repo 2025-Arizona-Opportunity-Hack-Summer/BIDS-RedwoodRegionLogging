@@ -46,7 +46,7 @@ export function ProtectedRoute({
       return <>{fallback}</>;
     }
     
-    router.push('/login');
+    router.push('/auth/login');
     return (
       <Box 
         display="flex" 
