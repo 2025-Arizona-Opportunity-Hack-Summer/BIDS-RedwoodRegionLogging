@@ -16,7 +16,7 @@ export function ProtectedRoute({
   requireAdmin = false, 
   fallback 
 }: ProtectedRouteProps) {
-  const { loading, isAdmin, isAuthenticated } = useAuth();
+  const { loading, isAdmin, isAuthenticated, isAuthReady, profileLoading } = useAuth();
   const router = useRouter();
 
   // Handle redirect in useEffect to avoid setState during render
@@ -26,8 +26,8 @@ export function ProtectedRoute({
     }
   }, [loading, isAuthenticated, fallback, router]);
 
-  // Show loading spinner while checking auth
-  if (loading) {
+  // Show loading spinner while checking auth or loading profile data
+  if (loading || (isAuthenticated() && !isAuthReady())) {
     return (
       <Box 
         display="flex" 
@@ -66,8 +66,8 @@ export function ProtectedRoute({
     );
   }
 
-  // Check admin requirement
-  if (requireAdmin && !isAdmin()) {
+  // Check admin requirement (only after auth is fully ready)
+  if (requireAdmin && isAuthReady() && !isAdmin()) {
     return (
       <Box 
         display="flex" 

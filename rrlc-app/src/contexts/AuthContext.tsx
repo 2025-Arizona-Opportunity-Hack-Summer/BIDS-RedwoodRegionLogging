@@ -44,6 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [lastSessionId, setLastSessionId] = useState<string | null>(null);
 
   // Fetch user profile from database
   const fetchProfile = async (userId: string) => {
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      setLastSessionId(session?.access_token || null);
       
       if (session?.user) {
         fetchProfile(session.user.id).then(setProfile);
@@ -88,21 +90,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      // Check if this is actually a new session to prevent unnecessary updates
+      const newSessionId = session?.access_token || null;
+      const currentUserId = session?.user?.id;
+      const previousUserId = user?.id;
+      
+      // Only update if session actually changed or user changed
+      if (newSessionId !== lastSessionId || currentUserId !== previousUserId) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLastSessionId(newSessionId);
 
-      if (session?.user) {
-        const userProfile = await fetchProfile(session.user.id);
-        setProfile(userProfile);
-      } else {
-        setProfile(null);
+        if (session?.user) {
+          // Only fetch profile if we don't have one or if user changed
+          if (!profile || profile.id !== session.user.id) {
+            const userProfile = await fetchProfile(session.user.id);
+            setProfile(userProfile);
+          }
+        } else {
+          setProfile(null);
+        }
       }
 
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [lastSessionId, user?.id, profile?.id]);
 
   // Sign up new user
   const signUp = async (email: string, password: string, fullName: string, role: 'admin' | 'applicant') => {
