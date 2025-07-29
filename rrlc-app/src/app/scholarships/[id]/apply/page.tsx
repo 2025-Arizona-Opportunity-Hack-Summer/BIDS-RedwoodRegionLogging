@@ -11,10 +11,7 @@ import {
   Text,
   Input,
   Textarea,
-  Select,
   Card,
-  CardBody,
-  CardHeader,
   Skeleton,
 } from "@chakra-ui/react";
 import { 
@@ -676,8 +673,8 @@ function ReviewStep({ formData, scholarship }: { formData: CreateApplicationData
   return (
     <VStack gap={6} align="stretch">
       {/* Scholarship Info */}
-      <Box bg="rgb(193,212,178)" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
-        <CardBody>
+      <Card.Root bg="rgb(193,212,178)" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
+        <Card.Body>
           <VStack gap={3} align="start">
             <Heading size="md" color="rgb(61,84,44)">
               Scholarship: {scholarship.name}
@@ -694,8 +691,8 @@ function ReviewStep({ formData, scholarship }: { formData: CreateApplicationData
               )}
             </HStack>
           </VStack>
-        </CardBody>
-      </Box>
+        </Card.Body>
+      </Card.Root>
 
       {/* Application Review */}
       <VStack gap={4} align="stretch">
@@ -927,49 +924,97 @@ export default function ScholarshipApplicationPage() {
             </VStack>
           </Box>
 
-          <CardBody p={8}>
-            <Box minH="400px">
-              {currentStep === 0 && (
-                <PersonalInfoStep 
-                  formData={formData} 
-                  updateFormData={updateFormData} 
-                  errors={errors} 
-                />
-              )}
-              {currentStep === 1 && (
-                <AcademicInfoStep 
-                  formData={formData} 
-                  updateFormData={updateFormData} 
-                  errors={errors} 
-                />
-              )}
-              {currentStep === 2 && (
-                <EssayStep 
-                  formData={formData} 
-                  updateFormData={updateFormData} 
-                  errors={errors} 
-                />
-              )}
-              {currentStep === 3 && (
-                <AdditionalInfoStep 
-                  formData={formData} 
-                  updateFormData={updateFormData} 
-                  errors={errors}
-                />
-              )}
-              {currentStep === 4 && (
-                <ReviewStep 
-                  formData={formData} 
-                  scholarship={scholarship}
-                />
-              )}
-            </Box>
+          <Card.Root>
+            <Card.Body p={8}>
+              <Box minH="400px">
+                {currentStep === 0 && (
+                  <PersonalInfoStep 
+                    formData={formData} 
+                    updateFormData={updateFormData} 
+                    errors={errors} 
+                  />
+                )}
+                {currentStep === 1 && (
+                  <AcademicInfoStep 
+                    formData={formData} 
+                    updateFormData={updateFormData} 
+                    errors={errors} 
+                  />
+                )}
+                {currentStep === 2 && (
+                  <EssayStep 
+                    formData={formData} 
+                    updateFormData={updateFormData} 
+                    errors={errors} 
+                  />
+                )}
+                {currentStep === 3 && (
+                  <AdditionalInfoStep 
+                    formData={formData} 
+                    updateFormData={updateFormData} 
+                    errors={errors}
+                  />
+                )}
+                {currentStep === 4 && (
+                  <ReviewStep 
+                    formData={formData} 
+                    scholarship={scholarship}
+                  />
+                )}
+              </Box>
 
-            {/* Navigation */}
-            <Box mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
-              {/* Mobile Layout - Stacked */}
-              <VStack gap={3} display={{ base: "flex", md: "none" }}>
-                <HStack gap={3} w="full">
+              {/* Navigation */}
+              <Box mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
+                {/* Mobile Layout - Stacked */}
+                <VStack gap={3} display={{ base: "flex", md: "none" }}>
+                  <HStack gap={3} w="full">
+                    <Button
+                      
+                      variant="ghost"
+                      onClick={prevStep}
+                      disabled={isFirstStep}
+                      color="rgb(78,61,30)"
+                      _hover={{ bg: "rgb(193,212,178)" }}
+                      flex="1"
+                      size="sm"
+                    >
+                      <FiArrowLeft style={{ marginRight: '8px' }} />
+                      Previous
+                    </Button>
+                    {isReviewStep ? (
+                      <Button
+                        
+                        bg="rgb(9,76,9)"
+                        color="white"
+                        onClick={handleSubmit}
+                        loading={submitting}
+                        loadingText="Submitting..."
+                        _hover={{ bg: "rgb(92,127,66)" }}
+                        flex="1"
+                        size="sm"
+                      >
+                        Submit
+                        <FiSend style={{ marginLeft: '8px' }} />
+                      </Button>
+                    ) : (
+                      <Button
+                        
+                        bg="rgb(9,76,9)"
+                        color="white"
+                        onClick={nextStep}
+                        _hover={{ bg: "rgb(92,127,66)" }}
+                        flex="1"
+                        size="sm"
+                      >
+                        {isLastStep ? "Review" : "Continue"}
+                        <FiArrowRight style={{ marginLeft: '8px' }} />
+                      </Button>
+                    )}
+                  </HStack>
+                </VStack>
+
+                {/* Desktop Layout - Horizontal */}
+                <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
                   <Button
                     
                     variant="ghost"
@@ -977,25 +1022,24 @@ export default function ScholarshipApplicationPage() {
                     disabled={isFirstStep}
                     color="rgb(78,61,30)"
                     _hover={{ bg: "rgb(193,212,178)" }}
-                    flex="1"
-                    size="sm"
                   >
                     <FiArrowLeft style={{ marginRight: '8px' }} />
                     Previous
                   </Button>
+
                   {isReviewStep ? (
                     <Button
                       
                       bg="rgb(9,76,9)"
                       color="white"
+                      size="lg"
                       onClick={handleSubmit}
                       loading={submitting}
                       loadingText="Submitting..."
                       _hover={{ bg: "rgb(92,127,66)" }}
-                      flex="1"
-                      size="sm"
+                      _active={{ transform: "scale(0.98)" }}
                     >
-                      Submit
+                      Submit Application
                       <FiSend style={{ marginLeft: '8px' }} />
                     </Button>
                   ) : (
@@ -1005,60 +1049,15 @@ export default function ScholarshipApplicationPage() {
                       color="white"
                       onClick={nextStep}
                       _hover={{ bg: "rgb(92,127,66)" }}
-                      flex="1"
-                      size="sm"
                     >
-                      {isLastStep ? "Review" : "Continue"}
+                      {isLastStep ? "Review Application" : "Continue"}
                       <FiArrowRight style={{ marginLeft: '8px' }} />
                     </Button>
                   )}
                 </HStack>
-              </VStack>
-
-              {/* Desktop Layout - Horizontal */}
-              <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
-                <Button
-                  
-                  variant="ghost"
-                  onClick={prevStep}
-                  disabled={isFirstStep}
-                  color="rgb(78,61,30)"
-                  _hover={{ bg: "rgb(193,212,178)" }}
-                >
-                  <FiArrowLeft style={{ marginRight: '8px' }} />
-                  Previous
-                </Button>
-
-                {isReviewStep ? (
-                  <Button
-                    
-                    bg="rgb(9,76,9)"
-                    color="white"
-                    size="lg"
-                    onClick={handleSubmit}
-                    loading={submitting}
-                    loadingText="Submitting..."
-                    _hover={{ bg: "rgb(92,127,66)" }}
-                    _active={{ transform: "scale(0.98)" }}
-                  >
-                    Submit Application
-                    <FiSend style={{ marginLeft: '8px' }} />
-                  </Button>
-                ) : (
-                  <Button
-                    
-                    bg="rgb(9,76,9)"
-                    color="white"
-                    onClick={nextStep}
-                    _hover={{ bg: "rgb(92,127,66)" }}
-                  >
-                    {isLastStep ? "Review Application" : "Continue"}
-                    <FiArrowRight style={{ marginLeft: '8px' }} />
-                  </Button>
-                )}
-              </HStack>
-            </Box>
-          </CardBody>
+              </Box>
+            </Card.Body>
+          </Card.Root>
         </Box>
       </Box>
     </Box>
