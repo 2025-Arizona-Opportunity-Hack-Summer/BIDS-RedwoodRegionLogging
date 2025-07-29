@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { 
   Box, 
   Flex, 
@@ -17,10 +18,28 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Navbar() {
   const { user, profile, signOut, isAuthenticated, isAdmin } = useAuth();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    await signOut();
-    router.push("/auth/login");
+    if (isLoggingOut) return; // Prevent double-clicks
+    
+    setIsLoggingOut(true);
+    try {
+      const { error } = await signOut();
+      if (!error) {
+        // Small delay to ensure auth state updates
+        setTimeout(() => {
+          router.push("/login");
+        }, 100);
+      } else {
+        console.error('Logout error:', error);
+        // Reset state on error so user can try again
+        setIsLoggingOut(false);
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -64,6 +83,20 @@ export default function Navbar() {
 
           {isAuthenticated() ? (
             <>
+              <Link href={isAdmin() ? "/admin" : "/home"}>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  color="white"
+                  _hover={{ 
+                    bg: "rgb(92,127,66)",
+                    color: "white"
+                  }}
+                >
+                  Home
+                </Button>
+              </Link>
+              
               {isAdmin() && (
                 <Link href="/admin">
                   <Button 
@@ -99,17 +132,23 @@ export default function Navbar() {
               <Button 
                 size="sm" 
                 onClick={handleLogout}
+                loading={isLoggingOut}
+                disabled={isLoggingOut}
                 bg="rgb(94,60,23)" // Rich brown
                 color="white"
                 _hover={{ 
                   bg: "rgb(78,61,30)" // Darker brown on hover
                 }}
+                _active={{
+                  bg: "rgb(78,61,30)",
+                  transform: "scale(0.98)"
+                }}
               >
-                Logout
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </>
           ) : (
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button 
                 size="sm"
                 bg="rgb(9,76,9)" // Deep green
@@ -175,18 +214,24 @@ export default function Navbar() {
               <Button 
                 size="sm" 
                 onClick={handleLogout}
+                loading={isLoggingOut}
+                disabled={isLoggingOut}
                 bg="rgb(94,60,23)"
                 color="white"
                 w="100%"
                 _hover={{ 
                   bg: "rgb(78,61,30)"
                 }}
+                _active={{
+                  bg: "rgb(78,61,30)",
+                  transform: "scale(0.98)"
+                }}
               >
-                Logout
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </>
           ) : (
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button 
                 size="sm"
                 bg="rgb(9,76,9)"

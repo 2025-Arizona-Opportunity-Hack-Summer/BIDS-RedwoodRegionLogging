@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Box, Spinner, Text, VStack } from '@chakra-ui/react';
@@ -18,6 +18,13 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { loading, isAdmin, isAuthenticated } = useAuth();
   const router = useRouter();
+
+  // Handle redirect in useEffect to avoid setState during render
+  useEffect(() => {
+    if (!loading && !isAuthenticated() && !fallback) {
+      router.push('/login');
+    }
+  }, [loading, isAuthenticated, fallback, router]);
 
   // Show loading spinner while checking auth
   if (loading) {
@@ -40,13 +47,12 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect to login if not authenticated
+  // Show fallback or redirect message if not authenticated
   if (!isAuthenticated()) {
     if (fallback) {
       return <>{fallback}</>;
     }
     
-    router.push('/auth/login');
     return (
       <Box 
         display="flex" 

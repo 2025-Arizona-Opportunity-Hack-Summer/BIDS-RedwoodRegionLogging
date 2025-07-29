@@ -112,23 +112,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (error || !data.user) {
         return { user: null, error };
       }
-      // Insert profile with role
-      const { error: profileError } = await supabase.from('profiles').insert([
-        {
-          id: data.user.id,
-          email,
-          full_name: fullName,
+      // Update the existing profile with the role (profile is created by database trigger)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
           role,
-        }
-      ]);
+          full_name: fullName // Update full_name in case it wasn't set by trigger
+        })
+        .eq('id', data.user.id);
+        
       if (profileError) {
-        // Create a custom error that matches AuthError interface
-        const authError = new Error(profileError.message) as AuthError;
-        authError.name = 'AuthError';
-        authError.status = 500;
-        authError.code = profileError.code || 'profile_creation_failed';
-        return { user: null, error: authError };
+        console.error('Error updating profile:', profileError);
+        // Don't fail the signup if profile update fails
       }
+      
+      // Sign out the user to require manual login
+      await supabase.auth.signOut();
+      
       return { user: data.user, error: null };
     } catch (error) {
       return { user: null, error: error as AuthError };

@@ -12,20 +12,27 @@ import {
 } from "@chakra-ui/react";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  // All users are applicants by default
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { signIn, isAuthenticated, isAdmin } = useAuth();
+  const { signUp } = useAuth();
 
-  // Redirect if already authenticated
+  // Auto-redirect to login after successful signup
   useEffect(() => {
-    if (isAuthenticated()) {
-      router.push(isAdmin() ? "/admin" : "/");
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/login');
+      }, 4000); // 4 seconds
+
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, isAdmin, router]);
+  }, [success, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,14 +40,21 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signUp(email, password, fullName, 'applicant');
       if (error) {
         setError(error.message);
+        setSuccess("");
       } else {
-        router.push("/admin");
+        setSuccess("Account created successfully! Please check your email to verify your account, then log in.");
+        setError("");
+        // Clear form
+        setEmail("");
+        setPassword("");
+        setFullName("");
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
+      setSuccess("");
     }
     
     setLoading(false);
@@ -79,11 +93,32 @@ export default function LoginPage() {
             color="rgb(78,61,30)" // Primary text color
             fontSize="md"
           >
-            Sign in to your account
+            Create your account
           </Text>
 
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <VStack gap={4}>
+              <Box w="full">
+                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
+                  Full Name <Text as="span" color="red.500">*</Text>
+                </Text>
+                <Input 
+                  type="text" 
+                  value={fullName} 
+                  onChange={e => setFullName(e.target.value)}
+                  required
+                  placeholder="Enter your full name"
+                  borderColor="rgb(146,169,129)"
+                  color="black"
+                  _hover={{ borderColor: "rgb(92,127,66)" }}
+                  _focus={{ 
+                    borderColor: "rgb(9,76,9)",
+                    boxShadow: "0 0 0 1px rgb(9,76,9)"
+                  }}
+                />
+              </Box>
+
+              
               <Box w="full">
                 <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
                   Email Address <Text as="span" color="red.500">*</Text>
@@ -139,6 +174,21 @@ export default function LoginPage() {
                 </Box>
               )}
               
+              {success && (
+                <Box 
+                  p={3} 
+                  bg="green.50" 
+                  border="1px" 
+                  borderColor="green.200" 
+                  borderRadius="md"
+                  w="full"
+                >
+                  <Text color="green.700" fontSize="sm">
+                    {success}
+                  </Text>
+                </Box>
+              )}
+              
               <Button 
                 type="submit" 
                 loading={loading}
@@ -153,22 +203,22 @@ export default function LoginPage() {
                 }}
                 size="lg"
               >
-                Sign In
+                Create Account
               </Button>
             </VStack>
           </form>
 
           <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
             <Text color="rgb(78,61,30)" fontSize="sm">
-              Don't have an account?
+              Already have an account?
             </Text>
             <Link 
-              href="/auth/register"
+              href="/login"
               color="rgb(9,76,9)"
               fontWeight="medium"
               _hover={{ color: "rgb(92,127,66)" }}
             >
-              Sign up here
+              Sign in here
             </Link>
           </Box>
         </VStack>

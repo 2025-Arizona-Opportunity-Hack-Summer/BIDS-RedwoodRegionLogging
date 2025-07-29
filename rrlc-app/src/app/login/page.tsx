@@ -12,20 +12,18 @@ import {
 } from "@chakra-ui/react";
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<'admin' | 'applicant'>('applicant');
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { signUp, isAuthenticated, isAdmin } = useAuth();
+  const { signIn, isAuthenticated, isAdmin } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated()) {
-      router.push(isAdmin() ? "/admin" : "/");
+      router.push(isAdmin() ? "/admin" : "/home");
     }
   }, [isAuthenticated, isAdmin, router]);
 
@@ -35,11 +33,14 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const { error } = await signUp(email, password, fullName, role);
+      const { error, user } = await signIn(email, password);
       if (error) {
         setError(error.message);
-      } else {
-        setError("Please check your email to verify your account.");
+      } else if (user) {
+        // Wait for the auth state to update and profile to be fetched
+        setTimeout(() => {
+          router.push(isAdmin() ? "/admin" : "/home");
+        }, 500);
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -81,53 +82,11 @@ export default function RegisterPage() {
             color="rgb(78,61,30)" // Primary text color
             fontSize="md"
           >
-            Create your account
+            Sign in to your account
           </Text>
 
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <VStack gap={4}>
-              <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                  Full Name <Text as="span" color="red.500">*</Text>
-                </Text>
-                <Input 
-                  type="text" 
-                  value={fullName} 
-                  onChange={e => setFullName(e.target.value)}
-                  required
-                  placeholder="Enter your full name"
-                  borderColor="rgb(146,169,129)"
-                  color="black"
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                  _focus={{ 
-                    borderColor: "rgb(9,76,9)",
-                    boxShadow: "0 0 0 1px rgb(9,76,9)"
-                  }}
-                />
-              </Box>
-
-              <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                  Role <Text as="span" color="red.500">*</Text>
-                </Text>
-                <select
-                  value={role}
-                  onChange={e => setRole(e.target.value as 'admin' | 'applicant')}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid rgb(146,169,129)',
-                    borderRadius: '6px',
-                    fontSize: '16px',
-                    backgroundColor: 'white',
-                    color: 'black',
-                  }}
-                >
-                  <option value="applicant">Applicant</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </Box>
-              
               <Box w="full">
                 <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
                   Email Address <Text as="span" color="red.500">*</Text>
@@ -197,22 +156,22 @@ export default function RegisterPage() {
                 }}
                 size="lg"
               >
-                Create Account
+                Sign In
               </Button>
             </VStack>
           </form>
 
           <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
             <Text color="rgb(78,61,30)" fontSize="sm">
-              Already have an account?
+              Don't have an account?
             </Text>
             <Link 
-              href="/auth/login"
+              href="/register"
               color="rgb(9,76,9)"
               fontWeight="medium"
               _hover={{ color: "rgb(92,127,66)" }}
             >
-              Sign in here
+              Sign up here
             </Link>
           </Box>
         </VStack>

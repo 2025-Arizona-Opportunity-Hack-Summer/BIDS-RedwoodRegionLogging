@@ -133,7 +133,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               
-              <Link href="/auth/login">
+              <Link href="/login">
                 <Button
                   size="lg"
                   variant="outline"
@@ -248,7 +248,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               
-              <Link href="/auth/register">
+              <Link href="/register">
                 <Button
                   size="lg"
                   variant="outline"
