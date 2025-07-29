@@ -103,7 +103,8 @@ export default function LoginPage() {
                   required
                   placeholder="Enter your email"
                   borderColor="rgb(146,169,129)"
-                  color="black"
+                  color="rgb(78,61,30)"
+                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
                   _hover={{ borderColor: "rgb(92,127,66)" }}
                   _focus={{ 
                     borderColor: "rgb(9,76,9)",
@@ -123,7 +124,8 @@ export default function LoginPage() {
                   required
                   placeholder="Enter your password"
                   borderColor="rgb(146,169,129)"
-                  color="black"
+                  color="rgb(78,61,30)"
+                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
                   _hover={{ borderColor: "rgb(92,127,66)" }}
                   _focus={{ 
                     borderColor: "rgb(9,76,9)",

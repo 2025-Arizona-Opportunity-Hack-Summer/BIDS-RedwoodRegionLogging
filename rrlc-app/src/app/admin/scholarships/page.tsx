@@ -15,7 +15,7 @@ import {
   Card,
   Skeleton,
 } from "@chakra-ui/react";
-import { FiPlus, FiEdit3, FiTrash2, FiEye } from "react-icons/fi";
+import { FiPlus, FiEdit3, FiTrash2, FiEye, FiSearch } from "react-icons/fi";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useScholarships } from "@/hooks/useScholarships";
 import { Scholarship } from "@/types/database";
@@ -163,6 +163,8 @@ function ScholarshipManagementContent() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   maxW="400px"
                   borderColor="rgb(146,169,129)"
+                  color="rgb(78,61,30)"
+                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
                   _hover={{ borderColor: "rgb(92,127,66)" }}
                   _focus={{
                     borderColor: "rgb(9,76,9)",

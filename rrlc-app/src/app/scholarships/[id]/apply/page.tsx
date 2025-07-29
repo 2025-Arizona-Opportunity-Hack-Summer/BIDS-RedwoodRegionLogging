@@ -123,6 +123,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.first_name}
             onChange={(e) => updateFormData('first_name', e.target.value)}
             borderColor={errors.first_name ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.first_name ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.first_name ? "red.500" : "rgb(9,76,9)",
@@ -144,6 +146,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.last_name}
             onChange={(e) => updateFormData('last_name', e.target.value)}
             borderColor={errors.last_name ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.last_name ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.last_name ? "red.500" : "rgb(9,76,9)",
@@ -168,6 +172,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.email}
             onChange={(e) => updateFormData('email', e.target.value)}
             borderColor={errors.email ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.email ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.email ? "red.500" : "rgb(9,76,9)",
@@ -190,6 +196,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.phone}
             onChange={(e) => updateFormData('phone', e.target.value)}
             borderColor={errors.phone ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.phone ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.phone ? "red.500" : "rgb(9,76,9)",
@@ -212,6 +220,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
           value={formData.address}
           onChange={(e) => updateFormData('address', e.target.value)}
           borderColor={errors.address ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.address ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.address ? "red.500" : "rgb(9,76,9)",
@@ -234,6 +244,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.city}
             onChange={(e) => updateFormData('city', e.target.value)}
             borderColor={errors.city ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.city ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.city ? "red.500" : "rgb(9,76,9)",
@@ -255,6 +267,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.state}
             onChange={(e) => updateFormData('state', e.target.value)}
             borderColor={errors.state ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.state ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.state ? "red.500" : "rgb(9,76,9)",
@@ -276,6 +290,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.zip}
             onChange={(e) => updateFormData('zip', e.target.value)}
             borderColor={errors.zip ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.zip ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.zip ? "red.500" : "rgb(9,76,9)",
@@ -299,6 +315,8 @@ function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentPro
           value={formData.date_of_birth || ''}
           onChange={(e) => updateFormData('date_of_birth', e.target.value)}
           borderColor="rgb(146,169,129)"
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: "rgb(92,127,66)" }}
           _focus={{
             borderColor: "rgb(9,76,9)",
@@ -322,6 +340,8 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
           onChange={(e) => updateFormData('school', e.target.value)}
           placeholder="Enter your school or institution name"
           borderColor={errors.school ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.school ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.school ? "red.500" : "rgb(9,76,9)",
@@ -348,7 +368,8 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
               borderWidth: '1px',
               borderColor: 'rgb(146,169,129)',
               borderRadius: '8px',
-              backgroundColor: 'white',
+              backgroundColor: 'rgb(146,169,129)',
+              color: 'white',
               fontSize: '18px',
               width: '100%'
             }}
@@ -371,6 +392,8 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
             min={new Date().getFullYear() - 5}
             max={new Date().getFullYear() + 10}
             borderColor={errors.graduation_year ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.graduation_year ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.graduation_year ? "red.500" : "rgb(9,76,9)",
@@ -395,6 +418,8 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
             onChange={(e) => updateFormData('major', e.target.value)}
             placeholder="e.g., Forestry, Environmental Science, Business"
             borderColor={errors.major ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.major ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.major ? "red.500" : "rgb(9,76,9)",
@@ -421,6 +446,8 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
             onChange={(e) => updateFormData('gpa', e.target.value ? parseFloat(e.target.value) : 0)}
             placeholder="e.g., 3.5"
             borderColor={errors.gpa ? "red.300" : "rgb(146,169,129)"}
+            color="rgb(78,61,30)"
+            _placeholder={{ color: "gray.500", opacity: 0.8 }}
             _hover={{ borderColor: errors.gpa ? "red.400" : "rgb(92,127,66)" }}
             _focus={{
               borderColor: errors.gpa ? "red.500" : "rgb(9,76,9)",
@@ -452,6 +479,8 @@ function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor={errors.career_goals ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.career_goals ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.career_goals ? "red.500" : "rgb(9,76,9)",
@@ -481,6 +510,8 @@ function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor={errors.financial_need ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.financial_need ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.financial_need ? "red.500" : "rgb(9,76,9)",
@@ -510,6 +541,8 @@ function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor={errors.community_involvement ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.community_involvement ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.community_involvement ? "red.500" : "rgb(9,76,9)",
@@ -539,6 +572,8 @@ function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor={errors.why_deserve_scholarship ? "red.300" : "rgb(146,169,129)"}
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: errors.why_deserve_scholarship ? "red.400" : "rgb(92,127,66)" }}
           _focus={{
             borderColor: errors.why_deserve_scholarship ? "red.500" : "rgb(9,76,9)",
@@ -574,6 +609,8 @@ function AdditionalInfoStep({ formData, updateFormData }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor="rgb(146,169,129)"
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: "rgb(92,127,66)" }}
           _focus={{
             borderColor: "rgb(9,76,9)",
@@ -593,6 +630,8 @@ function AdditionalInfoStep({ formData, updateFormData }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor="rgb(146,169,129)"
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: "rgb(92,127,66)" }}
           _focus={{
             borderColor: "rgb(9,76,9)",
@@ -612,6 +651,8 @@ function AdditionalInfoStep({ formData, updateFormData }: StepComponentProps) {
           rows={4}
           resize="vertical"
           borderColor="rgb(146,169,129)"
+          color="white"
+          _placeholder={{ color: "white", opacity: 0.7 }}
           _hover={{ borderColor: "rgb(92,127,66)" }}
           _focus={{
             borderColor: "rgb(9,76,9)",

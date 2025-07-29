@@ -12,7 +12,7 @@ import {
   Skeleton,
   Stack,
 } from "@chakra-ui/react";
-import { FiClock, FiDollarSign, FiFileText, FiArrowRight } from "react-icons/fi";
+import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiSearch, FiInfo } from "react-icons/fi";
 import { usePublicScholarships } from "@/hooks/usePublicScholarships";
 import { Scholarship } from "@/types/database";
 
@@ -263,13 +263,13 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
               placeholder="🔍 Search scholarships by name, description, or requirements..."
               value={localFilters.search}
               onChange={(e) => handleLocalFilterChange({ search: e.target.value })}
+              size="lg"
               borderColor="rgb(146,169,129)"
               _hover={{ borderColor: "rgb(92,127,66)" }}
               _focus={{
                 borderColor: "rgb(9,76,9)",
                 boxShadow: "0 0 0 1px rgb(9,76,9)"
               }}
-              size="lg"
             />
           </Box>
 
@@ -639,7 +639,7 @@ export default function PublicScholarshipsPage() {
                   {!hasFilters && !error && (
                     <Box p={4} bg="blue.50" borderRadius="md" border="1px" borderColor="blue.200">
                       <Text fontSize="sm" color="blue.800">
-                        💡 Administrators can add scholarships through the admin panel
+                        <FiInfo style={{ display: 'inline', marginRight: '8px' }} /> Administrators can add scholarships through the admin panel
                       </Text>
                     </Box>
                   )}

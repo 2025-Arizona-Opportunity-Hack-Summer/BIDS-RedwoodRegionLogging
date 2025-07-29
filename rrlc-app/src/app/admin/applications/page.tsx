@@ -17,7 +17,8 @@ import {
   FiX, 
   FiClock,
   FiDollarSign,
-  FiUsers
+  FiUsers,
+  FiSearch
 } from "react-icons/fi";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAdminApplications } from "@/hooks/useAdminApplications";
@@ -350,6 +351,8 @@ function ApplicationsContent() {
                     }}
                     maxW="400px"
                     borderColor="rgb(146,169,129)"
+                    color="rgb(78,61,30)"
+                    _placeholder={{ color: "gray.500", opacity: 0.8 }}
                     _hover={{ borderColor: "rgb(92,127,66)" }}
                     _focus={{
                       borderColor: "rgb(9,76,9)",
@@ -368,7 +371,8 @@ function ApplicationsContent() {
                       borderWidth: '1px',
                       borderColor: 'rgb(146,169,129)',
                       borderRadius: '8px',
-                      backgroundColor: 'white',
+                      backgroundColor: 'rgb(146,169,129)',
+                      color: 'white',
                       minWidth: '150px',
                       maxWidth: '200px',
                       fontSize: '16px',
@@ -406,6 +410,8 @@ function ApplicationsContent() {
                       size="sm"
                       maxW="160px"
                       borderColor="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
                       _hover={{ borderColor: "rgb(92,127,66)" }}
                       _focus={{
                         borderColor: "rgb(9,76,9)",
@@ -425,6 +431,8 @@ function ApplicationsContent() {
                       size="sm"
                       maxW="160px"
                       borderColor="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
                       _hover={{ borderColor: "rgb(92,127,66)" }}
                       _focus={{
                         borderColor: "rgb(9,76,9)",

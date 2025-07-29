@@ -269,8 +269,10 @@ export default function EventRegistrationsPage() {
                       onChange={e => setForm((f: any) => ({ ...f, user_name: e.target.value }))}
                       placeholder="Enter full name"
                       required
-                      bg="white"
-                      borderColor="gray.300"
+                      bg="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
+                      borderColor="rgb(146,169,129)"
                     />
                   </Box>
                   <Box>
@@ -281,8 +283,10 @@ export default function EventRegistrationsPage() {
                       onChange={e => setForm((f: any) => ({ ...f, user_email: e.target.value }))}
                       placeholder="Enter email address"
                       required
-                      bg="white"
-                      borderColor="gray.300"
+                      bg="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
+                      borderColor="rgb(146,169,129)"
                     />
                   </Box>
                   <Box>

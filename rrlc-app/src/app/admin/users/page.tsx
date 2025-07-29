@@ -274,8 +274,10 @@ export default function UsersPage() {
                       onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                       placeholder="Enter full name"
                       required
-                      bg="white"
-                      borderColor="gray.300"
+                      bg="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
+                      borderColor="rgb(146,169,129)"
                     />
                   </Box>
                   
@@ -289,8 +291,10 @@ export default function UsersPage() {
                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                       placeholder="Enter email address"
                       required
-                      bg="white"
-                      borderColor="gray.300"
+                      bg="rgb(146,169,129)"
+                      color="rgb(78,61,30)"
+                      _placeholder={{ color: "gray.500", opacity: 0.8 }}
+                      borderColor="rgb(146,169,129)"
                     />
                   </Box>
                   

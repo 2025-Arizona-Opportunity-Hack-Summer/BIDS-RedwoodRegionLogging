@@ -29,6 +29,7 @@ export default function Navbar() {
       if (!error) {
         // Small delay to ensure auth state updates
         setTimeout(() => {
+          setIsLoggingOut(false); // Reset loading state
           router.push("/login");
         }, 100);
       } else {
@@ -83,19 +84,21 @@ export default function Navbar() {
 
           {isAuthenticated() ? (
             <>
-              <Link href={isAdmin() ? "/admin" : "/home"}>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  color="white"
-                  _hover={{ 
-                    bg: "rgb(92,127,66)",
-                    color: "white"
-                  }}
-                >
-                  Home
-                </Button>
-              </Link>
+              {!isAdmin() && (
+                <Link href="/home">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    color="white"
+                    _hover={{ 
+                      bg: "rgb(92,127,66)",
+                      color: "white"
+                    }}
+                  >
+                    Home
+                  </Button>
+                </Link>
+              )}
               
               {isAdmin() && (
                 <Link href="/admin">
@@ -108,12 +111,12 @@ export default function Navbar() {
                       color: "white"
                     }}
                   >
-                    Admin Dashboard
+                    Home
                   </Button>
                 </Link>
               )}
               
-              <Box textAlign="right">
+              <HStack gap={2} align="center">
                 <Text fontSize="sm" color="rgb(255,211,88)">
                   {profile?.full_name || user?.email}
                 </Text>
@@ -127,7 +130,7 @@ export default function Navbar() {
                     {profile.role}
                   </Badge>
                 )}
-              </Box>
+              </HStack>
               
               <Button 
                 size="sm" 
@@ -194,6 +197,23 @@ export default function Navbar() {
 
           {isAuthenticated() ? (
             <>
+              {!isAdmin() && (
+                <Link href="/home">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    color="white"
+                    w="100%"
+                    _hover={{ 
+                      bg: "rgb(92,127,66)",
+                      color: "white"
+                    }}
+                  >
+                    Home
+                  </Button>
+                </Link>
+              )}
+              
               {isAdmin() && (
                 <Link href="/admin">
                   <Button 
@@ -206,7 +226,7 @@ export default function Navbar() {
                       color: "white"
                     }}
                   >
-                    Admin Dashboard
+                    Home
                   </Button>
                 </Link>
               )}

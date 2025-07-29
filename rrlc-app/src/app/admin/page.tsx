@@ -32,7 +32,7 @@ function AdminDashboardContent() {
               color="rgb(61,84,44)" // Dark forest green
               mb={2}
             >
-              Admin Dashboard
+              Home
             </Heading>
             <Text 
               fontSize="lg" 

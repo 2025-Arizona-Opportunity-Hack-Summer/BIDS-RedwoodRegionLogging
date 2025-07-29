@@ -190,12 +190,14 @@ function CreateScholarshipContent() {
                         placeholder="Enter the scholarship name..."
                         size="lg"
                         borderColor="rgb(146,169,129)"
+                        color="rgb(78,61,30)"
+                        _placeholder={{ color: "gray.500", opacity: 0.8 }}
                         _hover={{ borderColor: "rgb(92,127,66)" }}
                         _focus={{
                           borderColor: "rgb(9,76,9)",
                           boxShadow: "0 0 0 1px rgb(9,76,9)"
                         }}
-                        bg="white"
+                        bg="rgb(146,169,129)"
                       />
                       {errors.name && (
                         <Text color="red.500" fontSize="sm" mt={1}>
@@ -215,12 +217,14 @@ function CreateScholarshipContent() {
                         rows={4}
                         resize="vertical"
                         borderColor="rgb(146,169,129)"
+                        color="rgb(78,61,30)"
+                        _placeholder={{ color: "gray.500", opacity: 0.8 }}
                         _hover={{ borderColor: "rgb(92,127,66)" }}
                         _focus={{
                           borderColor: "rgb(9,76,9)",
                           boxShadow: "0 0 0 1px rgb(9,76,9)"
                         }}
-                        bg="white"
+                        bg="rgb(146,169,129)"
                       />
                       {errors.description && (
                         <Text color="red.500" fontSize="sm" mt={1}>
@@ -253,12 +257,14 @@ function CreateScholarshipContent() {
                           placeholder="Enter amount (e.g., 5000)"
                           size="lg"
                           borderColor="rgb(146,169,129)"
+                          color="white"
+                          _placeholder={{ color: "white", opacity: 0.7 }}
                           _hover={{ borderColor: "rgb(92,127,66)" }}
                           _focus={{
                             borderColor: "rgb(9,76,9)",
                             boxShadow: "0 0 0 1px rgb(9,76,9)"
                           }}
-                          bg="white"
+                          bg="rgb(146,169,129)"
                           step="0.01"
                           min="0"
                         />
@@ -279,12 +285,14 @@ function CreateScholarshipContent() {
                           onChange={(e) => handleInputChange("deadline", e.target.value)}
                           size="lg"
                           borderColor="rgb(146,169,129)"
+                          color="white"
+                          _placeholder={{ color: "white", opacity: 0.7 }}
                           _hover={{ borderColor: "rgb(92,127,66)" }}
                           _focus={{
                             borderColor: "rgb(9,76,9)",
                             boxShadow: "0 0 0 1px rgb(9,76,9)"
                           }}
-                          bg="white"
+                          bg="rgb(146,169,129)"
                         />
                         {errors.deadline && (
                           <Text color="red.500" fontSize="sm" mt={1}>
@@ -314,12 +322,14 @@ function CreateScholarshipContent() {
                         rows={5}
                         resize="vertical"
                         borderColor="rgb(146,169,129)"
+                        color="rgb(78,61,30)"
+                        _placeholder={{ color: "gray.500", opacity: 0.8 }}
                         _hover={{ borderColor: "rgb(92,127,66)" }}
                         _focus={{
                           borderColor: "rgb(9,76,9)",
                           boxShadow: "0 0 0 1px rgb(9,76,9)"
                         }}
-                        bg="white"
+                        bg="rgb(146,169,129)"
                       />
                       {errors.requirements && (
                         <Text color="red.500" fontSize="sm" mt={1}>
@@ -340,7 +350,8 @@ function CreateScholarshipContent() {
                           borderWidth: '1px',
                           borderColor: 'rgb(146,169,129)',
                           borderRadius: '8px',
-                          backgroundColor: 'white',
+                          backgroundColor: 'rgb(146,169,129)',
+                          color: 'white',
                           fontSize: '18px',
                           width: '100%'
                         }}
