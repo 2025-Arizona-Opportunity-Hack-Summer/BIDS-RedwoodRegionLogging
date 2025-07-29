@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
@@ -14,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiSearch, FiInfo } from "react-icons/fi";
 import { usePublicScholarships } from "@/hooks/usePublicScholarships";
+import { useAuth } from "@/contexts/AuthContext";
 import { Scholarship } from "@/types/database";
 
 function ScholarshipCardSkeleton() {
@@ -94,6 +96,9 @@ function CountdownBadge({ deadline }: { deadline: string | null }) {
 }
 
 function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  
   const formatCurrency = (amount: number | null) => {
     if (!amount) return "Amount varies";
     return new Intl.NumberFormat('en-US', {
@@ -102,6 +107,14 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const handleApplyClick = () => {
+    if (isAuthenticated()) {
+      router.push(`/scholarships/${scholarship.id}/apply`);
+    } else {
+      router.push('/login');
+    }
   };
 
   const cardProps = {
@@ -177,20 +190,19 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
       </Stack>
 
       {/* Apply button */}
-      <Link href={`/scholarships/${scholarship.id}/apply`}>
-        <Button
-          bg="rgb(9,76,9)"
-          color="white"
-          size="md"
-          w="full"
-          _hover={{ bg: "rgb(92,127,66)" }}
-          _active={{ transform: "scale(0.98)" }}
-          mt={4}
-        >
-          Apply Now
-          <Box as={FiArrowRight} ml={2} />
-        </Button>
-      </Link>
+      <Button
+        bg="rgb(9,76,9)"
+        color="white"
+        size="md"
+        w="full"
+        _hover={{ bg: "rgb(92,127,66)" }}
+        _active={{ transform: "scale(0.98)" }}
+        mt={4}
+        onClick={handleApplyClick}
+      >
+        Apply Now
+        <Box as={FiArrowRight} ml={2} />
+      </Button>
     </Box>
   );
 
