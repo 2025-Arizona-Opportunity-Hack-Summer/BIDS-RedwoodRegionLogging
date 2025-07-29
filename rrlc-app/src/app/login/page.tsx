@@ -18,14 +18,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { signIn, isAuthenticated, isAdmin } = useAuth();
+  const { signIn, isAuthenticated, isAdmin, isAuthReady } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (isAuthenticated() && isAuthReady()) {
       router.push(isAdmin() ? "/admin" : "/home");
     }
-  }, [isAuthenticated, isAdmin, router]);
+  }, [isAuthenticated, isAdmin, isAuthReady, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +38,14 @@ export default function LoginPage() {
         setError(error.message);
       } else if (user) {
         // Wait for the auth state to update and profile to be fetched
-        setTimeout(() => {
-          router.push(isAdmin() ? "/admin" : "/home");
-        }, 500);
+        const checkAuthReady = () => {
+          if (isAuthReady()) {
+            router.push(isAdmin() ? "/admin" : "/home");
+          } else {
+            setTimeout(checkAuthReady, 100);
+          }
+        };
+        checkAuthReady();
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -163,7 +168,7 @@ export default function LoginPage() {
 
           <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
             <Text color="rgb(78,61,30)" fontSize="sm">
-              Don't have an account?
+              Don&apos;t have an account?
             </Text>
             <Link 
               href="/register"

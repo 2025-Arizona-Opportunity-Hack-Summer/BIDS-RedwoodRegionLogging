@@ -11,6 +11,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;
   
   // Auth methods
   signUp: (email: string, password: string, fullName: string, role: 'admin' | 'applicant') => Promise<{ user: User | null; error: AuthError | null }>;
@@ -20,6 +21,7 @@ interface AuthContextType {
   // Helper methods
   isAdmin: () => boolean;
   isAuthenticated: () => boolean;
+  isAuthReady: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,9 +43,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Fetch user profile from database
   const fetchProfile = async (userId: string) => {
+    setProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -53,12 +57,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (error) {
         console.error('Error fetching profile:', error);
+        setProfileLoading(false);
         return null;
       }
 
+      setProfileLoading(false);
       return data as Profile;
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setProfileLoading(false);
       return null;
     }
   };
@@ -169,16 +176,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return !!user;
   };
 
+  // Helper method to check if auth is fully ready (user + profile loaded)
+  const isAuthReady = () => {
+    if (!user) return true; // If no user, auth is "ready" (not authenticated)
+    return !profileLoading && !!profile; // If user exists, wait for profile to load
+  };
+
   const value: AuthContextType = {
     user,
     session,
     profile,
     loading,
+    profileLoading,
     signUp,
     signIn,
     signOut,
     isAdmin,
     isAuthenticated,
+    isAuthReady,
   };
 
   return (
