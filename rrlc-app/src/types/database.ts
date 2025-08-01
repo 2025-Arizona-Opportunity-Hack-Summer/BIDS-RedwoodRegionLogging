@@ -13,13 +13,36 @@ export interface Scholarship {
   id: string;
   name: string;
   description: string | null;
+  extended_description?: string | null;
   amount: number | null;
   deadline: string | null;
   requirements: string | null;
+  eligibility_criteria?: any[] | null;
+  tags?: string[] | null;
+  custom_fields?: CustomField[] | null;
   status: 'active' | 'inactive' | 'closed';
   created_at: string;
   updated_at: string;
   created_by: string | null;
+}
+
+export interface CustomField {
+  id: string;
+  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'file' | 'email' | 'phone';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  order: number;
+  options?: string[]; // for select type
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+  acceptedFormats?: string[]; // for file type
+  maxSize?: number; // for file type in bytes
 }
 
 export interface Application {
@@ -50,6 +73,9 @@ export interface Application {
   financial_need: string | null;
   community_involvement: string | null;
   
+  // Custom Field Responses
+  custom_responses?: Record<string, any> | null;
+  
   // Award Information
   awarded_amount: number | null;
   awarded_date: string | null;
@@ -63,6 +89,17 @@ export interface ApplicationDocument {
   id: string;
   application_id: string;
   document_type: 'transcript' | 'recommendation' | 'essay' | 'other';
+  file_url: string;
+  file_name: string;
+  file_size: number | null;
+  mime_type: string | null;
+  uploaded_at: string;
+}
+
+export interface Document {
+  id: string;
+  application_id: string;
+  field_name: string;
   file_url: string;
   file_name: string;
   file_size: number | null;
@@ -129,7 +166,7 @@ export interface CreateScholarshipData {
   amount?: number;
   deadline?: string;
   requirements?: string;
-  status?: 'active' | 'inactive';
+  status?: 'active' | 'inactive' | 'closed';
 }
 
 export interface UpdateScholarshipData extends Partial<CreateScholarshipData> {

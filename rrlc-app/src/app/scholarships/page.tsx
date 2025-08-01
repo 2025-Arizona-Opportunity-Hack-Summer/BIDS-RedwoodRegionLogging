@@ -4,11 +4,19 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiSearch, FiInfo } from "react-icons/fi";
-import { usePublicScholarships, ScholarshipFilters } from "@/hooks/usePublicScholarships";
+import { usePublicScholarshipContext } from "@/contexts/PublicScholarshipContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Scholarship } from "@/types/database";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+export interface ScholarshipFilters {
+  search: string;
+  minAmount?: number;
+  maxAmount?: number;
+  deadline: 'week' | 'month' | 'quarter' | 'all';
+}
 
 function ScholarshipCardSkeleton() {
   return (
@@ -210,11 +218,56 @@ export default function ScholarshipsPage() {
     maxAmount: undefined,
   });
 
-  const { scholarships, loading, error } = usePublicScholarships();
+  const { scholarships, loading, error, isRefreshing } = usePublicScholarshipContext();
 
   const updateFilters = (updates: Partial<typeof filters>) => {
     setFilters(prev => ({ ...prev, ...updates }));
   };
+
+  // Filter scholarships based on current filters
+  const filteredScholarships = scholarships.filter(scholarship => {
+    // Search filter
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase();
+      if (
+        !scholarship.name.toLowerCase().includes(searchTerm) &&
+        !scholarship.description?.toLowerCase().includes(searchTerm) &&
+        !scholarship.requirements?.toLowerCase().includes(searchTerm)
+      ) {
+        return false;
+      }
+    }
+
+    // Amount filters
+    if (filters.minAmount && scholarship.amount && scholarship.amount < filters.minAmount) {
+      return false;
+    }
+    if (filters.maxAmount && scholarship.amount && scholarship.amount > filters.maxAmount) {
+      return false;
+    }
+
+    // Deadline filter
+    if (filters.deadline !== 'all' && scholarship.deadline) {
+      const deadlineDate = new Date(scholarship.deadline);
+      const now = new Date();
+      const diffTime = deadlineDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      switch (filters.deadline) {
+        case 'week':
+          if (diffDays > 7) return false;
+          break;
+        case 'month':
+          if (diffDays > 30) return false;
+          break;
+        case 'quarter':
+          if (diffDays > 90) return false;
+          break;
+      }
+    }
+
+    return true;
+  });
 
   if (error) {
     return (
@@ -233,9 +286,14 @@ export default function ScholarshipsPage() {
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex flex-col space-y-6">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-primary mb-4">
-              Available Scholarships
-            </h1>
+            <div className="flex items-center justify-center gap-3">
+              <h1 className="text-4xl font-bold text-primary mb-4">
+                Available Scholarships
+              </h1>
+              {isRefreshing && (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-4" />
+              )}
+            </div>
             <p className="text-lg text-primary-dark max-w-2xl mx-auto">
               Discover scholarship opportunities to support your education in forestry and sustainable logging practices.
             </p>
@@ -244,12 +302,12 @@ export default function ScholarshipsPage() {
           <FilterSection filters={filters} updateFilters={updateFilters} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
+            {loading && scholarships.length === 0 ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <ScholarshipCardSkeleton key={index} />
               ))
-            ) : scholarships.length > 0 ? (
-              scholarships.map((scholarship) => (
+            ) : filteredScholarships.length > 0 ? (
+              filteredScholarships.map((scholarship) => (
                 <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
               ))
             ) : (

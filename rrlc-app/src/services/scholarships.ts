@@ -55,7 +55,7 @@ export async function getScholarshipById(id: string): Promise<{ data: Scholarshi
 }
 
 // Create new scholarship
-export async function createScholarship(scholarshipData: CreateScholarshipData): Promise<{ data: Scholarship | null; error: string | null }> {
+export async function createScholarship(scholarshipData: any): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -81,7 +81,7 @@ export async function createScholarship(scholarshipData: CreateScholarshipData):
 }
 
 // Update existing scholarship
-export async function updateScholarship(scholarshipData: UpdateScholarshipData): Promise<{ data: Scholarship | null; error: string | null }> {
+export async function updateScholarship(scholarshipData: any): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
     const { id, ...updateData } = scholarshipData;
     

@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { Application } from './applications';
+import { Application, ApplicationWithDetails } from '@/types/database';
 import { sendEmailForStatusChange } from '@/services/emailClient';
 
 export interface ApplicationWithScholarship extends Application {
@@ -60,6 +60,31 @@ export async function getAllApplications(filters?: ApplicationFilters) {
   } catch (error) {
     console.error('Error fetching applications:', error);
     return { data: null, error };
+  }
+}
+
+// Get all applications for admin view with scholarship and profile details
+export async function getAllApplicationsForAdmin(): Promise<{ 
+  data: ApplicationWithDetails[] | null; 
+  error: string | null 
+}> {
+  try {
+    const { data, error } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        scholarship:scholarships(id, name, amount, deadline),
+        profile:profiles(id, email, full_name)
+      `)
+      .order('created_at', { ascending: false });
+
+    return { data, error: error?.message || null };
+  } catch (error) {
+    console.error('Error fetching applications for admin:', error);
+    return { 
+      data: null, 
+      error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' 
+    };
   }
 }
 
@@ -206,7 +231,7 @@ export async function getApplicationsForExport(filters?: ApplicationFilters) {
     'Major': app.major,
     'Graduation Year': app.graduation_year,
     'GPA': app.gpa || 'N/A',
-    'Academic Level': app.academic_level,
+    'Academic Level': (app as any).academic_level || 'N/A',
     'Status': app.status,
     'Application Date': new Date(app.created_at).toLocaleDateString(),
     'Awarded Amount': app.awarded_amount ? `$${app.awarded_amount}` : 'N/A',

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { 
   FiArrowLeft, 
@@ -22,8 +22,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { createScholarship, getScholarshipById } from "@/services/scholarships";
-import { CreateScholarshipData, CustomField } from "@/types/database";
+import { getScholarshipById, updateScholarship } from "@/services/scholarships";
+import { UpdateScholarshipData, CustomField, Scholarship } from "@/types/database";
 import { useScholarshipContext } from "@/contexts/AdminContext";
 
 interface FieldOption {
@@ -99,6 +99,7 @@ function CustomFieldBuilder({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
@@ -118,6 +119,7 @@ function CustomFieldBuilder({
           {FIELD_OPTIONS.map((option) => (
             <button
               key={option.type}
+              type="button"
               onClick={() => addField(option.type)}
               className="flex flex-col items-center gap-2 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -168,6 +170,7 @@ function CustomFieldBuilder({
                           <span className="text-sm">Required</span>
                         </label>
                         <Button
+                          type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => removeField(index)}
@@ -177,14 +180,12 @@ function CustomFieldBuilder({
                         </Button>
                       </div>
                       
-                      {field.placeholder !== undefined && (
-                        <Input
-                          value={field.placeholder || ''}
-                          onChange={(e) => updateField(index, { placeholder: e.target.value })}
-                          placeholder="Placeholder text (optional)"
-                          className="text-sm"
-                        />
-                      )}
+                      <Input
+                        value={field.placeholder || ''}
+                        onChange={(e) => updateField(index, { placeholder: e.target.value || undefined })}
+                        placeholder="Placeholder text (optional)"
+                        className="text-sm"
+                      />
                       
                       {field.type === 'select' && (
                         <div className="space-y-2">
@@ -202,6 +203,7 @@ function CustomFieldBuilder({
                                 className="text-sm"
                               />
                               <Button
+                                type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
@@ -214,6 +216,7 @@ function CustomFieldBuilder({
                             </div>
                           ))}
                           <Button
+                            type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => {
@@ -238,14 +241,17 @@ function CustomFieldBuilder({
   );
 }
 
-function NewScholarshipContent() {
+function EditScholarshipContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const duplicateId = searchParams.get('duplicate');
-  const { refreshScholarships } = useScholarshipContext();
+  const params = useParams();
+  const scholarshipId = params.id as string;
+  const { scholarships, updateScholarshipInCache } = useScholarshipContext();
   
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateScholarshipData>({
+  const [loadingScholarship, setLoadingScholarship] = useState(true);
+  const [scholarship, setScholarship] = useState<Scholarship | null>(null);
+  const [formData, setFormData] = useState<UpdateScholarshipData>({
+    id: scholarshipId,
     name: '',
     description: '',
     amount: undefined,
@@ -260,33 +266,55 @@ function NewScholarshipContent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    if (duplicateId) {
-      loadScholarshipToDuplicate(duplicateId);
-    }
-  }, [duplicateId]);
+    loadScholarship();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scholarshipId, scholarships]);
 
-  const loadScholarshipToDuplicate = async (id: string) => {
-    const { data } = await getScholarshipById(id);
-    if (data) {
-      setFormData({
-        name: `${data.name} (Copy)`,
-        description: data.description || '',
-        amount: data.amount || undefined,
-        deadline: data.deadline || '',
-        requirements: data.requirements || '',
-        status: 'active'
-      });
-      setCustomFields(data.custom_fields || []);
-      setExtendedDescription(data.extended_description || '');
-      setEligibilityCriteria(data.eligibility_criteria || []);
-      setTags(data.tags || []);
+  const loadScholarship = async () => {
+    // First, check if we already have this scholarship in the context
+    const cachedScholarship = scholarships.find(s => s.id === scholarshipId);
+    if (cachedScholarship) {
+      // Use cached data immediately
+      populateFormWithScholarship(cachedScholarship);
+      setLoadingScholarship(false);
+      return;
     }
+
+    // If not in cache, fetch from API
+    setLoadingScholarship(true);
+    const { data, error } = await getScholarshipById(scholarshipId);
+    
+    if (error || !data) {
+      alert('Failed to load scholarship');
+      router.push('/admin/scholarships');
+      return;
+    }
+
+    populateFormWithScholarship(data);
+    setLoadingScholarship(false);
+  };
+
+  const populateFormWithScholarship = (data: Scholarship) => {
+    setScholarship(data);
+    setFormData({
+      id: scholarshipId,
+      name: data.name,
+      description: data.description || '',
+      amount: data.amount || undefined,
+      deadline: data.deadline || '',
+      requirements: data.requirements || '',
+      status: data.status
+    });
+    setCustomFields(data.custom_fields || []);
+    setExtendedDescription(data.extended_description || '');
+    setEligibilityCriteria(data.eligibility_criteria || []);
+    setTags(data.tags || []);
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       newErrors.name = 'Scholarship name is required';
     }
     
@@ -313,13 +341,15 @@ function NewScholarshipContent() {
       tags: tags.length > 0 ? tags : null
     };
     
-    const { data, error } = await createScholarship(scholarshipData);
+    const { data, error } = await updateScholarship(scholarshipData);
     
     if (error) {
-      alert('Failed to create scholarship: ' + error);
+      alert('Failed to update scholarship: ' + error);
     } else {
-      // Refresh the scholarship list to include the new scholarship
-      await refreshScholarships();
+      // Update the cached scholarship data
+      if (data) {
+        updateScholarshipInCache(data);
+      }
       router.push('/admin/scholarships');
     }
     
@@ -354,6 +384,17 @@ function NewScholarshipContent() {
     setTags(tags.filter((_, i) => i !== index));
   };
 
+  // Only show loading skeleton if we're loading and have no scholarship data yet
+  if (loadingScholarship && !scholarship) {
+    return (
+      <div className="min-h-screen bg-accent p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="h-96 bg-gray-300 rounded animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-accent p-6">
       <div className="max-w-4xl mx-auto">
@@ -370,9 +411,17 @@ function NewScholarshipContent() {
                 <FiArrowLeft className="mr-2" />
                 Back to Scholarships
               </Button>
-              <h1 className="text-3xl font-bold text-primary">
-                {duplicateId ? 'Duplicate Scholarship' : 'Create New Scholarship'}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-primary">
+                  Edit Scholarship
+                </h1>
+                {loadingScholarship && scholarship && (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                )}
+              </div>
+              <p className="text-primary-dark">
+                {scholarship?.name}
+              </p>
             </div>
           </div>
 
@@ -384,12 +433,27 @@ function NewScholarshipContent() {
               <div>
                 <label className="block mb-2 font-medium">Scholarship Name *</label>
                 <Input
-                  value={formData.name}
+                  value={formData.name || ''}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Environmental Science Excellence Award"
                   className={errors.name ? 'border-red-500' : ''}
                 />
                 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 font-medium">Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                    className="w-full p-3 border border-gray-300 rounded-lg"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="closed">Closed</option>
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -553,7 +617,7 @@ function NewScholarshipContent() {
               className="bg-primary text-white hover:bg-primary-light"
             >
               <FiSave className="mr-2" />
-              {loading ? 'Creating...' : 'Create Scholarship'}
+              {loading ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>
@@ -562,10 +626,10 @@ function NewScholarshipContent() {
   );
 }
 
-export default function NewScholarshipPage() {
+export default function EditScholarshipPage() {
   return (
     <ProtectedRoute requireAdmin={true}>
-      <NewScholarshipContent />
+      <EditScholarshipContent />
     </ProtectedRoute>
   );
 }

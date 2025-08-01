@@ -17,6 +17,7 @@ import { useApplicationForm } from "@/hooks/useApplicationForm";
 import { getScholarshipById } from "@/services/scholarships";
 import { Scholarship } from "@/types/database";
 import { CreateApplicationData } from "@/services/applications";
+import { usePublicScholarshipContext } from "@/contexts/PublicScholarshipContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -689,6 +690,7 @@ function ReviewStep({ formData, scholarship }: { formData: CreateApplicationData
 export default function ScholarshipApplicationPage() {
   const params = useParams();
   const router = useRouter();
+  const { getScholarshipFromCache } = usePublicScholarshipContext();
   const scholarshipId = params.id as string;
   
   const [scholarship, setScholarship] = useState<Scholarship | null>(null);
@@ -715,6 +717,16 @@ export default function ScholarshipApplicationPage() {
 
   useEffect(() => {
     const fetchScholarship = async () => {
+      // First, check if we already have this scholarship in the context
+      const cachedScholarship = getScholarshipFromCache(scholarshipId);
+      if (cachedScholarship) {
+        // Use cached data immediately
+        setScholarship(cachedScholarship);
+        setLoading(false);
+        return;
+      }
+
+      // If not in cache, fetch from API
       setLoading(true);
       const { data, error } = await getScholarshipById(scholarshipId);
       
@@ -731,7 +743,7 @@ export default function ScholarshipApplicationPage() {
     if (scholarshipId) {
       fetchScholarship();
     }
-  }, [scholarshipId]);
+  }, [scholarshipId, getScholarshipFromCache]);
 
   const handleSubmit = async () => {
     const result = await submitApplication();
@@ -753,7 +765,8 @@ export default function ScholarshipApplicationPage() {
     }
   };
 
-  if (loading) {
+  // Only show loading skeleton if we're loading and have no scholarship data yet
+  if (loading && !scholarship) {
     return (
       <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(193,212,178)' }}>
         <div className="max-w-4xl mx-auto">

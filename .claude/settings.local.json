@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(cp:*)",
@@ -20,7 +21,10 @@
       "Bash(done)",
       "Bash(mv:*)",
       "Bash(for file in *.tsx.bak)",
-      "Bash(do mv \"$file\" \"$file%.bak\")"
+      "Bash(do mv \"$file\" \"$file%.bak\")",
+      "Bash(mkdir:*)",
+      "Bash(grep:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }
