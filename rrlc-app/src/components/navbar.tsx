@@ -11,6 +11,11 @@ export default function Navbar() {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const getHomeRoute = () => {
+    if (!isAuthenticated()) return "/";
+    return isAdmin() ? "/admin" : "/home";
+  };
+
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent double-clicks
     
@@ -37,7 +42,7 @@ export default function Navbar() {
   return (
     <nav className="bg-primary text-white border-b-2 border-secondary">
       <div className="flex items-center p-4">
-        <Link href="/">
+        <Link href={getHomeRoute()}>
           <h1 className="font-bold text-lg md:text-xl text-white hover:text-secondary cursor-pointer">
             RRLC Scholarship Portal
           </h1>
@@ -47,41 +52,8 @@ export default function Navbar() {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-4">
-          <Link href="/scholarships">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="text-white hover:bg-primary-light hover:text-white"
-            >
-              Browse Scholarships
-            </Button>
-          </Link>
-
           {isAuthenticated() ? (
             <>
-              {!isAdmin() && (
-                <Link href="/home">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-white hover:bg-primary-light hover:text-white"
-                  >
-                    Home
-                  </Button>
-                </Link>
-              )}
-              
-              {isAdmin() && (
-                <Link href="/admin">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="text-white hover:bg-primary-light hover:text-white"
-                  >
-                    Home
-                  </Button>
-                </Link>
-              )}
               
               <div className="flex items-center gap-2">
                 <span className="text-sm text-secondary">
@@ -119,41 +91,8 @@ export default function Navbar() {
         {/* Mobile Navigation - Simplified */}
         <div className="absolute top-full left-0 right-0 bg-primary p-4 border-t border-primary-light z-10 md:hidden">
           <div className="flex flex-col gap-2">
-            <Link href="/scholarships">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-white hover:bg-primary-light hover:text-white w-full"
-              >
-                Browse Scholarships
-              </Button>
-            </Link>
-
             {isAuthenticated() ? (
               <>
-                {!isAdmin() && (
-                  <Link href="/home">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-white hover:bg-primary-light hover:text-white w-full"
-                    >
-                      Home
-                    </Button>
-                  </Link>
-                )}
-                
-                {isAdmin() && (
-                  <Link href="/admin">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-white hover:bg-primary-light hover:text-white w-full"
-                    >
-                      Home
-                    </Button>
-                  </Link>
-                )}
                 
                 <Button 
                   size="sm" 
