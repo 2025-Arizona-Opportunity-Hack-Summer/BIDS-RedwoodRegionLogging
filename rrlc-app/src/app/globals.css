@@ -3,6 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* RRLC Custom Colors */
+  --forest-green: rgb(78, 61, 30);
+  --golden-yellow: rgb(245, 193, 52);
+  --sage-green: rgb(193, 212, 178);
+  --light-sage: rgb(220, 233, 208);
+  --dark-forest: rgb(56, 44, 22);
+  --cream: rgb(248, 246, 240);
 }
 
 @theme inline {
@@ -10,17 +18,153 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Custom RRLC Color Palette */
+  --color-primary: var(--forest-green);
+  --color-primary-light: rgb(98, 78, 45);
+  --color-primary-dark: var(--dark-forest);
+  
+  --color-secondary: var(--golden-yellow);
+  --color-secondary-light: rgb(248, 205, 85);
+  --color-secondary-dark: rgb(212, 165, 35);
+  
+  --color-accent: var(--sage-green);
+  --color-accent-light: var(--light-sage);
+  --color-accent-dark: rgb(164, 185, 151);
+  
+  --color-neutral: var(--cream);
+  --color-neutral-light: rgb(252, 251, 248);
+  --color-neutral-dark: rgb(235, 230, 218);
+  
+  /* Semantic Colors */
+  --color-success: rgb(34, 197, 94);
+  --color-error: rgb(239, 68, 68);
+  --color-warning: rgb(245, 158, 11);
+  --color-info: rgb(59, 130, 246);
+  
+  /* Gray Scale */
+  --color-gray-50: rgb(249, 250, 251);
+  --color-gray-100: rgb(243, 244, 246);
+  --color-gray-200: rgb(229, 231, 235);
+  --color-gray-300: rgb(209, 213, 219);
+  --color-gray-400: rgb(156, 163, 175);
+  --color-gray-500: rgb(107, 114, 128);
+  --color-gray-600: rgb(75, 85, 99);
+  --color-gray-700: rgb(55, 65, 81);
+  --color-gray-800: rgb(31, 41, 55);
+  --color-gray-900: rgb(17, 24, 39);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: rgb(193,212,178); /* Keep sage green even in dark mode */
-    --foreground: rgb(78,61,30); /* Use app's primary text color */
+    --background: var(--dark-forest);
+    --foreground: var(--cream);
   }
 }
 
 body {
-  background: rgb(193,212,178); /* Light sage green - matches app theme */
+  background: var(--sage-green);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom Component Classes */
+.btn {
+  @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+}
+
+.btn-primary {
+  @apply bg-primary text-white hover:bg-primary-light focus-visible:ring-primary;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-primary hover:bg-secondary-light focus-visible:ring-secondary;
+}
+
+.btn-outline {
+  @apply border border-primary text-primary hover:bg-primary hover:text-white focus-visible:ring-primary;
+}
+
+.btn-ghost {
+  @apply text-primary hover:bg-accent focus-visible:ring-primary;
+}
+
+.btn-sm {
+  @apply h-8 px-3 text-xs;
+}
+
+.btn-md {
+  @apply h-10 px-4 py-2;
+}
+
+.btn-lg {
+  @apply h-12 px-8 text-base;
+}
+
+.card {
+  @apply rounded-lg border border-gray-200 bg-white shadow-sm;
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.card-body {
+  @apply px-6 py-4;
+}
+
+.card-footer {
+  @apply px-6 py-4 border-t border-gray-200;
+}
+
+.input {
+  @apply flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.textarea {
+  @apply flex min-h-[80px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.alert {
+  @apply relative w-full rounded-lg border px-4 py-3 text-sm;
+}
+
+.alert-info {
+  @apply border-info/20 bg-info/10 text-info;
+}
+
+.alert-success {
+  @apply border-success/20 bg-success/10 text-success;
+}
+
+.alert-warning {
+  @apply border-warning/20 bg-warning/10 text-warning;
+}
+
+.alert-error {
+  @apply border-error/20 bg-error/10 text-error;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.badge-primary {
+  @apply bg-primary text-white;
+}
+
+.badge-secondary {
+  @apply bg-secondary text-primary;
+}
+
+.badge-success {
+  @apply bg-success text-white;
+}
+
+.badge-warning {
+  @apply bg-warning text-white;
+}
+
+.badge-error {
+  @apply bg-error text-white;
 }

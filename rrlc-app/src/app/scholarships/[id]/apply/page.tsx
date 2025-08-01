@@ -2,18 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Button,
-  Heading,
-  VStack,
-  HStack,
-  Text,
-  Input,
-  Textarea,
-  Card,
-  Skeleton,
-} from "@chakra-ui/react";
 import { 
   FiArrowLeft, 
   FiArrowRight, 
@@ -29,6 +17,9 @@ import { useApplicationForm } from "@/hooks/useApplicationForm";
 import { getScholarshipById } from "@/services/scholarships";
 import { Scholarship } from "@/types/database";
 import { CreateApplicationData } from "@/services/applications";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface StepComponentProps {
   formData: CreateApplicationData;
@@ -38,15 +29,15 @@ interface StepComponentProps {
 
 function ProgressBar({ progress }: { progress: number }) {
   return (
-    <Box w="full" bg="rgb(193,212,178)" borderRadius="full" h="3">
-      <Box
-        bg="rgb(9,76,9)"
-        h="full"
-        borderRadius="full"
-        transition="width 0.5s ease"
-        style={{ width: `${progress}%` }}
+    <div className="w-full bg-accent rounded-full h-3">
+      <div
+        className="h-full rounded-full transition-all duration-500 ease-in-out"
+        style={{ 
+          width: `${progress}%`,
+          backgroundColor: 'rgb(9,76,9)'
+        }}
       />
-    </Box>
+    </div>
   );
 }
 
@@ -60,7 +51,7 @@ function StepIndicator({ steps, currentStep, goToStep }: StepIndicatorProps) {
   const icons = [FiUser, FiBook, FiEdit3, FiPlus, FiCheckCircle];
   
   return (
-    <HStack gap={{ base: 2, md: 4 }} justify="center" wrap="wrap">
+    <div className="flex flex-wrap justify-center gap-2 md:gap-4">
       {steps.map((step, index: number) => {
         const Icon = icons[index];
         const isActive = index === currentStep;
@@ -68,307 +59,283 @@ function StepIndicator({ steps, currentStep, goToStep }: StepIndicatorProps) {
         const isClickable = index <= currentStep;
         
         return (
-          <VStack
+          <div
             key={step.id}
-            gap={2}
-            cursor={isClickable ? "pointer" : "default"}
+            className={`flex flex-col items-center gap-2 ${
+              isClickable ? 'cursor-pointer' : 'cursor-default'
+            } ${
+              isClickable ? 'opacity-100' : 'opacity-50'
+            } flex-shrink-0 md:flex-auto`}
             onClick={isClickable ? () => goToStep(index) : undefined}
-            opacity={isClickable ? 1 : 0.5}
-            flex={{ base: "0 0 auto", md: "unset" }}
           >
-            <Box
-              w={{ base: "40px", md: "50px" }}
-              h={{ base: "40px", md: "50px" }}
-              borderRadius="full"
-              bg={isCompleted ? "rgb(9,76,9)" : isActive ? "rgb(92,127,66)" : "rgb(193,212,178)"}
-              color={isCompleted || isActive ? "white" : "rgb(78,61,30)"}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              border="3px solid"
-              borderColor={isActive ? "rgb(9,76,9)" : "transparent"}
-              transition="all 0.3s ease"
-              _hover={isClickable ? { transform: "scale(1.05)" } : {}}
+            <div
+              className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-3 transition-all duration-300 ${
+                isClickable ? 'hover:scale-105' : ''
+              } ${
+                isCompleted 
+                  ? 'text-white border-transparent' 
+                  : isActive 
+                  ? 'text-white border-primary-dark'
+                  : 'text-primary border-transparent'
+              }`}
+              style={{
+                backgroundColor: isCompleted 
+                  ? 'rgb(9,76,9)' 
+                  : isActive 
+                  ? 'rgb(92,127,66)' 
+                  : 'rgb(193,212,178)',
+                borderColor: isActive ? 'rgb(9,76,9)' : 'transparent'
+              }}
             >
               <Icon size={20} />
-            </Box>
-            <Text
-              fontSize="xs"
-              textAlign="center"
-              color={isActive ? "rgb(9,76,9)" : "rgb(78,61,30)"}
-              fontWeight={isActive ? "bold" : "medium"}
-              maxW="80px"
+            </div>
+            <p
+              className={`text-xs text-center max-w-20 ${
+                isActive ? 'font-bold' : 'font-medium'
+              }`}
+              style={{
+                color: isActive ? 'rgb(9,76,9)' : 'rgb(78,61,30)'
+              }}
             >
               {step.title}
-            </Text>
-          </VStack>
+            </p>
+          </div>
         );
       })}
-    </HStack>
+    </div>
   );
 }
 
 function PersonalInfoStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack gap={6} align="stretch">
-      <HStack gap={4}>
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+    <div className="flex flex-col space-y-6">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             First Name *
-          </Text>
+          </label>
           <Input
             value={formData.first_name}
             onChange={(e) => updateFormData('first_name', e.target.value)}
-            borderColor={errors.first_name ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.first_name ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.first_name ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.first_name ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.first_name 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.first_name}
           />
           {errors.first_name && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.first_name}
-            </Text>
+            </p>
           )}
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             Last Name *
-          </Text>
+          </label>
           <Input
             value={formData.last_name}
             onChange={(e) => updateFormData('last_name', e.target.value)}
-            borderColor={errors.last_name ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.last_name ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.last_name ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.last_name ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.last_name 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.last_name}
           />
           {errors.last_name && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.last_name}
-            </Text>
+            </p>
           )}
-        </Box>
-      </HStack>
+        </div>
+      </div>
 
-      <HStack gap={4}>
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             Email Address *
-          </Text>
+          </label>
           <Input
             type="email"
             value={formData.email}
             onChange={(e) => updateFormData('email', e.target.value)}
-            borderColor={errors.email ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.email ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.email ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.email ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.email 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.email}
           />
           {errors.email && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.email}
-            </Text>
+            </p>
           )}
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             Phone Number *
-          </Text>
+          </label>
           <Input
             type="tel"
             value={formData.phone}
             onChange={(e) => updateFormData('phone', e.target.value)}
-            borderColor={errors.phone ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.phone ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.phone ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.phone ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.phone 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.phone}
           />
           {errors.phone && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.phone}
-            </Text>
+            </p>
           )}
-        </Box>
-      </HStack>
+        </div>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Address *
-        </Text>
+        </label>
         <Input
           value={formData.address}
           onChange={(e) => updateFormData('address', e.target.value)}
-          borderColor={errors.address ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.address ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.address ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.address ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+            errors.address 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          }`}
+          error={!!errors.address}
         />
         {errors.address && (
-          <Text color="red.500" fontSize="sm" mt={1}>
+          <p className="text-red-500 text-sm mt-1">
             {errors.address}
-          </Text>
+          </p>
         )}
-      </Box>
+      </div>
 
-      <HStack gap={4}>
-        <Box flex={2}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-2">
+          <label className="block mb-2 text-black font-medium">
             City *
-          </Text>
+          </label>
           <Input
             value={formData.city}
             onChange={(e) => updateFormData('city', e.target.value)}
-            borderColor={errors.city ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.city ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.city ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.city ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.city 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.city}
           />
           {errors.city && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.city}
-            </Text>
+            </p>
           )}
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             State *
-          </Text>
+          </label>
           <Input
             value={formData.state}
             onChange={(e) => updateFormData('state', e.target.value)}
-            borderColor={errors.state ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.state ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.state ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.state ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.state 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.state}
           />
           {errors.state && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.state}
-            </Text>
+            </p>
           )}
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             ZIP Code *
-          </Text>
+          </label>
           <Input
             value={formData.zip}
             onChange={(e) => updateFormData('zip', e.target.value)}
-            borderColor={errors.zip ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.zip ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.zip ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.zip ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.zip 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.zip}
           />
           {errors.zip && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.zip}
-            </Text>
+            </p>
           )}
-        </Box>
-      </HStack>
+        </div>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Date of Birth
-        </Text>
+        </label>
         <Input
           type="date"
           value={formData.date_of_birth || ''}
           onChange={(e) => updateFormData('date_of_birth', e.target.value)}
-          borderColor="rgb(146,169,129)"
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: "rgb(9,76,9)",
-            boxShadow: "0 0 0 1px rgb(9,76,9)"
-          }}
+          className="bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 border-accent-dark hover:border-primary-light focus-visible:ring-primary"
         />
-      </Box>
-    </VStack>
+      </div>
+    </div>
   );
 }
 
 function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack gap={6} align="stretch">
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+    <div className="flex flex-col space-y-6">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           School/Institution *
-        </Text>
+        </label>
         <Input
           value={formData.school}
           onChange={(e) => updateFormData('school', e.target.value)}
           placeholder="Enter your school or institution name"
-          borderColor={errors.school ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.school ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.school ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.school ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+            errors.school 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          }`}
+          error={!!errors.school}
         />
         {errors.school && (
-          <Text color="red.500" fontSize="sm" mt={1}>
+          <p className="text-red-500 text-sm mt-1">
             {errors.school}
-          </Text>
+          </p>
         )}
-      </Box>
+      </div>
 
-      <HStack gap={4}>
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             Academic Level *
-          </Text>
+          </label>
           <select
             value={formData.academic_level}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateFormData('academic_level', e.target.value)}
+            className="w-full p-3 border border-accent-dark rounded-lg text-white text-lg"
             style={{
-              padding: '12px',
-              borderWidth: '1px',
-              borderColor: 'rgb(146,169,129)',
-              borderRadius: '8px',
-              backgroundColor: 'rgb(146,169,129)',
-              color: 'white',
-              fontSize: '18px',
-              width: '100%'
+              backgroundColor: 'rgb(146,169,129)'
             }}
           >
             <option value="high_school">High School</option>
@@ -376,64 +343,60 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
             <option value="graduate">Graduate</option>
             <option value="other">Other</option>
           </select>
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             Expected Graduation Year *
-          </Text>
+          </label>
           <Input
             type="number"
             value={formData.graduation_year}
             onChange={(e) => updateFormData('graduation_year', parseInt(e.target.value))}
             min={new Date().getFullYear() - 5}
             max={new Date().getFullYear() + 10}
-            borderColor={errors.graduation_year ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.graduation_year ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.graduation_year ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.graduation_year ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.graduation_year 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.graduation_year}
           />
           {errors.graduation_year && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.graduation_year}
-            </Text>
+            </p>
           )}
-        </Box>
-      </HStack>
+        </div>
+      </div>
 
-      <HStack gap={4}>
-        <Box flex={2}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-2">
+          <label className="block mb-2 text-black font-medium">
             Major/Field of Study *
-          </Text>
+          </label>
           <Input
             value={formData.major}
             onChange={(e) => updateFormData('major', e.target.value)}
             placeholder="e.g., Forestry, Environmental Science, Business"
-            borderColor={errors.major ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.major ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.major ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.major ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.major 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.major}
           />
           {errors.major && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.major}
-            </Text>
+            </p>
           )}
-        </Box>
+        </div>
         
-        <Box flex={1}>
-          <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+        <div className="flex-1">
+          <label className="block mb-2 text-black font-medium">
             GPA (optional)
-          </Text>
+          </label>
           <Input
             type="number"
             step="0.01"
@@ -442,222 +405,180 @@ function AcademicInfoStep({ formData, updateFormData, errors }: StepComponentPro
             value={formData.gpa || ''}
             onChange={(e) => updateFormData('gpa', e.target.value ? parseFloat(e.target.value) : 0)}
             placeholder="e.g., 3.5"
-            borderColor={errors.gpa ? "red.300" : "rgb(146,169,129)"}
-            color="rgb(78,61,30)"
-            _placeholder={{ color: "gray.500", opacity: 0.8 }}
-            _hover={{ borderColor: errors.gpa ? "red.400" : "rgb(92,127,66)" }}
-            _focus={{
-              borderColor: errors.gpa ? "red.500" : "rgb(9,76,9)",
-              boxShadow: `0 0 0 1px ${errors.gpa ? "red.500" : "rgb(9,76,9)"}`
-            }}
+            className={`bg-white text-black placeholder:text-gray-500 placeholder:opacity-80 ${
+              errors.gpa 
+                ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+                : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+            }`}
+            error={!!errors.gpa}
           />
           {errors.gpa && (
-            <Text color="red.500" fontSize="sm" mt={1}>
+            <p className="text-red-500 text-sm mt-1">
               {errors.gpa}
-            </Text>
+            </p>
           )}
-        </Box>
-      </HStack>
-    </VStack>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function EssayStep({ formData, updateFormData, errors }: StepComponentProps) {
   return (
-    <VStack gap={6} align="stretch">
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+    <div className="flex flex-col space-y-6">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Career Goals and Aspirations * (minimum 50 characters)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.career_goals || ''}
           onChange={(e) => updateFormData('career_goals', e.target.value)}
           placeholder="Describe your career goals and how this scholarship will help you achieve them..."
           rows={4}
-          resize="vertical"
-          borderColor={errors.career_goals ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.career_goals ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.career_goals ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.career_goals ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`textarea resize-y ${
+            errors.career_goals 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          } bg-white text-black placeholder:text-gray-500 placeholder:opacity-80`}
         />
-        <HStack justify="space-between" mt={1}>
+        <div className="flex justify-between mt-1">
           {errors.career_goals && (
-            <Text color="red.500" fontSize="sm">
+            <p className="text-red-500 text-sm">
               {errors.career_goals}
-            </Text>
+            </p>
           )}
-          <Text fontSize="sm" color="gray.500" ml="auto">
+          <p className="text-sm text-gray-500 ml-auto">
             {formData.career_goals?.length || 0}/50 minimum
-          </Text>
-        </HStack>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Financial Need * (minimum 25 characters)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.financial_need || ''}
           onChange={(e) => updateFormData('financial_need', e.target.value)}
           placeholder="Explain your financial situation and why you need this scholarship..."
           rows={4}
-          resize="vertical"
-          borderColor={errors.financial_need ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.financial_need ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.financial_need ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.financial_need ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`textarea resize-y ${
+            errors.financial_need 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          } bg-white text-black placeholder:text-gray-500 placeholder:opacity-80`}
         />
-        <HStack justify="space-between" mt={1}>
+        <div className="flex justify-between mt-1">
           {errors.financial_need && (
-            <Text color="red.500" fontSize="sm">
+            <p className="text-red-500 text-sm">
               {errors.financial_need}
-            </Text>
+            </p>
           )}
-          <Text fontSize="sm" color="gray.500" ml="auto">
+          <p className="text-sm text-gray-500 ml-auto">
             {formData.financial_need?.length || 0}/25 minimum
-          </Text>
-        </HStack>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Community Involvement * (minimum 25 characters)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.community_involvement || ''}
           onChange={(e) => updateFormData('community_involvement', e.target.value)}
           placeholder="Describe your involvement in community service, volunteering, or local organizations..."
           rows={4}
-          resize="vertical"
-          borderColor={errors.community_involvement ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.community_involvement ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.community_involvement ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.community_involvement ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`textarea resize-y ${
+            errors.community_involvement 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          } bg-white text-black placeholder:text-gray-500 placeholder:opacity-80`}
         />
-        <HStack justify="space-between" mt={1}>
+        <div className="flex justify-between mt-1">
           {errors.community_involvement && (
-            <Text color="red.500" fontSize="sm">
+            <p className="text-red-500 text-sm">
               {errors.community_involvement}
-            </Text>
+            </p>
           )}
-          <Text fontSize="sm" color="gray.500" ml="auto">
+          <p className="text-sm text-gray-500 ml-auto">
             {formData.community_involvement?.length || 0}/25 minimum
-          </Text>
-        </HStack>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Why You Deserve This Scholarship * (minimum 25 characters)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.why_deserve_scholarship || ''}
           onChange={(e) => updateFormData('why_deserve_scholarship', e.target.value)}
           placeholder="Explain why you are a deserving candidate for this scholarship..."
           rows={4}
-          resize="vertical"
-          borderColor={errors.why_deserve_scholarship ? "red.300" : "rgb(146,169,129)"}
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: errors.why_deserve_scholarship ? "red.400" : "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: errors.why_deserve_scholarship ? "red.500" : "rgb(9,76,9)",
-            boxShadow: `0 0 0 1px ${errors.why_deserve_scholarship ? "red.500" : "rgb(9,76,9)"}`
-          }}
+          className={`textarea resize-y ${
+            errors.why_deserve_scholarship 
+              ? 'border-red-300 hover:border-red-400 focus-visible:ring-red-500' 
+              : 'border-accent-dark hover:border-primary-light focus-visible:ring-primary'
+          } bg-white text-black placeholder:text-gray-500 placeholder:opacity-80`}
         />
-        <HStack justify="space-between" mt={1}>
+        <div className="flex justify-between mt-1">
           {errors.why_deserve_scholarship && (
-            <Text color="red.500" fontSize="sm">
+            <p className="text-red-500 text-sm">
               {errors.why_deserve_scholarship}
-            </Text>
+            </p>
           )}
-          <Text fontSize="sm" color="gray.500" ml="auto">
+          <p className="text-sm text-gray-500 ml-auto">
             {formData.why_deserve_scholarship?.length || 0}/25 minimum
-          </Text>
-        </HStack>
-      </Box>
-    </VStack>
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function AdditionalInfoStep({ formData, updateFormData }: StepComponentProps) {
   return (
-    <VStack gap={6} align="stretch">
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+    <div className="flex flex-col space-y-6">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Work Experience (optional)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.work_experience || ''}
           onChange={(e) => updateFormData('work_experience', e.target.value)}
           placeholder="Describe any relevant work experience, internships, or part-time jobs..."
           rows={4}
-          resize="vertical"
-          borderColor="rgb(146,169,129)"
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: "rgb(9,76,9)",
-            boxShadow: "0 0 0 1px rgb(9,76,9)"
-          }}
+          className="textarea resize-y border-accent-dark hover:border-primary-light focus-visible:ring-primary bg-white text-black placeholder:text-gray-500 placeholder:opacity-80"
         />
-      </Box>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Extracurricular Activities (optional)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.extracurricular_activities || ''}
           onChange={(e) => updateFormData('extracurricular_activities', e.target.value)}
           placeholder="List clubs, sports, organizations, or other activities you participate in..."
           rows={4}
-          resize="vertical"
-          borderColor="rgb(146,169,129)"
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: "rgb(9,76,9)",
-            boxShadow: "0 0 0 1px rgb(9,76,9)"
-          }}
+          className="textarea resize-y border-accent-dark hover:border-primary-light focus-visible:ring-primary bg-white text-black placeholder:text-gray-500 placeholder:opacity-80"
         />
-      </Box>
+      </div>
 
-      <Box>
-        <Text mb={2} color="rgb(78,61,30)" fontWeight="medium">
+      <div>
+        <label className="block mb-2 text-black font-medium">
           Awards and Honors (optional)
-        </Text>
-        <Textarea
+        </label>
+        <textarea
           value={formData.awards_and_honors || ''}
           onChange={(e) => updateFormData('awards_and_honors', e.target.value)}
           placeholder="List any academic awards, honors, recognitions, or achievements..."
           rows={4}
-          resize="vertical"
-          borderColor="rgb(146,169,129)"
-          color="white"
-          _placeholder={{ color: "white", opacity: 0.7 }}
-          _hover={{ borderColor: "rgb(92,127,66)" }}
-          _focus={{
-            borderColor: "rgb(9,76,9)",
-            boxShadow: "0 0 0 1px rgb(9,76,9)"
-          }}
+          className="textarea resize-y border-accent-dark hover:border-primary-light focus-visible:ring-primary bg-white text-black placeholder:text-gray-500 placeholder:opacity-80"
         />
-      </Box>
-    </VStack>
+      </div>
+    </div>
   );
 }
 
@@ -671,91 +592,97 @@ function ReviewStep({ formData, scholarship }: { formData: CreateApplicationData
   };
 
   return (
-    <VStack gap={6} align="stretch">
+    <div className="flex flex-col space-y-6">
       {/* Scholarship Info */}
-      <Card.Root bg="rgb(193,212,178)" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
-        <Card.Body>
-          <VStack gap={3} align="start">
-            <Heading size="md" color="rgb(61,84,44)">
+      <Card 
+        className="p-4 border-2" 
+        style={{ 
+          backgroundColor: 'rgb(193,212,178)', 
+          borderColor: 'rgb(146,169,129)' 
+        }}
+      >
+        <CardContent className="p-0">
+          <div className="flex flex-col space-y-3">
+            <h3 className="text-lg font-semibold" style={{ color: 'rgb(61,84,44)' }}>
               Scholarship: {scholarship.name}
-            </Heading>
-            <Text color="rgb(78,61,30)">{scholarship.description}</Text>
-            <HStack>
-              <Text fontWeight="bold" color="rgb(9,76,9)">
+            </h3>
+            <p style={{ color: 'rgb(78,61,30)' }}>{scholarship.description}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-bold" style={{ color: 'rgb(9,76,9)' }}>
                 Award Amount: {formatCurrency(scholarship.amount)}
-              </Text>
+              </p>
               {scholarship.deadline && (
-                <Text color="rgb(78,61,30)">
+                <p style={{ color: 'rgb(78,61,30)' }}>
                   • Deadline: {new Date(scholarship.deadline).toLocaleDateString()}
-                </Text>
+                </p>
               )}
-            </HStack>
-          </VStack>
-        </Card.Body>
-      </Card.Root>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Application Review */}
-      <VStack gap={4} align="stretch">
-        <Heading size="md" color="rgb(61,84,44)">
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-lg font-semibold" style={{ color: 'rgb(61,84,44)' }}>
           Your Application Summary
-        </Heading>
+        </h3>
         
-        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
-          <Box pb={2}>
-            <Heading size="sm" color="rgb(61,84,44)">Personal Information</Heading>
-          </Box>
-          <Box pt={0}>
-            <VStack gap={2} align="start" fontSize="sm">
-              <Text><strong>Name:</strong> {formData.first_name} {formData.last_name}</Text>
-              <Text><strong>Email:</strong> {formData.email}</Text>
-              <Text><strong>Phone:</strong> {formData.phone}</Text>
-              <Text><strong>Address:</strong> {formData.address}, {formData.city}, {formData.state} {formData.zip}</Text>
-            </VStack>
-          </Box>
-        </Box>
+        <Card className="bg-white border-2 p-4" style={{ borderColor: 'rgb(146,169,129)' }}>
+          <CardHeader className="pb-2 px-0">
+            <h4 className="text-base font-semibold" style={{ color: 'rgb(61,84,44)' }}>Personal Information</h4>
+          </CardHeader>
+          <CardContent className="pt-0 px-0">
+            <div className="flex flex-col space-y-2 text-sm">
+              <p><strong>Name:</strong> {formData.first_name} {formData.last_name}</p>
+              <p><strong>Email:</strong> {formData.email}</p>
+              <p><strong>Phone:</strong> {formData.phone}</p>
+              <p><strong>Address:</strong> {formData.address}, {formData.city}, {formData.state} {formData.zip}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
-          <Box pb={2}>
-            <Heading size="sm" color="rgb(61,84,44)">Academic Information</Heading>
-          </Box>
-          <Box pt={0}>
-            <VStack gap={2} align="start" fontSize="sm">
-              <Text><strong>School:</strong> {formData.school}</Text>
-              <Text><strong>Major:</strong> {formData.major}</Text>
-              <Text><strong>Academic Level:</strong> {formData.academic_level.replace('_', ' ')}</Text>
-              <Text><strong>Graduation Year:</strong> {formData.graduation_year}</Text>
-              {formData.gpa && <Text><strong>GPA:</strong> {formData.gpa}</Text>}
-            </VStack>
-          </Box>
-        </Box>
+        <Card className="bg-white border-2 p-4" style={{ borderColor: 'rgb(146,169,129)' }}>
+          <CardHeader className="pb-2 px-0">
+            <h4 className="text-base font-semibold" style={{ color: 'rgb(61,84,44)' }}>Academic Information</h4>
+          </CardHeader>
+          <CardContent className="pt-0 px-0">
+            <div className="flex flex-col space-y-2 text-sm">
+              <p><strong>School:</strong> {formData.school}</p>
+              <p><strong>Major:</strong> {formData.major}</p>
+              <p><strong>Academic Level:</strong> {formData.academic_level.replace('_', ' ')}</p>
+              <p><strong>Graduation Year:</strong> {formData.graduation_year}</p>
+              {formData.gpa && <p><strong>GPA:</strong> {formData.gpa}</p>}
+            </div>
+          </CardContent>
+        </Card>
 
-        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" borderRadius="md" p={4}>
-          <Box pb={2}>
-            <Heading size="sm" color="rgb(61,84,44)">Essay Responses</Heading>
-          </Box>
-          <Box pt={0}>
-            <VStack gap={3} align="start" fontSize="sm">
-              <Box>
-                <Text fontWeight="bold">Career Goals:</Text>
-                <Text>{formData.career_goals}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold">Financial Need:</Text>
-                <Text>{formData.financial_need}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold">Community Involvement:</Text>
-                <Text>{formData.community_involvement}</Text>
-              </Box>
-              <Box>
-                <Text fontWeight="bold">Why You Deserve This Scholarship:</Text>
-                <Text>{formData.why_deserve_scholarship}</Text>
-              </Box>
-            </VStack>
-          </Box>
-        </Box>
-      </VStack>
-    </VStack>
+        <Card className="bg-white border-2 p-4" style={{ borderColor: 'rgb(146,169,129)' }}>
+          <CardHeader className="pb-2 px-0">
+            <h4 className="text-base font-semibold" style={{ color: 'rgb(61,84,44)' }}>Essay Responses</h4>
+          </CardHeader>
+          <CardContent className="pt-0 px-0">
+            <div className="flex flex-col space-y-3 text-sm">
+              <div>
+                <p className="font-bold">Career Goals:</p>
+                <p>{formData.career_goals}</p>
+              </div>
+              <div>
+                <p className="font-bold">Financial Need:</p>
+                <p>{formData.financial_need}</p>
+              </div>
+              <div>
+                <p className="font-bold">Community Involvement:</p>
+                <p>{formData.community_involvement}</p>
+              </div>
+              <div>
+                <p className="font-bold">Why You Deserve This Scholarship:</p>
+                <p>{formData.why_deserve_scholarship}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
 
@@ -828,75 +755,71 @@ export default function ScholarshipApplicationPage() {
 
   if (loading) {
     return (
-      <Box minHeight="100vh" bg="rgb(193,212,178)" p={6}>
-        <Box maxW="4xl" mx="auto">
-          <VStack gap={8}>
-            <Skeleton height="60px" width="300px" />
-            <Skeleton height="400px" width="100%" />
-          </VStack>
-        </Box>
-      </Box>
+      <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(193,212,178)' }}>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-col space-y-8">
+            <div className="h-15 w-75 bg-gray-300 rounded animate-pulse"></div>
+            <div className="h-96 w-full bg-gray-300 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (error || !scholarship) {
     return (
-      <Box minHeight="100vh" bg="rgb(193,212,178)" p={6}>
-        <Box maxW="4xl" mx="auto" textAlign="center" py={20}>
-          <VStack gap={4}>
-            <Heading color="rgb(61,84,44)">Scholarship Not Found</Heading>
-            <Text color="rgb(78,61,30)">
+      <div className="min-h-screen p-6" style={{ backgroundColor: 'rgb(193,212,178)' }}>
+        <div className="max-w-4xl mx-auto text-center py-20">
+          <div className="flex flex-col space-y-4">
+            <h1 className="text-2xl font-bold" style={{ color: 'rgb(61,84,44)' }}>Scholarship Not Found</h1>
+            <p style={{ color: 'rgb(78,61,30)' }}>
               {error || "The scholarship you're looking for doesn't exist or may have been removed."}
-            </Text>
+            </p>
             <Button
               onClick={() => router.push('/scholarships')}
-              bg="rgb(9,76,9)"
-              color="white"
-              _hover={{ bg: "rgb(92,127,66)" }}
+              className="bg-primary text-white hover:bg-primary-light"
             >
               Browse Scholarships
             </Button>
-          </VStack>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     );
   }
 
   const currentStepData = steps[currentStep];
   
   return (
-    <Box minHeight="100vh" bg="rgb(193,212,178)">
+    <div className="min-h-screen" style={{ backgroundColor: 'rgb(193,212,178)' }}>
       {/* Header */}
-      <Box bg="white" borderBottom="2px" borderColor="rgb(146,169,129)" p={6}>
-        <Box maxW="6xl" mx="auto">
-          <VStack gap={6}>
-            <HStack justify="space-between" w="full">
+      <div className="bg-white border-b-2 p-6" style={{ borderColor: 'rgb(146,169,129)' }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col space-y-6">
+            <div className="flex justify-between w-full">
               <Button
                 variant="ghost"
-                color="rgb(78,61,30)"
                 onClick={() => router.push('/scholarships')}
-                _hover={{ bg: "rgb(193,212,178)" }}
+                className="text-primary hover:bg-accent"
               >
-                <FiArrowLeft style={{ marginRight: '8px' }} />
+                <FiArrowLeft className="mr-2" />
                 Back to Scholarships
               </Button>
               
               <Button
-                
                 variant="ghost"
-                color="rgb(9,76,9)"
                 onClick={handleSaveDraft}
-                _hover={{ bg: "rgb(193,212,178)" }}
+                className="hover:bg-accent"
+                style={{ color: 'rgb(9,76,9)' }}
               >
-                <FiSave style={{ marginRight: '8px' }} />
+                <FiSave className="mr-2" />
                 Save Draft
               </Button>
-            </HStack>
+            </div>
             
-            <VStack gap={4} w="full">
-              <Heading size="xl" color="rgb(61,84,44)" textAlign="center">
+            <div className="flex flex-col space-y-4 w-full">
+              <h1 className="text-3xl font-bold text-center" style={{ color: 'rgb(61,84,44)' }}>
                 Apply for {scholarship.name}
-              </Heading>
+              </h1>
               
               <ProgressBar progress={getStepProgress()} />
               
@@ -905,28 +828,28 @@ export default function ScholarshipApplicationPage() {
                 currentStep={currentStep} 
                 goToStep={goToStep}
               />
-            </VStack>
-          </VStack>
-        </Box>
-      </Box>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Form Content */}
-      <Box maxW="4xl" mx="auto" p={{ base: 4, md: 6 }}>
-        <Box bg="white" border="2px" borderColor="rgb(146,169,129)" boxShadow="xl" borderRadius="md">
-          <Box bg="rgb(193,212,178)" borderBottom="2px" borderBottomColor="rgb(146,169,129)" p={4}>
-            <VStack gap={2} align="start">
-              <Heading size={{ base: "md", md: "lg" }} color="rgb(61,84,44)">
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="bg-white border-2 shadow-xl rounded-md" style={{ borderColor: 'rgb(146,169,129)' }}>
+          <div className="border-b-2 p-4" style={{ backgroundColor: 'rgb(193,212,178)', borderColor: 'rgb(146,169,129)' }}>
+            <div className="flex flex-col space-y-2">
+              <h2 className="text-lg md:text-xl font-semibold" style={{ color: 'rgb(61,84,44)' }}>
                 {currentStepData.title}
-              </Heading>
-              <Text color="rgb(78,61,30)">
+              </h2>
+              <p style={{ color: 'rgb(78,61,30)' }}>
                 {currentStepData.description}
-              </Text>
-            </VStack>
-          </Box>
+              </p>
+            </div>
+          </div>
 
-          <Card.Root>
-            <Card.Body p={8}>
-              <Box minH="400px">
+          <Card>
+            <CardContent className="p-8">
+              <div className="min-h-96">
                 {currentStep === 0 && (
                   <PersonalInfoStep 
                     formData={formData} 
@@ -961,105 +884,87 @@ export default function ScholarshipApplicationPage() {
                     scholarship={scholarship}
                   />
                 )}
-              </Box>
+              </div>
 
               {/* Navigation */}
-              <Box mt={8} pt={6} borderTop="1px" borderColor="rgb(193,212,178)">
+              <div className="mt-8 pt-6 border-t" style={{ borderColor: 'rgb(193,212,178)' }}>
                 {/* Mobile Layout - Stacked */}
-                <VStack gap={3} display={{ base: "flex", md: "none" }}>
-                  <HStack gap={3} w="full">
+                <div className="flex flex-col space-y-3 md:hidden">
+                  <div className="flex gap-3 w-full">
                     <Button
-                      
                       variant="ghost"
                       onClick={prevStep}
                       disabled={isFirstStep}
-                      color="rgb(78,61,30)"
-                      _hover={{ bg: "rgb(193,212,178)" }}
-                      flex="1"
+                      className="flex-1 text-primary hover:bg-accent"
                       size="sm"
                     >
-                      <FiArrowLeft style={{ marginRight: '8px' }} />
+                      <FiArrowLeft className="mr-2" />
                       Previous
                     </Button>
                     {isReviewStep ? (
                       <Button
-                        
-                        bg="rgb(9,76,9)"
-                        color="white"
                         onClick={handleSubmit}
                         loading={submitting}
-                        loadingText="Submitting..."
-                        _hover={{ bg: "rgb(92,127,66)" }}
-                        flex="1"
+                        className="flex-1 text-white hover:bg-primary-light"
+                        style={{ backgroundColor: 'rgb(9,76,9)' }}
                         size="sm"
                       >
                         Submit
-                        <FiSend style={{ marginLeft: '8px' }} />
+                        <FiSend className="ml-2" />
                       </Button>
                     ) : (
                       <Button
-                        
-                        bg="rgb(9,76,9)"
-                        color="white"
                         onClick={nextStep}
-                        _hover={{ bg: "rgb(92,127,66)" }}
-                        flex="1"
+                        className="flex-1 text-white hover:bg-primary-light"
+                        style={{ backgroundColor: 'rgb(9,76,9)' }}
                         size="sm"
                       >
                         {isLastStep ? "Review" : "Continue"}
-                        <FiArrowRight style={{ marginLeft: '8px' }} />
+                        <FiArrowRight className="ml-2" />
                       </Button>
                     )}
-                  </HStack>
-                </VStack>
+                  </div>
+                </div>
 
                 {/* Desktop Layout - Horizontal */}
-                <HStack justify="space-between" display={{ base: "none", md: "flex" }}>
+                <div className="hidden md:flex justify-between">
                   <Button
-                    
                     variant="ghost"
                     onClick={prevStep}
                     disabled={isFirstStep}
-                    color="rgb(78,61,30)"
-                    _hover={{ bg: "rgb(193,212,178)" }}
+                    className="text-primary hover:bg-accent"
                   >
-                    <FiArrowLeft style={{ marginRight: '8px' }} />
+                    <FiArrowLeft className="mr-2" />
                     Previous
                   </Button>
 
                   {isReviewStep ? (
                     <Button
-                      
-                      bg="rgb(9,76,9)"
-                      color="white"
-                      size="lg"
                       onClick={handleSubmit}
                       loading={submitting}
-                      loadingText="Submitting..."
-                      _hover={{ bg: "rgb(92,127,66)" }}
-                      _active={{ transform: "scale(0.98)" }}
+                      size="lg"
+                      className="text-white hover:bg-primary-light active:scale-98"
+                      style={{ backgroundColor: 'rgb(9,76,9)' }}
                     >
                       Submit Application
-                      <FiSend style={{ marginLeft: '8px' }} />
+                      <FiSend className="ml-2" />
                     </Button>
                   ) : (
                     <Button
-                      
-                      bg="rgb(9,76,9)"
-                      color="white"
                       onClick={nextStep}
-                      _hover={{ bg: "rgb(92,127,66)" }}
+                      className="text-white hover:bg-primary-light"
+                      style={{ backgroundColor: 'rgb(9,76,9)' }}
                     >
                       {isLastStep ? "Review Application" : "Continue"}
-                      <FiArrowRight style={{ marginLeft: '8px' }} />
+                      <FiArrowRight className="ml-2" />
                     </Button>
                   )}
-                </HStack>
-              </Box>
-            </Card.Body>
-          </Card.Root>
-        </Box>
-      </Box>
-    </Box>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }

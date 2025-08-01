@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { 
-  Box, 
-  Flex, 
-  Spacer, 
-  Button, 
-  Text, 
-  HStack, 
-  VStack,
-  Badge
-} from "@chakra-ui/react";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
@@ -44,39 +35,23 @@ export default function Navbar() {
   };
 
   return (
-    <Box 
-      as="nav" 
-      bg="rgb(61,84,44)" // Dark forest green
-      color="white"
-      borderBottomWidth={2}
-      borderBottomColor="rgb(255,211,88)" // Golden yellow accent
-    >
-      <Flex align="center" p={4}>
+    <nav className="bg-primary text-white border-b-2 border-secondary">
+      <div className="flex items-center p-4">
         <Link href="/">
-          <Text 
-            fontWeight="bold" 
-            fontSize={{ base: "lg", md: "xl" }}
-            color="white"
-            _hover={{ color: "rgb(255,211,88)" }}
-            cursor="pointer"
-          >
+          <h1 className="font-bold text-lg md:text-xl text-white hover:text-secondary cursor-pointer">
             RRLC Scholarship Portal
-          </Text>
+          </h1>
         </Link>
         
-        <Spacer />
+        <div className="flex-1" />
         
         {/* Desktop Navigation */}
-        <HStack gap={4} display={{ base: "none", md: "flex" }}>
+        <div className="hidden md:flex items-center gap-4">
           <Link href="/scholarships">
             <Button 
               variant="ghost" 
               size="sm"
-              color="white"
-              _hover={{ 
-                bg: "rgb(92,127,66)",
-                color: "white"
-              }}
+              className="text-white hover:bg-primary-light hover:text-white"
             >
               Browse Scholarships
             </Button>
@@ -89,11 +64,7 @@ export default function Navbar() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    color="white"
-                    _hover={{ 
-                      bg: "rgb(92,127,66)",
-                      color: "white"
-                    }}
+                    className="text-white hover:bg-primary-light hover:text-white"
                   >
                     Home
                   </Button>
@@ -105,47 +76,30 @@ export default function Navbar() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    color="white"
-                    _hover={{ 
-                      bg: "rgb(92,127,66)",
-                      color: "white"
-                    }}
+                    className="text-white hover:bg-primary-light hover:text-white"
                   >
                     Home
                   </Button>
                 </Link>
               )}
               
-              <HStack gap={2} align="center">
-                <Text fontSize="sm" color="rgb(255,211,88)">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-secondary">
                   {profile?.full_name || user?.email}
-                </Text>
+                </span>
                 {profile?.role && (
-                  <Badge 
-                    size="sm" 
-                    bg="rgb(255,211,88)"
-                    color="rgb(78,61,30)"
-                    textTransform="capitalize"
-                  >
+                  <span className="badge badge-secondary capitalize text-xs">
                     {profile.role}
-                  </Badge>
+                  </span>
                 )}
-              </HStack>
+              </div>
               
               <Button 
                 size="sm" 
                 onClick={handleLogout}
                 loading={isLoggingOut}
                 disabled={isLoggingOut}
-                bg="rgb(94,60,23)" // Rich brown
-                color="white"
-                _hover={{ 
-                  bg: "rgb(78,61,30)" // Darker brown on hover
-                }}
-                _active={{
-                  bg: "rgb(78,61,30)",
-                  transform: "scale(0.98)"
-                }}
+                className="bg-primary-dark text-white hover:bg-primary-light active:scale-95"
               >
                 {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
@@ -154,119 +108,76 @@ export default function Navbar() {
             <Link href="/login">
               <Button 
                 size="sm"
-                bg="rgb(9,76,9)" // Deep green
-                color="white"
-                _hover={{ 
-                  bg: "rgb(92,127,66)" // Forest accent on hover
-                }}
+                className="bg-primary-dark text-white hover:bg-primary-light"
               >
                 Login
               </Button>
             </Link>
           )}
-        </HStack>
+        </div>
 
         {/* Mobile Navigation - Simplified */}
-        <VStack 
-          gap={2} 
-          display={{ base: "flex", md: "none" }}
-          position="absolute"
-          top="100%"
-          left={0}
-          right={0}
-          bg="rgb(61,84,44)"
-          p={4}
-          borderTopWidth={1}
-          borderTopColor="rgb(92,127,66)"
-          zIndex={10}
-        >
-          <Link href="/scholarships">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              color="white"
-              w="100%"
-              _hover={{ 
-                bg: "rgb(92,127,66)",
-                color: "white"
-              }}
-            >
-              Browse Scholarships
-            </Button>
-          </Link>
-
-          {isAuthenticated() ? (
-            <>
-              {!isAdmin() && (
-                <Link href="/home">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    color="white"
-                    w="100%"
-                    _hover={{ 
-                      bg: "rgb(92,127,66)",
-                      color: "white"
-                    }}
-                  >
-                    Home
-                  </Button>
-                </Link>
-              )}
-              
-              {isAdmin() && (
-                <Link href="/admin">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    color="white"
-                    w="100%"
-                    _hover={{ 
-                      bg: "rgb(92,127,66)",
-                      color: "white"
-                    }}
-                  >
-                    Home
-                  </Button>
-                </Link>
-              )}
-              
+        <div className="absolute top-full left-0 right-0 bg-primary p-4 border-t border-primary-light z-10 md:hidden">
+          <div className="flex flex-col gap-2">
+            <Link href="/scholarships">
               <Button 
-                size="sm" 
-                onClick={handleLogout}
-                loading={isLoggingOut}
-                disabled={isLoggingOut}
-                bg="rgb(94,60,23)"
-                color="white"
-                w="100%"
-                _hover={{ 
-                  bg: "rgb(78,61,30)"
-                }}
-                _active={{
-                  bg: "rgb(78,61,30)",
-                  transform: "scale(0.98)"
-                }}
-              >
-                {isLoggingOut ? "Logging out..." : "Logout"}
-              </Button>
-            </>
-          ) : (
-            <Link href="/login">
-              <Button 
+                variant="ghost" 
                 size="sm"
-                bg="rgb(9,76,9)"
-                color="white"
-                w="100%"
-                _hover={{ 
-                  bg: "rgb(92,127,66)"
-                }}
+                className="text-white hover:bg-primary-light hover:text-white w-full"
               >
-                Login
+                Browse Scholarships
               </Button>
             </Link>
-          )}
-        </VStack>
-      </Flex>
-    </Box>
+
+            {isAuthenticated() ? (
+              <>
+                {!isAdmin() && (
+                  <Link href="/home">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-white hover:bg-primary-light hover:text-white w-full"
+                    >
+                      Home
+                    </Button>
+                  </Link>
+                )}
+                
+                {isAdmin() && (
+                  <Link href="/admin">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="text-white hover:bg-primary-light hover:text-white w-full"
+                    >
+                      Home
+                    </Button>
+                  </Link>
+                )}
+                
+                <Button 
+                  size="sm" 
+                  onClick={handleLogout}
+                  loading={isLoggingOut}
+                  disabled={isLoggingOut}
+                  className="bg-primary-dark text-white hover:bg-primary-light active:scale-95 w-full"
+                >
+                  {isLoggingOut ? "Logging out..." : "Logout"}
+                </Button>
+              </>
+            ) : (
+              <Link href="/login">
+                <Button 
+                  size="sm"
+                  className="bg-primary-dark text-white hover:bg-primary-light w-full"
+                >
+                  Login
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 } 

@@ -1,15 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Box, 
-  Button, 
-  Input, 
-  Heading,
-  Text,
-  VStack,
-  Link
-} from "@chakra-ui/react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterPage() {
@@ -61,171 +55,97 @@ export default function RegisterPage() {
   };
 
   return (
-    <Box
-      minHeight="100vh"
-      bg="rgb(193,212,178)" // Light sage background
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      p={4}
-    >
-      <Box 
-        maxW="md" 
-        w="full"
-        bg="white"
-        p={8} 
-        borderRadius="lg" 
-        boxShadow="lg"
-        border="2px"
-        borderColor="rgb(146,169,129)" // Medium sage border
-      >
-        <VStack gap={6}>
-          <Heading 
-            size="xl" 
-            textAlign="center"
-            color="rgb(61,84,44)" // Dark forest green
-          >
+    <div className="min-h-screen bg-accent flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-lg border-2 border-accent-dark">
+        <div className="flex flex-col gap-6">
+          <h1 className="text-3xl text-center text-primary font-bold">
             RRLC Scholarship Portal
-          </Heading>
+          </h1>
           
-          <Text 
-            textAlign="center" 
-            color="rgb(78,61,30)" // Primary text color
-            fontSize="md"
-          >
+          <p className="text-center text-primary-dark">
             Create your account
-          </Text>
+          </p>
 
-          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            <VStack gap={4}>
-              <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                  Full Name <Text as="span" color="red.500">*</Text>
-                </Text>
+          <form onSubmit={handleSubmit} className="w-full">
+            <div className="flex flex-col gap-4">
+              <div className="w-full">
+                <label className="block mb-2 text-sm font-medium text-primary-dark">
+                  Full Name <span className="text-error">*</span>
+                </label>
                 <Input 
                   type="text" 
                   value={fullName} 
                   onChange={e => setFullName(e.target.value)}
                   required
                   placeholder="Enter your full name"
-                  borderColor="rgb(146,169,129)"
-                  color="rgb(78,61,30)"
-                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                  _focus={{ 
-                    borderColor: "rgb(9,76,9)",
-                    boxShadow: "0 0 0 1px rgb(9,76,9)"
-                  }}
+                  className="border-accent-dark text-primary-dark"
                 />
-              </Box>
-
+              </div>
               
-              <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                  Email Address <Text as="span" color="red.500">*</Text>
-                </Text>
+              <div className="w-full">
+                <label className="block mb-2 text-sm font-medium text-primary-dark">
+                  Email Address <span className="text-error">*</span>
+                </label>
                 <Input 
                   type="email" 
                   value={email} 
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="Enter your email"
-                  borderColor="rgb(146,169,129)"
-                  color="rgb(78,61,30)"
-                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                  _focus={{ 
-                    borderColor: "rgb(9,76,9)",
-                    boxShadow: "0 0 0 1px rgb(9,76,9)"
-                  }}
+                  className="border-accent-dark text-primary-dark"
                 />
-              </Box>
+              </div>
               
-              <Box w="full">
-                <Text mb={2} fontSize="sm" fontWeight="medium" color="rgb(78,61,30)">
-                  Password <Text as="span" color="red.500">*</Text>
-                </Text>
+              <div className="w-full">
+                <label className="block mb-2 text-sm font-medium text-primary-dark">
+                  Password <span className="text-error">*</span>
+                </label>
                 <Input 
                   type="password" 
                   value={password} 
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="Enter your password"
-                  borderColor="rgb(146,169,129)"
-                  color="rgb(78,61,30)"
-                  _placeholder={{ color: "gray.500", opacity: 0.8 }}
-                  _hover={{ borderColor: "rgb(92,127,66)" }}
-                  _focus={{ 
-                    borderColor: "rgb(9,76,9)",
-                    boxShadow: "0 0 0 1px rgb(9,76,9)"
-                  }}
+                  className="border-accent-dark text-primary-dark"
                 />
-              </Box>
+              </div>
               
               {error && (
-                <Box 
-                  p={3} 
-                  bg="red.50" 
-                  border="1px" 
-                  borderColor="red.200" 
-                  borderRadius="md"
-                  w="full"
-                >
-                  <Text color="red.700" fontSize="sm">
-                    {error}
-                  </Text>
-                </Box>
+                <div className="alert alert-error">
+                  {error}
+                </div>
               )}
               
               {success && (
-                <Box 
-                  p={3} 
-                  bg="green.50" 
-                  border="1px" 
-                  borderColor="green.200" 
-                  borderRadius="md"
-                  w="full"
-                >
-                  <Text color="green.700" fontSize="sm">
-                    {success}
-                  </Text>
-                </Box>
+                <div className="alert alert-success">
+                  {success}
+                </div>
               )}
               
               <Button 
                 type="submit" 
                 loading={loading}
-                w="full"
-                bg="rgb(9,76,9)" // Deep green
-                color="white"
-                _hover={{ 
-                  bg: "rgb(92,127,66)" // Forest accent on hover
-                }}
-                _active={{ 
-                  bg: "rgb(9,76,9)" 
-                }}
+                className="w-full bg-primary text-white hover:bg-primary-light"
                 size="lg"
               >
                 Create Account
               </Button>
-            </VStack>
+            </div>
           </form>
 
-          <Box textAlign="center" borderTop="2px" borderTopColor="rgb(146,169,129)" pt={6}>
-            <Text color="rgb(78,61,30)" fontSize="sm">
+          <div className="text-center border-t-2 border-accent-dark pt-6">
+            <p className="text-primary-dark text-sm">
               Already have an account?
-            </Text>
+            </p>
             <Link 
               href="/login"
-              color="rgb(9,76,9)"
-              fontWeight="medium"
-              _hover={{ color: "rgb(92,127,66)" }}
+              className="text-primary font-medium hover:text-primary-light"
             >
               Sign in here
             </Link>
-          </Box>
-        </VStack>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

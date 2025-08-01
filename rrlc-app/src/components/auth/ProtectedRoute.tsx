@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Box, Spinner, Text, VStack } from '@chakra-ui/react';
+// No imports needed - using Tailwind CSS
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -29,21 +29,12 @@ export function ProtectedRoute({
   // Show loading spinner while checking auth or loading profile data
   if (loading || (isAuthenticated() && !isAuthReady())) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="200px"
-        bg="rgb(193,212,178)" // Light sage background
-      >
-        <VStack gap={4}>
-          <Spinner 
-            size="lg" 
-            color="rgb(9,76,9)" // Deep green
-          />
-          <Text color="rgb(78,61,30)">Loading...</Text>
-        </VStack>
-      </Box>
+      <div className="flex justify-center items-center min-h-[200px] bg-accent">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-primary-dark">Loading...</p>
+        </div>
+      </div>
     );
   }
 
@@ -54,42 +45,25 @@ export function ProtectedRoute({
     }
     
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="200px"
-        bg="rgb(193,212,178)"
-      >
-        <Text color="rgb(78,61,30)">Redirecting to login...</Text>
-      </Box>
+      <div className="flex justify-center items-center min-h-[200px] bg-accent">
+        <p className="text-primary-dark">Redirecting to login...</p>
+      </div>
     );
   }
 
   // Check admin requirement (only after auth is fully ready)
   if (requireAdmin && isAuthReady() && !isAdmin()) {
     return (
-      <Box 
-        display="flex" 
-        justifyContent="center" 
-        alignItems="center" 
-        minHeight="200px"
-        bg="rgb(193,212,178)"
-        p={8}
-      >
-        <VStack gap={4} textAlign="center">
-          <Text 
-            fontSize="xl" 
-            fontWeight="bold" 
-            color="rgb(78,61,30)"
-          >
+      <div className="flex justify-center items-center min-h-[200px] bg-accent p-8">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-xl font-bold text-primary-dark">
             Access Denied
-          </Text>
-          <Text color="rgb(78,61,30)">
+          </p>
+          <p className="text-primary-dark">
             You need administrator privileges to access this page.
-          </Text>
-        </VStack>
-      </Box>
+          </p>
+        </div>
+      </div>
     );
   }
 

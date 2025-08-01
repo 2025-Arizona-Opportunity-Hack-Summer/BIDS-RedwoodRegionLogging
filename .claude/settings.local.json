@@ -6,7 +6,21 @@
       "Bash(lsof:*)",
       "Bash(pkill:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(find:*)",
+      "Bash(npx next lint:*)",
+      "Bash(for file in *.tsx)",
+      "Bash(do mv \"$file\" \"$file.bak\")",
+      "Bash(done)",
+      "Bash(mv:*)",
+      "Bash(for file in *.tsx.bak)",
+      "Bash(do mv \"$file\" \"$file%.bak\")"
     ],
     "deny": []
   }

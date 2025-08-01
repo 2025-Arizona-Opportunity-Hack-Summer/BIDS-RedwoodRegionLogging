@@ -124,7 +124,7 @@ export async function getAnalyticsData(timeRange?: TimeRange): Promise<{
     });
 
     const statusDistribution = Array.from(statusCounts.entries()).map(([status, count]) => ({
-      status: status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      status: status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
       count,
       percentage: totalApplications > 0 ? (count / totalApplications) * 100 : 0
     }));
