@@ -5,9 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminContext } from "@/contexts/AdminContext";
 
 function AdminDashboardContent() {
   const { profile } = useAuth();
+  const { scholarships, applications, scholarshipsLoading, applicationsLoading } = useAdminContext();
+
+  // Calculate statistics
+  const stats = {
+    totalApplicationsThisMonth: applications.filter(app => {
+      const appDate = new Date(app.created_at);
+      const now = new Date();
+      return appDate.getMonth() === now.getMonth() && 
+             appDate.getFullYear() === now.getFullYear();
+    }).length,
+    activeScholarships: scholarships.filter(s => s.status === 'active').length,
+    pendingApplications: applications.filter(app => 
+      app.status === 'submitted' || app.status === 'under_review'
+    ).length,
+    totalAwarded: applications
+      .filter(app => app.awarded_amount)
+      .reduce((sum, app) => sum + (app.awarded_amount || 0), 0)
+  };
+
+  const isLoading = scholarshipsLoading || applicationsLoading;
 
   return (
     <div className="min-h-screen bg-accent p-4">
@@ -25,7 +46,11 @@ function AdminDashboardContent() {
             <Card className="bg-white border-2 border-accent-dark hover:border-primary-light transition-colors">
               <CardContent className="text-center p-6">
                 <p className="text-sm text-primary-dark mb-2">Total Applications</p>
-                <p className="text-3xl font-bold text-primary">0</p>
+                {isLoading ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mb-2" />
+                ) : (
+                  <p className="text-3xl font-bold text-primary">{stats.totalApplicationsThisMonth}</p>
+                )}
                 <p className="text-sm text-primary-dark">This month</p>
               </CardContent>
             </Card>
@@ -33,7 +58,11 @@ function AdminDashboardContent() {
             <Card className="bg-white border-2 border-accent-dark hover:border-primary-light transition-colors">
               <CardContent className="text-center p-6">
                 <p className="text-sm text-primary-dark mb-2">Active Scholarships</p>
-                <p className="text-3xl font-bold text-primary">0</p>
+                {isLoading ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mb-2" />
+                ) : (
+                  <p className="text-3xl font-bold text-primary">{stats.activeScholarships}</p>
+                )}
                 <p className="text-sm text-primary-dark">Currently open</p>
               </CardContent>
             </Card>
@@ -41,7 +70,11 @@ function AdminDashboardContent() {
             <Card className="bg-white border-2 border-accent-dark hover:border-primary-light transition-colors">
               <CardContent className="text-center p-6">
                 <p className="text-sm text-primary-dark mb-2">Awards Pending</p>
-                <p className="text-3xl font-bold text-secondary">0</p>
+                {isLoading ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mb-2" />
+                ) : (
+                  <p className="text-3xl font-bold text-secondary">{stats.pendingApplications}</p>
+                )}
                 <p className="text-sm text-primary-dark">Awaiting approval</p>
               </CardContent>
             </Card>
@@ -49,7 +82,11 @@ function AdminDashboardContent() {
             <Card className="bg-white border-2 border-accent-dark hover:border-primary-light transition-colors">
               <CardContent className="text-center p-6">
                 <p className="text-sm text-primary-dark mb-2">Total Awarded</p>
-                <p className="text-3xl font-bold text-primary">$0</p>
+                {isLoading ? (
+                  <div className="h-9 bg-gray-300 rounded animate-pulse mb-2" />
+                ) : (
+                  <p className="text-3xl font-bold text-primary">${stats.totalAwarded.toLocaleString()}</p>
+                )}
                 <p className="text-sm text-primary-dark">This year</p>
               </CardContent>
             </Card>
@@ -120,9 +157,62 @@ function AdminDashboardContent() {
               </h2>
             </CardHeader>
             <CardContent>
-              <p className="text-primary-dark text-center py-8">
-                No recent activity to display.
-              </p>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-16 bg-gray-300 rounded animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {applications
+                    .filter(app => app.submission_date || app.created_at)
+                    .sort((a, b) => {
+                      const dateA = new Date(a.submission_date || a.created_at).getTime();
+                      const dateB = new Date(b.submission_date || b.created_at).getTime();
+                      return dateB - dateA;
+                    })
+                    .slice(0, 5)
+                    .map((app) => (
+                      <div key={app.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-semibold">
+                              {app.first_name?.[0]}{app.last_name?.[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-primary">
+                              {app.first_name} {app.last_name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              Applied to {app.scholarship?.name || 'Scholarship'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">
+                            {new Date(app.submission_date || app.created_at).toLocaleDateString()}
+                          </p>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            app.status === 'submitted' ? 'bg-blue-100 text-blue-800' :
+                            app.status === 'approved' ? 'bg-green-100 text-green-800' :
+                            app.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            app.status === 'awarded' ? 'bg-purple-100 text-purple-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {app.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  {applications.filter(app => app.submission_date || app.created_at).length === 0 && (
+                    <p className="text-primary-dark text-center py-8">
+                      No recent activity to display.
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
