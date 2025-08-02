@@ -8,12 +8,9 @@ function AdminAnalyticsContent() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col gap-6">
           <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">
+            <h1 className="text-4xl font-bold text-primary">
               Analytics Dashboard
             </h1>
-            <p className="text-lg text-primary-dark">
-              View scholarship and application analytics
-            </p>
           </div>
           
           <div className="bg-white border-2 border-accent-dark rounded-lg p-8 text-center">

@@ -295,9 +295,6 @@ function ScholarshipsPageContent() {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-4" />
               )}
             </div>
-            <p className="text-lg text-primary-dark max-w-2xl mx-auto">
-              Discover scholarship opportunities to support your education in forestry and sustainable logging practices.
-            </p>
           </div>
 
           <FilterSection filters={filters} updateFilters={updateFilters} />

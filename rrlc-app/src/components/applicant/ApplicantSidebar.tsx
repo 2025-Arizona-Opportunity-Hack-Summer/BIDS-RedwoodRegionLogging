@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSidebar } from '@/contexts/SidebarContext';
 import { 
   FiHome, 
   FiBook, 
@@ -58,22 +59,9 @@ interface ApplicantSidebarProps {
 }
 
 export function ApplicantSidebar({ className = '' }: ApplicantSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isApplicantCollapsed: isCollapsed, setIsApplicantCollapsed: setIsCollapsed } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
-
-  // Load collapsed state from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('applicant-sidebar-collapsed');
-    if (saved !== null) {
-      setIsCollapsed(JSON.parse(saved));
-    }
-  }, []);
-
-  // Save collapsed state to localStorage
-  useEffect(() => {
-    localStorage.setItem('applicant-sidebar-collapsed', JSON.stringify(isCollapsed));
-  }, [isCollapsed]);
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -226,14 +214,6 @@ export function ApplicantSidebar({ className = '' }: ApplicantSidebarProps) {
 
 // Hook to get sidebar state
 export function useApplicantSidebarState() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('applicant-sidebar-collapsed');
-    if (saved !== null) {
-      setIsCollapsed(JSON.parse(saved));
-    }
-  }, []);
-
+  const { isApplicantCollapsed: isCollapsed } = useSidebar();
   return { isCollapsed };
 }

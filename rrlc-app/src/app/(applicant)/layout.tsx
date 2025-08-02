@@ -1,5 +1,6 @@
 "use client";
 
+import { SidebarProvider } from '@/contexts/SidebarContext';
 import { ApplicantSidebar, useApplicantSidebarState } from '@/components/applicant/ApplicantSidebar';
 
 function ApplicantLayoutContent({
@@ -16,8 +17,8 @@ function ApplicantLayoutContent({
       {/* Main Content Area */}
       <div 
         className={`
-          transition-all duration-300 ease-in-out min-h-screen pt-16
-          lg:ml-56 ${isCollapsed ? 'lg:ml-14' : 'lg:ml-56'}
+          transition-all duration-300 ease-in-out min-h-screen
+          ${isCollapsed ? 'lg:ml-14' : 'lg:ml-56'}
         `}
       >
         {children}
@@ -32,8 +33,10 @@ export default function ApplicantLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ApplicantLayoutContent>
-      {children}
-    </ApplicantLayoutContent>
+    <SidebarProvider>
+      <ApplicantLayoutContent>
+        {children}
+      </ApplicantLayoutContent>
+    </SidebarProvider>
   );
 }

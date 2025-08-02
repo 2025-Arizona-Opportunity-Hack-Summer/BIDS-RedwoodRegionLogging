@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSidebar } from '@/contexts/SidebarContext';
 import { 
   FiHome, 
   FiBook, 
@@ -82,22 +83,9 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ className = '' }: AdminSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isAdminCollapsed: isCollapsed, setIsAdminCollapsed: setIsCollapsed } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
-
-  // Load collapsed state from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('admin-sidebar-collapsed');
-    if (saved !== null) {
-      setIsCollapsed(JSON.parse(saved));
-    }
-  }, []);
-
-  // Save collapsed state to localStorage
-  useEffect(() => {
-    localStorage.setItem('admin-sidebar-collapsed', JSON.stringify(isCollapsed));
-  }, [isCollapsed]);
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -242,14 +230,6 @@ export function AdminSidebar({ className = '' }: AdminSidebarProps) {
 
 // Hook to get sidebar state
 export function useSidebarState() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('admin-sidebar-collapsed');
-    if (saved !== null) {
-      setIsCollapsed(JSON.parse(saved));
-    }
-  }, []);
-
+  const { isAdminCollapsed: isCollapsed } = useSidebar();
   return { isCollapsed };
 }

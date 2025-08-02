@@ -9,24 +9,21 @@ function HomePageContent() {
   const { profile } = useAuth();
 
   return (
-    <div className="min-h-screen bg-accent p-6">
+    <div className="min-h-screen bg-accent p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">
-              Welcome, {profile?.full_name || "Student"}!
-            </h1>
-            <p className="text-lg text-primary-dark">
+            <h1 className="text-3xl font-bold text-primary mb-1">
               Your scholarship application dashboard
-            </p>
+            </h1>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white border-2 border-accent-dark rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-primary mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white border-2 border-accent-dark rounded-lg p-5">
+              <h2 className="text-xl font-semibold text-primary mb-2">
                 Browse Scholarships
               </h2>
-              <p className="text-primary-dark mb-4">
+              <p className="text-primary-dark mb-3">
                 Discover available scholarship opportunities
               </p>
               <Link href="/scholarships">
@@ -36,11 +33,11 @@ function HomePageContent() {
               </Link>
             </div>
             
-            <div className="bg-white border-2 border-accent-dark rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-primary mb-3">
+            <div className="bg-white border-2 border-accent-dark rounded-lg p-5">
+              <h2 className="text-xl font-semibold text-primary mb-2">
                 My Applications
               </h2>
-              <p className="text-primary-dark mb-4">
+              <p className="text-primary-dark mb-3">
                 Track your scholarship applications
               </p>
               <Link href="/applications">

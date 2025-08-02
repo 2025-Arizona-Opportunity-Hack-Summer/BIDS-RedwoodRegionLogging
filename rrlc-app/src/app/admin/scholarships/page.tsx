@@ -215,9 +215,6 @@ function AdminScholarshipsContent() {
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2" />
                 )}
               </div>
-              <p className="text-lg text-primary-dark">
-                {scholarships.length} total scholarships
-              </p>
             </div>
             
             <Link href="/admin/scholarships/new">

@@ -162,12 +162,9 @@ function MyApplicationsContent() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold text-primary mb-2">
+              <h1 className="text-4xl font-bold text-primary">
                 My Applications
               </h1>
-              <p className="text-lg text-primary-dark">
-                Track your scholarship application status
-              </p>
             </div>
             
             <Link href="/scholarships">

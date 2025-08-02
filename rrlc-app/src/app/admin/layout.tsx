@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminProvider } from '@/contexts/AdminContext';
+import { SidebarProvider } from '@/contexts/SidebarContext';
 import { AdminSidebar, useSidebarState } from '@/components/admin/AdminSidebar';
 
 function AdminLayoutContent({
@@ -17,8 +18,8 @@ function AdminLayoutContent({
       {/* Main Content Area */}
       <div 
         className={`
-          transition-all duration-300 ease-in-out min-h-screen pt-16
-          lg:ml-56 ${isCollapsed ? 'lg:ml-14' : 'lg:ml-56'}
+          transition-all duration-300 ease-in-out min-h-screen
+          ${isCollapsed ? 'lg:ml-14' : 'lg:ml-56'}
         `}
       >
         {children}
@@ -33,10 +34,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdminProvider>
-      <AdminLayoutContent>
-        {children}
-      </AdminLayoutContent>
-    </AdminProvider>
+    <SidebarProvider>
+      <AdminProvider>
+        <AdminLayoutContent>
+          {children}
+        </AdminLayoutContent>
+      </AdminProvider>
+    </SidebarProvider>
   );
 }

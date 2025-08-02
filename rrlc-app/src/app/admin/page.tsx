@@ -10,17 +10,14 @@ function AdminDashboardContent() {
   const { profile } = useAuth();
 
   return (
-    <div className="min-h-screen bg-accent p-6">
+    <div className="min-h-screen bg-accent p-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
           {/* Header */}
           <div>
-            <h1 className="text-4xl font-bold text-primary mb-2">
-              Home
+            <h1 className="text-3xl font-bold text-primary">
+              Admin Dashboard
             </h1>
-            <p className="text-lg text-primary-dark">
-              Welcome back, {profile?.full_name || "Administrator"}!
-            </p>
           </div>
 
           {/* Stats Overview */}

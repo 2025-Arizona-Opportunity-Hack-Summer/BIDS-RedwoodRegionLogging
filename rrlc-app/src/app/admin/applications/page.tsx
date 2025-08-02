@@ -227,9 +227,6 @@ function AdminApplicationsContent() {
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-2" />
                 )}
               </div>
-              <p className="text-lg text-primary-dark">
-                {applications.length} total applications • {filteredApplications.length} shown
-              </p>
             </div>
             
             <Button className="bg-primary text-white hover:bg-primary-light">
