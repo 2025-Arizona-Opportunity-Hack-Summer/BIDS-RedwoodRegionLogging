@@ -2,7 +2,7 @@
 
 import { PublicScholarshipProvider } from '@/contexts/PublicScholarshipContext';
 
-export default function ScholarshipsLayout({
+export default function PublicScholarshipsLayout({
   children,
 }: {
   children: React.ReactNode;

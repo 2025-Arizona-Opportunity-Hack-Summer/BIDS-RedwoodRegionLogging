@@ -10,16 +10,16 @@ import {
   FiArrowLeft,
   FiClock,
   FiAlertCircle,
-  FiCheckCircle
+  FiCheckCircle,
+  FiUser
 } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { Scholarship } from "@/types/database";
 
-function ScholarshipDetailContent() {
+export default function PublicScholarshipDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
@@ -34,7 +34,7 @@ function ScholarshipDetailContent() {
   useEffect(() => {
     if (scholarshipId) {
       fetchScholarship();
-      if (user) {
+      if (user && isAuthenticated()) {
         checkExistingApplication();
       }
     }
@@ -251,8 +251,25 @@ function ScholarshipDetailContent() {
                 </div>
               )}
 
-              {/* Application Status */}
-              {hasApplied && (
+              {/* Login Prompt for Unauthenticated Users */}
+              {!isAuthenticated() && !isExpired && (
+                <div className="mb-8">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <div className="flex items-center gap-3">
+                      <FiUser className="text-blue-600" size={24} />
+                      <div>
+                        <h3 className="font-semibold text-blue-800">Ready to Apply?</h3>
+                        <p className="text-blue-700">
+                          Create an account or login to submit your application for this scholarship.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Application Status for Authenticated Users */}
+              {isAuthenticated() && hasApplied && (
                 <div className="mb-8">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div className="flex items-center gap-3">
@@ -270,7 +287,26 @@ function ScholarshipDetailContent() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {!hasApplied && !isExpired && (
+                {!isAuthenticated() && !isExpired && (
+                  <>
+                    <Button 
+                      onClick={handleApply}
+                      className="bg-primary text-white hover:bg-primary-light flex-1"
+                    >
+                      Login to Apply
+                    </Button>
+                    <Link href="/register" className="flex-1">
+                      <Button 
+                        variant="outline"
+                        className="w-full border-primary text-primary hover:bg-primary hover:text-white"
+                      >
+                        Create Account
+                      </Button>
+                    </Link>
+                  </>
+                )}
+
+                {isAuthenticated() && !hasApplied && !isExpired && (
                   <Button 
                     onClick={handleApply}
                     disabled={checkingApplication}
@@ -280,7 +316,7 @@ function ScholarshipDetailContent() {
                   </Button>
                 )}
                 
-                {hasApplied && (
+                {isAuthenticated() && hasApplied && (
                   <Link href="/applications" className="flex-1">
                     <Button 
                       variant="outline"
@@ -319,13 +355,5 @@ function ScholarshipDetailContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ScholarshipDetailPage() {
-  return (
-    <ProtectedRoute requireApplicant={true}>
-      <ScholarshipDetailContent />
-    </ProtectedRoute>
   );
 }

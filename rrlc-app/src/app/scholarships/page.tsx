@@ -10,7 +10,6 @@ import { Scholarship } from "@/types/database";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export interface ScholarshipFilters {
   search: string;
@@ -211,7 +210,7 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
   );
 }
 
-function ScholarshipsPageContent() {
+export default function PublicScholarshipsPage() {
   const [filters, setFilters] = useState<ScholarshipFilters>({
     search: '',
     deadline: 'all',
@@ -295,6 +294,12 @@ function ScholarshipsPageContent() {
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mb-4" />
               )}
             </div>
+            <p className="text-lg text-primary-dark max-w-2xl mx-auto">
+              Browse available scholarships and learn more about opportunities. 
+              <Link href="/login" className="text-primary font-semibold hover:underline ml-1">
+                Login to apply
+              </Link>
+            </p>
           </div>
 
           <FilterSection filters={filters} updateFilters={updateFilters} />
@@ -319,13 +324,5 @@ function ScholarshipsPageContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ScholarshipsPage() {
-  return (
-    <ProtectedRoute requireApplicant={true}>
-      <ScholarshipsPageContent />
-    </ProtectedRoute>
   );
 }
