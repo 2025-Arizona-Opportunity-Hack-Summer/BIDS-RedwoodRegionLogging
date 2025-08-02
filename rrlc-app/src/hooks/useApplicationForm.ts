@@ -314,7 +314,7 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
         // Provide a more user-friendly error message with specific details
         let errorMessage = 'Failed to submit application';
         if (error && typeof error === 'object') {
-          if ('message' in error && error.message) {
+          if ('message' in error && error.message && typeof error.message === 'string') {
             errorMessage = error.message;
           } else if ('code' in error && error.code) {
             errorMessage = `Database error: ${error.code}`;

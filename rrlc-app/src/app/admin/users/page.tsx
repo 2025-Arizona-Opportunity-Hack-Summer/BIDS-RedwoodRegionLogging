@@ -8,7 +8,7 @@ import { Profile } from "@/types/database";
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Modal, ModalBody, ModalFooter } from "@/components/ui/modal";
@@ -82,6 +82,29 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
+    
+    // Set up real-time subscription for profile changes
+    const channel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('Real-time profile change:', payload);
+          // Refresh the user list when any profile changes
+          fetchUsers();
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter users based on search and role
@@ -156,31 +179,41 @@ export default function UsersPage() {
 
   const handleDelete = async (user: Profile) => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${user.full_name || user.email}? This action cannot be undone.`
+      `Are you sure you want to delete ${user.full_name || user.email}? This action cannot be undone and will prevent them from logging in.`
     );
     
     if (!confirmed) return;
     
-    const { error } = await supabase
-      .from("profiles")
-      .delete()
-      .eq("id", user.id);
-    
-    if (error) {
+    try {
+      const response = await fetch(`/api/admin/users/delete?userId=${user.id}`, {
+        method: 'DELETE',
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        addToast({
+          title: "Error deleting user",
+          description: result.error || 'Failed to delete user',
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        addToast({
+          title: "User deleted",
+          description: "User has been completely deleted and can no longer log in",
+          type: "success",
+          duration: 3000,
+        });
+        // No need to call fetchUsers() - real-time subscription will handle the update
+      }
+    } catch (error) {
       addToast({
         title: "Error deleting user",
-        description: error.message,
+        description: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         type: "error",
         duration: 5000,
       });
-    } else {
-      addToast({
-        title: "User deleted",
-        description: "User has been successfully deleted",
-        type: "success",
-        duration: 3000,
-      });
-      fetchUsers();
     }
   };
 
@@ -277,32 +310,54 @@ export default function UsersPage() {
     if (selectedUsers.size === 0) return;
     
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedUsers.size} users? This action cannot be undone.`
+      `Are you sure you want to delete ${selectedUsers.size} users? This action cannot be undone and will prevent them from logging in.`
     );
     
     if (!confirmed) return;
     
-    const { error } = await supabase
-      .from("profiles")
-      .delete()
-      .in("id", Array.from(selectedUsers));
-    
-    if (error) {
+    try {
+      const userIds = Array.from(selectedUsers);
+      
+      const response = await fetch(`/api/admin/users/delete?userIds=${JSON.stringify(userIds)}`, {
+        method: 'DELETE',
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        addToast({
+          title: "Error deleting users",
+          description: result.error || 'Failed to delete users',
+          type: "error",
+          duration: 5000,
+        });
+      } else {
+        if (result.failedCount > 0) {
+          addToast({
+            title: "Partial deletion completed",
+            description: result.message,
+            type: "warning",
+            duration: 5000,
+          });
+        } else {
+          addToast({
+            title: "Users deleted",
+            description: result.message,
+            type: "success",
+            duration: 3000,
+          });
+        }
+      }
+      
+      setSelectedUsers(new Set());
+      // No need to call fetchUsers() - real-time subscription will handle the update
+    } catch (error) {
       addToast({
         title: "Error deleting users",
-        description: error.message,
+        description: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         type: "error",
         duration: 5000,
       });
-    } else {
-      addToast({
-        title: "Users deleted",
-        description: `${selectedUsers.size} users have been deleted`,
-        type: "success",
-        duration: 3000,
-      });
-      setSelectedUsers(new Set());
-      fetchUsers();
     }
   };
 
