@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

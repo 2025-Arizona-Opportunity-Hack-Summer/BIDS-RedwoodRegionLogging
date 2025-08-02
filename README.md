@@ -1,306 +1,326 @@
-# RRLC Centralized Management Platform
+# RRLC Scholarship Management System 🌲
 
-## Quick Links
+*A comprehensive scholarship and event management platform for the Redwood Region Logging Conference*
 
-- Nonprofit: [Redwood Region Logging Conference](https://ohack.dev/nonprofit/WONxYIazfrL2Bnew0npm)
-- [Hackathon Details](https://www.ohack.dev/hack/2025_summer)
-- [Team Slack Channel](https://opportunity-hack.slack.com/app_redirect?channel=bids)
-- RRLC Website: [https://www.rrlc.net/](https://www.rrlc.net/)
+## 🎯 Demo & Links
 
+- **Live Demo:** [Coming Soon - Deployed on Vercel]
+- **DevPost:** [Coming Soon]
+- **Video Demo:** [Coming Soon - 4 minutes]
+- **Nonprofit:** [Redwood Region Logging Conference](https://ohack.dev/nonprofit/WONxYIazfrL2Bnew0npm)
+- **Hackathon:** [2025 Summer Opportunity Hack](https://www.ohack.dev/hack/2025_summer)
+- **RRLC Website:** [https://www.rrlc.net/](https://www.rrlc.net/)
 
-## Team "BIDS"
+## 👥 Team "BIDS"
 
-- George Badulescu [(GitHub profile link)](https://github.com/gbchill)
+- **George Badulescu** - Full Stack Developer [(GitHub)](https://github.com/gbchill)
+- **Team Slack:** [#bids](https://opportunity-hack.slack.com/app_redirect?channel=bids)
 
-<!-- Add all team members -->
+## 🎯 Problem Statement
 
-## Problem Statement
+The Redwood Region Logging Conference (RRLC), Northern California's largest timber-focused nonprofit, manages **$70,000+ in annual scholarships** and **500-6,000 conference attendees** using manual spreadsheets and disconnected systems.
 
-The Redwood Region Logging Conferencge (RRLC), Northern California's largest timber-focused nonprofit event and educational organization, faces growing operational complexity with data scattered across manual spreadsheets and disconnected systems.
+### Current Pain Points:
+- ❌ **Manual scholarship applications** via paper forms and email
+- ❌ **Scattered data** across multiple spreadsheets
+- ❌ **No application tracking** or status updates for students
+- ❌ **Inefficient review process** for administrators
+- ❌ **Limited reporting** and impact measurement
+- ❌ **Poor applicant experience** with unclear processes
 
-**Current Challenges:**
+### Our Solution:
+✅ **Unified digital platform** streamlining the entire scholarship lifecycle
+✅ **Automated workflows** from application to award disbursement  
+✅ **Real-time tracking** and notifications for all stakeholders
+✅ **Comprehensive analytics** for data-driven decisions
+✅ **Mobile-responsive design** for accessibility
+✅ **Scalable architecture** supporting growth to 10,000+ members
 
-- Manual tracking of diverse stakeholder groups (10,000+ members)
-- Inefficient management of conference registrations (500-6,000 attendees)
-- Scattered scholarship application processes ($70,000 distributed annually)
-- No centralized system for tracking educational impact
-- Limited historical data access and reporting capabilities
+## ✨ Key Features
 
-**Our Solution:**
-A unified, web-based platform that centralizes stakeholder management, event coordination, and scholarship tracking while enabling data-driven decision making and impact measurement.
+### For Students/Applicants
+- 📝 **Multi-step Application Forms** with auto-save functionality
+- 📎 **Document Upload** for transcripts, essays, and recommendations
+- 📊 **Real-time Status Tracking** of application progress
+- 📧 **Email Notifications** for status updates and deadlines
+- 👤 **User Profiles** with academic and personal information
+- 🎓 **Scholarship Discovery** with filtering and search
 
-## Technical Architecture
+### For Administrators
+- 📋 **Application Review Dashboard** with filtering and sorting
+- 👥 **User Management** with role-based access control
+- 📈 **Analytics & Reporting** with exportable data
+- ✉️ **Automated Email System** for confirmations and notifications
+- 🏆 **Award Management** with disbursement tracking
+- ⚙️ **Dynamic Form Builder** for custom scholarship requirements
 
-### Tech Stack
+### For Events
+- 📅 **Event Management** for conferences and workshops
+- 🎟️ **Registration System** with capacity management
+- 💰 **Payment Tracking** and fee management
+- 📊 **Attendance Tracking** and reporting
+
+## 🛠️ Technical Architecture
+
+### Technology Stack
 
 #### Frontend
-
-- **Framework:** React 18 with Next.js 15 (App Router)
-- **Styling:** Tailwind CSS 4.x
+- **Framework:** Next.js 15 with App Router
 - **Language:** TypeScript
+- **Styling:** Tailwind CSS 4.x
+- **UI Components:** Custom component library with Headless UI
+- **State Management:** React Context + Custom Hooks
 - **Deployment:** Vercel
 
 #### Backend
-
-- **API:** Next.js API Routes (serverless functions)
+- **API:** Next.js API Routes (Serverless Functions)
 - **Database:** Supabase (PostgreSQL)
-- **Authentication:** Supabase Auth
+- **Authentication:** Supabase Auth with Row Level Security
+- **File Storage:** Supabase Storage for document uploads
 - **Real-time:** Supabase Realtime subscriptions
 
-#### External Integrations
-
-- **Forms:** Tally.so for scholarship/event applications
-- **Email:** Automated workflows via Zapier/Supabase triggers
-- **Data Export:** CSV/PDF report generation
+#### External Services
+- **Email:** Automated notifications via API routes
+- **Analytics:** Built-in dashboard with charts
+- **Export:** CSV/PDF generation for reports
 
 ### System Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client Apps   │    │   Tally.so      │    │   Admin Panel   │
-│  (Web/Mobile)   │    │   Forms         │    │   Dashboard     │
+│  Student Portal │    │  Admin Dashboard│    │  Public Portal  │
+│   Applications  │    │  Reviews & Mgmt │    │   Scholarships  │
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          │              ┌───────▼────────┐             │
-          │              │    Zapier      │             │
-          │              │  Integration   │             │
-          │              └───────┬────────┘             │
           │                      │                      │
           └──────────────────────▼──────────────────────┘
                                  │
                     ┌─────────────▼─────────────┐
-                    │      Next.js API         │
-                    │     (Serverless)         │
+                    │      Next.js 15          │
+                    │   App Router & API       │
+                    │    (Vercel Deploy)       │
                     └─────────────┬─────────────┘
                                   │
                     ┌─────────────▼─────────────┐
-                    │      Supabase            │
-                    │  PostgreSQL Database     │
-                    │  Authentication          │
-                    │  Real-time Subscriptions │
+                    │       Supabase           │
+                    │   PostgreSQL Database    │
+                    │   Authentication & RLS   │
+                    │   Real-time Updates      │
+                    │   File Storage           │
                     └──────────────────────────┘
 ```
 
-### Database Design
+### Database Schema
 
-#### Core Tables Structure
-
-**Stakeholders Table**
+#### Core Tables
 
 ```sql
-CREATE TABLE stakeholders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  type VARCHAR(50) NOT NULL, -- 'member', 'sponsor', 'vendor', 'student', 'educator'
-  first_name VARCHAR(100),
-  last_name VARCHAR(100),
-  email VARCHAR(255) UNIQUE,
-  phone VARCHAR(20),
-  organization VARCHAR(255),
-  address JSONB,
-  metadata JSONB, -- Flexible field for type-specific data
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
+-- User Management
+profiles (id, email, full_name, role, created_at, updated_at)
+├── role: 'admin' | 'applicant' | 'reviewer'
+└── extends Supabase auth.users
+
+-- Scholarship Management  
+scholarships (id, name, description, amount, deadline, requirements, status)
+├── status: 'active' | 'inactive' | 'closed'
+└── created_by: references profiles(id)
+
+-- Application System
+applications (id, scholarship_id, applicant_id, status, submission_date, ...)
+├── status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'awarded'
+├── Personal info: first_name, last_name, email, phone, address
+├── Academic info: school, graduation_year, gpa, major
+├── Essays: career_goals, financial_need, community_involvement
+└── Award info: awarded_amount, awarded_date, admin_notes
+
+-- Document Storage
+application_documents (id, application_id, document_type, file_url, file_name)
+└── document_type: 'transcript' | 'recommendation' | 'essay' | 'other'
+
+-- Event Management
+events (id, name, description, event_date, event_type, capacity, location)
+└── event_type: 'conference' | 'workshop' | 'networking' | 'award_ceremony'
+
+event_registrations (id, event_id, user_id, registration_status, payment_status)
+├── registration_status: 'registered' | 'cancelled' | 'attended' | 'no_show'
+└── payment_status: 'pending' | 'paid' | 'refunded' | 'waived'
 ```
 
-**Events Table**
-
-```sql
-CREATE TABLE events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  type VARCHAR(50), -- 'conference', 'education_day', 'career_day'
-  description TEXT,
-  start_date DATE,
-  end_date DATE,
-  location VARCHAR(255),
-  capacity INTEGER,
-  registration_fee DECIMAL(10,2),
-  status VARCHAR(20) DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**Event Registrations Table**
-
-```sql
-CREATE TABLE event_registrations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_id UUID REFERENCES events(id),
-  stakeholder_id UUID REFERENCES stakeholders(id),
-  registration_date TIMESTAMP DEFAULT NOW(),
-  payment_status VARCHAR(20) DEFAULT 'pending',
-  attendance_status VARCHAR(20) DEFAULT 'registered',
-  metadata JSONB
-);
-```
-
-**Scholarships Table**
-
-```sql
-CREATE TABLE scholarships (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  program_name VARCHAR(255),
-  year INTEGER,
-  total_budget DECIMAL(10,2),
-  application_deadline DATE,
-  status VARCHAR(20) DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**Scholarship Applications Table**
-
-```sql
-CREATE TABLE scholarship_applications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  scholarship_id UUID REFERENCES scholarships(id),
-  applicant_id UUID REFERENCES stakeholders(id),
-  application_date TIMESTAMP DEFAULT NOW(),
-  status VARCHAR(20) DEFAULT 'submitted',
-  award_amount DECIMAL(10,2),
-  award_date DATE,
-  tally_form_id VARCHAR(100), -- Reference to external form
-  application_data JSONB
-);
-```
-
-### API Structure
-
-#### Authentication Endpoints
-
-- `POST /api/auth/login` - User authentication
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/user` - Get current user
-
-#### Stakeholder Management
-
-- `GET /api/stakeholders` - List stakeholders with filtering
-- `POST /api/stakeholders` - Create new stakeholder
-- `GET /api/stakeholders/[id]` - Get stakeholder details
-- `PUT /api/stakeholders/[id]` - Update stakeholder
-- `DELETE /api/stakeholders/[id]` - Delete stakeholder
-
-#### Event Management
-
-- `GET /api/events` - List events
-- `POST /api/events` - Create new event
-- `GET /api/events/[id]` - Get event details
-- `POST /api/events/[id]/register` - Register for event
-- `GET /api/events/[id]/attendees` - List event attendees
-
-#### Scholarship Management
-
-- `GET /api/scholarships` - List scholarship programs
-- `POST /api/scholarships` - Create scholarship program
-- `GET /api/scholarships/[id]/applications` - List applications
-- `PUT /api/applications/[id]` - Update application status
-
-#### Reporting & Analytics
-
-- `GET /api/reports/stakeholders` - Generate stakeholder reports
-- `GET /api/reports/events` - Generate event reports
-- `GET /api/reports/scholarships` - Generate scholarship reports
-- `POST /api/reports/export` - Export data as CSV/PDF
-
-#### Form Integration
-
-- `POST /api/webhooks/tally` - Receive Tally.so form submissions
-- `POST /api/integrations/zapier` - Zapier webhook endpoint
-
-### Security Implementation
-
-#### Access Control
-
-- **Admin Level:** Full CRUD access to all resources
-- **Volunteer Level:** Limited access to event functions (future)
-- **Applicant Level:** View and submit personal applications (future)
-
-#### Data Protection
-
-- Row Level Security (RLS) enabled on all Supabase tables
-- JWT-based authentication with Supabase Auth
-- Environment variables for sensitive configuration
-- Input validation and sanitization on all endpoints
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
+- Node.js 18 or higher
+- npm or yarn package manager  
+- Supabase account (free tier works)
 
-- Node.js 18+
-- npm or yarn
-- Supabase account
+### Quick Setup
 
-### Installation
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/2025-Arizona-Opportunity-Hack/BIDS-RedwoodRegionLogging.git
+   cd BIDS-RedwoodRegionLogging/rrlc-app
+   ```
 
-```bash
-# Clone the repository
-git clone [your-repo-link]
-cd rrlc-platform
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Install dependencies
-npm install
+3. **Environment setup**
+   ```bash
+   cp .env.local.example .env.local
+   # Add your Supabase credentials
+   ```
 
-# Set up environment variables
-cp .env.local.example .env.local
-# Add your Supabase URL and anon key
+4. **Database setup**
+   ```bash
+   # Run the SQL schema in your Supabase dashboard
+   cat database/schema.sql
+   ```
 
-# Run the development server
-npm run dev
-```
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Environment Variables
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-TALLY_WEBHOOK_SECRET=your_tally_webhook_secret
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-## Deployment
+### User Roles & Access
 
-The application is deployed on Vercel with automatic deployments from the main branch.
+- **Admin**: Full access to all features, user management, application review
+- **Applicant**: Can apply for scholarships, view application status, manage profile
+- **Reviewer**: Can review applications (future enhancement)
+
+## 📚 Documentation
+
+- **[Setup Guide](./SETUP.md)** - Detailed installation and configuration
+- **[API Documentation](./API.md)** - Complete API reference
+- **[Admin Guide](./ADMIN_GUIDE.md)** - Admin dashboard walkthrough
+- **[Applicant Guide](./APPLICANT_GUIDE.md)** - Student user manual
+- **[Deployment Guide](./DEPLOYMENT.md)** - Production deployment
+- **[Troubleshooting](./TROUBLESHOOTING.md)** - Common issues and solutions
+
+## 🔒 Security & Privacy
+
+### Data Protection
+- **Row Level Security (RLS)** enabled on all Supabase tables
+- **JWT-based authentication** with Supabase Auth
+- **Role-based access control** with granular permissions
+- **Input validation** and sanitization on all endpoints
+- **Secure file uploads** with type and size restrictions
+- **Environment variables** for sensitive configuration
+
+### Privacy Considerations
+- Student data is protected and only accessible to authorized admins
+- Applications are only visible to the applicant and administrators
+- File uploads are stored securely in Supabase Storage
+- No sensitive data in client-side code or logs
+
+## 🚀 Deployment
+
+### Vercel Deployment (Recommended)
+
+1. **Connect to Vercel**
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+2. **Environment Variables**
+   - Add all required environment variables in Vercel dashboard
+   - Enable automatic deployments from main branch
+
+3. **Build Configuration**
+   ```json
+   {
+     "buildCommand": "cd rrlc-app && npm run build",
+     "outputDirectory": "rrlc-app/.next",
+     "installCommand": "cd rrlc-app && npm install"
+   }
+   ```
+
+### Manual Deployment
 
 ```bash
 # Build for production
 npm run build
 
-# Deploy to Vercel
-npx vercel --prod
+# Start production server
+npm start
 ```
 
-## Your next steps
+## 📊 Project Impact
 
-1. ✅ Add everyone on your team to your GitHub repo like [this video posted in our Slack channel](https://opportunity-hack.slack.com/archives/C1Q6YHXQU/p1605657678139600)
-2. ✅ Create your DevPost project [like this video](https://youtu.be/vCa7QFFthfU?si=bzMQ91d8j3ZkOD03)
-3. ✅ Use the [this DevPost]() to submit your project
-4. ✅ Your DevPost final submission demo video should be 4 minutes or less
-5. ✅ Review the judging criteria on DevPost
+### Metrics & Goals
+- **Target Users**: 500+ scholarship applicants annually
+- **Processing Volume**: $70,000+ in scholarship awards
+- **Time Savings**: 80% reduction in manual processing
+- **User Experience**: Mobile-first, accessible design
+- **Scalability**: Support for 10,000+ members
 
-# What should your final Readme look like?
+### Success Metrics
+- ✅ Streamlined application process
+- ✅ Real-time application tracking
+- ✅ Automated email notifications
+- ✅ Comprehensive admin dashboard
+- ✅ Mobile-responsive design
+- ✅ Secure file handling
+- ✅ Role-based access control
 
-Your readme should be a one-stop-shop for the judges to understand your project. It should include:
+## 🏆 Future Enhancements
 
-- Team name
-- Team members
-- Slack channel
-- Problem statement
-- Tech stack
-- Link to your DevPost project
-- Link to your final demo video
-- Any other information you think is important
+### Phase 2 Features
+- **Multi-language Support** for diverse applicant base
+- **Mobile App** for iOS and Android
+- **Advanced Analytics** with predictive insights
+- **Integration APIs** for accounting systems
+- **Automated Background Checks** for award verification
+- **Video Interview System** for finalist rounds
 
-You'll use this repo as your resume in the future, so make it shine! 🌟
+### Technical Improvements
+- **Caching Layer** for improved performance
+- **Advanced Search** with full-text capabilities
+- **Batch Operations** for bulk application processing
+- **Audit Logging** for compliance requirements
+- **Advanced Reporting** with custom dashboards
 
-Examples of stellar readmes:
+## 🤝 Contributing
 
-- ✨ [2019 Team 3](https://github.com/2019-Arizona-Opportunity-Hack/Team-3)
-- ✨ [2019 Team 6](https://github.com/2019-Arizona-Opportunity-Hack/Team-6)
-- ✨ [2020 Team 2](https://github.com/2020-opportunity-hack/Team-02)
-- ✨ [2020 Team 4](https://github.com/2020-opportunity-hack/Team-04)
-- ✨ [2020 Team 8](https://github.com/2020-opportunity-hack/Team-08)
-- ✨ [2020 Team 12](https://github.com/2020-opportunity-hack/Team-12)
+We welcome contributions! Please see our contributing guidelines and code of conduct.
+
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+### Code Standards
+- TypeScript for type safety
+- ESLint + Prettier for code formatting
+- Comprehensive testing required
+- Documentation for new features
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **RRLC Team** for their vision and collaboration
+- **Opportunity Hack** for organizing this amazing event
+- **Supabase** for their excellent backend-as-a-service platform
+- **Vercel** for seamless deployment and hosting
 
 ---
+
+**Built with ❤️ by Team BIDS for the 2025 Summer Opportunity Hack**
+
+*Making scholarship management accessible, efficient, and impactful for the forestry education community.*
