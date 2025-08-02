@@ -474,45 +474,7 @@ export default function UsersPage() {
         </Card>
       </div>
 
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="all">All Roles</option>
-              <option value="admin">Admins</option>
-              <option value="applicant">Applicants</option>
-              <option value="reviewer">Reviewers</option>
-            </select>
-            
-            {selectedUsers.size > 0 && (
-              <Button
-                variant="destructive"
-                onClick={handleBulkDelete}
-                leftIcon={<TrashIcon className="h-4 w-4" />}
-              >
-                Delete Selected ({selectedUsers.size})
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Users Table */}
+      {/* Users Table with Search */}
       {loading ? (
         <Card>
           <CardContent className="p-12">
@@ -522,22 +484,65 @@ export default function UsersPage() {
             </div>
           </CardContent>
         </Card>
-      ) : filteredUsers.length === 0 ? (
+      ) : filteredUsers.length === 0 && searchQuery === "" && roleFilter === "all" ? (
         <Card>
           <CardContent className="p-12">
             <div className="text-center">
               <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium text-gray-900">
-                {searchQuery || roleFilter !== "all" 
-                  ? "No users found matching your filters"
-                  : "No users found"}
-              </h3>
-              <p className="mt-2 text-gray-500">
-                {searchQuery || roleFilter !== "all" 
-                  ? "Try adjusting your search or filter criteria"
-                  : "Add your first user to get started"}
-              </p>
-              {(searchQuery || roleFilter !== "all") && (
+              <h3 className="mt-4 text-lg font-medium text-gray-900">No users found</h3>
+              <p className="mt-2 text-gray-500">Add your first user to get started</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          {/* Search and Filters */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">All Roles</option>
+                <option value="admin">Admins</option>
+                <option value="applicant">Applicants</option>
+                <option value="reviewer">Reviewers</option>
+              </select>
+              
+              {selectedUsers.size > 0 && (
+                <Button
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  leftIcon={<TrashIcon className="h-4 w-4" />}
+                >
+                  Delete Selected ({selectedUsers.size})
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Table Content */}
+          {filteredUsers.length === 0 ? (
+            <CardContent className="p-12">
+              <div className="text-center">
+                <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-4 text-lg font-medium text-gray-900">
+                  No users found matching your filters
+                </h3>
+                <p className="mt-2 text-gray-500">
+                  Try adjusting your search or filter criteria
+                </p>
                 <Button
                   variant="link"
                   onClick={() => {
@@ -548,114 +553,112 @@ export default function UsersPage() {
                 >
                   Clear filters
                 </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.size === filteredUsers.length}
-                      onChange={toggleAllUsers}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map((user) => {
-                  const RoleIcon = getRoleIcon(user.role);
-                  return (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedUsers.has(user.id)}
-                          onChange={() => toggleUserSelection(user.id)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Avatar name={user.full_name || user.email} size="sm" />
-                          <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">
-                              {user.full_name || "Unnamed User"}
-                            </p>
+              </div>
+            </CardContent>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.size === filteredUsers.length}
+                        onChange={toggleAllUsers}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.map((user) => {
+                    const RoleIcon = getRoleIcon(user.role);
+                    return (
+                      <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.has(user.id)}
+                            onChange={() => toggleUserSelection(user.id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Avatar name={user.full_name || user.email} size="sm" />
+                            <div className="ml-3">
+                              <p className="text-sm font-medium text-gray-900">
+                                {user.full_name || "Unnamed User"}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
-                          <RoleIcon className="h-3 w-3 mr-1" />
-                          {user.role}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center space-x-2">
-                          <Tooltip content="View details">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleViewDetails(user)}
-                            >
-                              <UserIcon className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                          <Tooltip content="Edit user">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenEdit(user)}
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                          <Tooltip content="Delete user">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(user)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge variant={getRoleBadgeVariant(user.role)} className="flex items-center w-fit">
+                            <RoleIcon className="h-3 w-3 mr-1" />
+                            {user.role}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center space-x-2">
+                            <Tooltip content="View details">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewDetails(user)}
+                              >
+                                <UserIcon className="h-4 w-4" />
+                              </Button>
+                            </Tooltip>
+                            <Tooltip content="Edit user">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenEdit(user)}
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                              </Button>
+                            </Tooltip>
+                            <Tooltip content="Delete user">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(user)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </Button>
+                            </Tooltip>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Card>
       )}
 
