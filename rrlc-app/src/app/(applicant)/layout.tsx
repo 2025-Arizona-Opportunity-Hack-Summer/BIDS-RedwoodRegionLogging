@@ -1,18 +1,17 @@
 "use client";
 
-import { AdminProvider } from '@/contexts/AdminContext';
-import { AdminSidebar, useSidebarState } from '@/components/admin/AdminSidebar';
+import { ApplicantSidebar, useApplicantSidebarState } from '@/components/applicant/ApplicantSidebar';
 
-function AdminLayoutContent({
+function ApplicantLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isCollapsed } = useSidebarState();
+  const { isCollapsed } = useApplicantSidebarState();
 
   return (
     <div className="min-h-screen bg-accent">
-      <AdminSidebar />
+      <ApplicantSidebar />
       
       {/* Main Content Area */}
       <div 
@@ -27,16 +26,14 @@ function AdminLayoutContent({
   );
 }
 
-export default function AdminLayout({
+export default function ApplicantLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <AdminProvider>
-      <AdminLayoutContent>
-        {children}
-      </AdminLayoutContent>
-    </AdminProvider>
+    <ApplicantLayoutContent>
+      {children}
+    </ApplicantLayoutContent>
   );
 }

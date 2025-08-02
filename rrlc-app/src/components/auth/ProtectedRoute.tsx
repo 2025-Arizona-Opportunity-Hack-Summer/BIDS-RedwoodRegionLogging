@@ -8,12 +8,14 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  requireApplicant?: boolean;
   fallback?: React.ReactNode;
 }
 
 export function ProtectedRoute({ 
   children, 
-  requireAdmin = false, 
+  requireAdmin = false,
+  requireApplicant = false,
   fallback 
 }: ProtectedRouteProps) {
   const { loading, isAdmin, isAuthenticated, isAuthReady, profileLoading } = useAuth();
@@ -23,8 +25,24 @@ export function ProtectedRoute({
   useEffect(() => {
     if (!loading && !isAuthenticated() && !fallback) {
       router.push('/login');
+      return;
     }
-  }, [loading, isAuthenticated, fallback, router]);
+
+    // Role-based redirects when auth is ready
+    if (!loading && isAuthenticated() && isAuthReady()) {
+      // If admin tries to access applicant-only routes, redirect to admin dashboard
+      if (requireApplicant && isAdmin()) {
+        router.push('/admin');
+        return;
+      }
+      
+      // If applicant tries to access admin routes, redirect to applicant home
+      if (requireAdmin && !isAdmin()) {
+        router.push('/home');
+        return;
+      }
+    }
+  }, [loading, isAuthenticated, isAuthReady, isAdmin, requireAdmin, requireApplicant, fallback, router]);
 
   // Show loading spinner while checking auth or loading profile data
   if (loading || (isAuthenticated() && !isAuthReady())) {
@@ -51,20 +69,45 @@ export function ProtectedRoute({
     );
   }
 
-  // Check admin requirement (only after auth is fully ready)
-  if (requireAdmin && isAuthReady() && !isAdmin()) {
-    return (
-      <div className="flex justify-center items-center min-h-[200px] bg-accent p-8">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-xl font-bold text-primary-dark">
-            Access Denied
-          </p>
-          <p className="text-primary-dark">
-            You need administrator privileges to access this page.
-          </p>
+  // Check role requirements (only after auth is fully ready)
+  if (isAuthReady()) {
+    // Check admin requirement
+    if (requireAdmin && !isAdmin()) {
+      return (
+        <div className="flex justify-center items-center min-h-[200px] bg-accent p-8">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-xl font-bold text-primary-dark">
+              Access Denied
+            </p>
+            <p className="text-primary-dark">
+              You need administrator privileges to access this page.
+            </p>
+            <p className="text-sm text-gray-500">
+              Redirecting to your dashboard...
+            </p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    // Check applicant requirement
+    if (requireApplicant && isAdmin()) {
+      return (
+        <div className="flex justify-center items-center min-h-[200px] bg-accent p-8">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-xl font-bold text-primary-dark">
+              Access Denied
+            </p>
+            <p className="text-primary-dark">
+              This page is only accessible to applicants.
+            </p>
+            <p className="text-sm text-gray-500">
+              Redirecting to admin dashboard...
+            </p>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Render protected content

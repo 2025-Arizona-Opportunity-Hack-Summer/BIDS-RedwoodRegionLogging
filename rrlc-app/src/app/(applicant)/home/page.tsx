@@ -43,9 +43,11 @@ function HomePageContent() {
               <p className="text-primary-dark mb-4">
                 Track your scholarship applications
               </p>
-              <Button className="bg-secondary text-primary hover:bg-secondary-light">
-                View Applications
-              </Button>
+              <Link href="/applications">
+                <Button className="bg-secondary text-primary hover:bg-secondary-light">
+                  View Applications
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -56,7 +58,7 @@ function HomePageContent() {
 
 export default function HomePage() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireApplicant={true}>
       <HomePageContent />
     </ProtectedRoute>
   );
