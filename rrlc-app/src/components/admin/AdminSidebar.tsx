@@ -31,50 +31,43 @@ const sidebarItems: SidebarItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     href: '/admin',
-    icon: FiHome,
-    description: 'Overview and quick stats'
+    icon: FiHome
   },
   {
     id: 'scholarships',
     label: 'Scholarships',
     href: '/admin/scholarships',
-    icon: FiBook,
-    description: 'Manage scholarships'
+    icon: FiBook
   },
   {
     id: 'applications',
     label: 'Applications',
     href: '/admin/applications',
-    icon: FiFileText,
-    description: 'Review applications'
+    icon: FiFileText
   },
   {
     id: 'users',
     label: 'Users',
     href: '/admin/users',
-    icon: FiUsers,
-    description: 'User management'
+    icon: FiUsers
   },
   {
     id: 'events',
     label: 'Events',
     href: '/admin/events',
-    icon: FiCalendar,
-    description: 'Event management'
+    icon: FiCalendar
   },
   {
     id: 'analytics',
     label: 'Analytics',
     href: '/admin/analytics',
-    icon: FiBarChart,
-    description: 'Reports and insights'
+    icon: FiBarChart
   },
   {
     id: 'reports',
     label: 'Reports',
     href: '/admin/reports',
-    icon: FiSettings,
-    description: 'Generate reports'
+    icon: FiSettings
   }
 ];
 
@@ -168,11 +161,6 @@ export function AdminSidebar({ className = '' }: AdminSidebarProps) {
                       <span className="font-medium truncate block">
                         {item.label}
                       </span>
-                      {item.description && (
-                        <span className="text-xs opacity-75 truncate block">
-                          {item.description}
-                        </span>
-                      )}
                     </div>
                   )}
                 </Link>

@@ -28,29 +28,25 @@ const sidebarItems: SidebarItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     href: '/home',
-    icon: FiHome,
-    description: 'Overview and quick actions'
+    icon: FiHome
   },
   {
     id: 'scholarships',
     label: 'Browse Scholarships',
     href: '/scholarships',
-    icon: FiBook,
-    description: 'Discover opportunities'
+    icon: FiBook
   },
   {
     id: 'applications',
     label: 'My Applications',
     href: '/applications',
-    icon: FiFileText,
-    description: 'Track your submissions'
+    icon: FiFileText
   },
   {
     id: 'profile',
     label: 'Profile',
     href: '/profile',
-    icon: FiUser,
-    description: 'Account settings'
+    icon: FiUser
   }
 ];
 
@@ -153,11 +149,6 @@ export function ApplicantSidebar({ className = '' }: ApplicantSidebarProps) {
                       <span className="font-medium truncate block">
                         {item.label}
                       </span>
-                      {item.description && (
-                        <span className="text-xs opacity-75 truncate block">
-                          {item.description}
-                        </span>
-                      )}
                     </div>
                   )}
                 </Link>
