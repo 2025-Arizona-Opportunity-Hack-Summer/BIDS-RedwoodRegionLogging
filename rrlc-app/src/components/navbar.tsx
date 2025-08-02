@@ -102,7 +102,7 @@ export default function Navbar() {
   const isAdminPage = pathname.startsWith('/admin');
   const isApplicantPage = isAuthenticated() && !isAdmin() && (
     pathname.startsWith('/home') || 
-    pathname.startsWith('/scholarships') || 
+    pathname.startsWith('/dashboard') || 
     pathname.startsWith('/applications') ||
     pathname.startsWith('/profile')
   );
@@ -131,7 +131,7 @@ export default function Navbar() {
   return (
     <nav className={`bg-primary text-white border-b-2 border-secondary transition-all duration-300 ease-in-out ${
       (isAdminPage || isApplicantPage)
-        ? 'fixed top-0 z-20 w-full lg:w-auto left-0' 
+        ? 'fixed top-0 z-40 w-full lg:w-auto left-0' 
         : ''
     }`}
          style={(isAdminPage || isApplicantPage) ? getNavbarStyle() : undefined}>

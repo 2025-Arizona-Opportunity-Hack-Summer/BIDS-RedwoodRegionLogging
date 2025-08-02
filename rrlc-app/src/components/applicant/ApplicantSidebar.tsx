@@ -32,8 +32,8 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     id: 'scholarships',
-    label: 'Browse Scholarships',
-    href: '/scholarships',
+    label: 'Scholarships',
+    href: '/dashboard/scholarships',
     icon: FiBook
   },
   {
@@ -76,8 +76,8 @@ export function ApplicantSidebar({ className = '' }: ApplicantSidebarProps) {
     if (href === '/home') {
       return pathname === '/home';
     }
-    if (href === '/scholarships') {
-      return pathname.startsWith('/scholarships');
+    if (href === '/dashboard/scholarships') {
+      return pathname.startsWith('/dashboard/scholarships');
     }
     if (href === '/applications') {
       return pathname.startsWith('/applications');
