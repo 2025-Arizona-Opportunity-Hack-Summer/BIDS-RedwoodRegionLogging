@@ -11,7 +11,10 @@
       "Bash(npx next build:*)",
       "Bash(npx tsc:*)",
       "Bash(pkill:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(psql:*)"
     ],
     "deny": []
   }

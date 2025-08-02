@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { CreateApplicationData } from '@/services/applications';
+import { CreateApplicationData } from '@/types/database';
 import { CustomField } from '@/types/database';
 import * as applicationService from '@/services/applications';
 
@@ -63,6 +63,7 @@ export function useApplicationForm(scholarshipId: string) {
     graduation_year: new Date().getFullYear() + 1,
     major: '',
     academic_level: 'undergraduate',
+    custom_responses: {},
     status: 'draft'
   });
   
@@ -118,6 +119,21 @@ export function useApplicationForm(scholarshipId: string) {
         });
         return newErrors;
       });
+    }
+  }, [errors]);
+
+  const updateCustomFieldResponse = useCallback((fieldId: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      custom_responses: {
+        ...prev.custom_responses,
+        [fieldId]: value
+      }
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[fieldId]) {
+      setErrors(prev => ({ ...prev, [fieldId]: '' }));
     }
   }, [errors]);
 
@@ -368,6 +384,7 @@ export function useApplicationForm(scholarshipId: string) {
     submitting,
     updateFormData,
     updateMultipleFields,
+    updateCustomFieldResponse,
     validateStep,
     validateCustomFields,
     nextStep,

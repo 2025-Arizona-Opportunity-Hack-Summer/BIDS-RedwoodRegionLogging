@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 import { supabase } from '@/lib/supabaseClient';
-import { CreateApplicationData } from '@/services/applications';
+import { CreateApplicationData } from '@/types/database';
 
 export interface CSVRow {
   [key: string]: string;

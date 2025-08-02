@@ -16,6 +16,8 @@ import { useApplicationForm, FormStep as StepType } from "@/hooks/useApplication
 import { FormStep } from "./FormStep";
 import { FormProgress } from "./FormProgress";
 import { useAuth } from "@/contexts/AuthContext";
+import { FormSection } from "@/types/database";
+import { DEFAULT_FORM_TEMPLATES } from "@/lib/formFields";
 
 interface ApplicationFormProps {
   scholarship: Scholarship;
@@ -37,6 +39,7 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
     submitting,
     updateFormData,
     updateMultipleFields,
+    updateCustomFieldResponse,
     validateStep,
     validateCustomFields,
     nextStep,
@@ -69,18 +72,45 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
     }
   }, [user, formData.email, updateFormData]);
 
-  // Add custom fields step if scholarship has custom fields
-  const allSteps = [...steps];
-  if (scholarship.custom_fields && scholarship.custom_fields.length > 0) {
-    // Insert custom fields step before the review step
-    const customStep: StepType = {
-      id: 'custom',
-      title: 'Additional Information',
-      description: 'Scholarship-specific questions',
-      fields: scholarship.custom_fields.map(field => field.id)
-    };
-    allSteps.splice(allSteps.length - 1, 0, customStep);
-  }
+  // Generate steps from form schema or fall back to legacy custom fields
+  const getDynamicSteps = (): StepType[] => {
+    if (scholarship.form_schema?.sections) {
+      // Use new dynamic form schema
+      const formSteps = scholarship.form_schema.sections
+        .sort((a, b) => a.order - b.order)
+        .map((section: FormSection) => ({
+          id: section.id,
+          title: section.title,
+          description: section.description,
+          fields: section.fields.map(field => field.id)
+        }));
+      
+      // Add review step
+      formSteps.push({
+        id: 'review',
+        title: 'Review & Submit',
+        description: 'Review your application before submitting',
+        fields: []
+      });
+      
+      return formSteps;
+    } else {
+      // Fall back to legacy system with hardcoded steps + custom fields
+      const legacySteps = [...steps];
+      if (scholarship.custom_fields && scholarship.custom_fields.length > 0) {
+        const customStep: StepType = {
+          id: 'custom',
+          title: 'Scholarship Questions',
+          description: 'Answer questions specific to this scholarship',
+          fields: scholarship.custom_fields.map(field => field.id)
+        };
+        legacySteps.splice(legacySteps.length - 1, 0, customStep);
+      }
+      return legacySteps;
+    }
+  };
+
+  const allSteps = getDynamicSteps();
 
   const currentStepData = allSteps[currentStep];
 
@@ -109,12 +139,19 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
   };
 
   const handleNext = () => {
-    // Special handling for custom fields step
-    if (currentStepData.id === 'custom' && scholarship.custom_fields) {
+    // Special handling for dynamic form sections with custom fields
+    if (scholarship.form_schema?.sections) {
+      const currentSection = scholarship.form_schema.sections.find(s => s.id === currentStepData.id);
+      if (currentSection) {
+        const customFieldErrors = validateCustomFields(currentSection.fields);
+        if (Object.keys(customFieldErrors).length > 0) {
+          return;
+        }
+      }
+    } else if (currentStepData.id === 'custom' && scholarship.custom_fields) {
+      // Legacy custom fields validation
       const customFieldErrors = validateCustomFields(scholarship.custom_fields);
       if (Object.keys(customFieldErrors).length > 0) {
-        // Set errors but don't use the main setErrors since it's managed by the hook
-        // Instead, we'll trust that the CustomFieldRenderer will show errors
         return;
       }
     }
@@ -188,7 +225,12 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
             errors={errors}
             onFieldChange={updateFormData}
             onMultipleFieldsChange={updateMultipleFields}
-            customFields={currentStepData.id === 'custom' ? scholarship.custom_fields : undefined}
+            onCustomFieldChange={updateCustomFieldResponse}
+            customFields={
+              scholarship.form_schema?.sections 
+                ? scholarship.form_schema.sections.find(s => s.id === currentStepData.id)?.fields
+                : (currentStepData.id === 'custom' ? scholarship.custom_fields : undefined)
+            }
             isReviewStep={isReviewStep}
             scholarship={scholarship}
           />

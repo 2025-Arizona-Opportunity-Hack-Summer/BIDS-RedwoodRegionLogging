@@ -118,7 +118,7 @@ export async function createScholarship(scholarshipData: any): Promise<{ data: S
 // Update existing scholarship
 export async function updateScholarship(scholarshipData: any): Promise<{ data: Scholarship | null; error: string | null }> {
   try {
-    const { id, ...updateData } = scholarshipData;
+    const { id, form_schema, ...updateData } = scholarshipData;
     
     // Validate deadline if status is being set to active
     if (updateData.status === 'active' && !isValidDeadlineForActivation(updateData.deadline)) {
@@ -128,14 +128,73 @@ export async function updateScholarship(scholarshipData: any): Promise<{ data: S
       };
     }
 
-    const { data, error } = await supabase
-      .from('scholarships')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
+    // Try to update with form_schema first, fallback if column doesn't exist
+    const finalUpdateData = { ...updateData };
+    
+    // Check if form_schema should be included
+    if (form_schema) {
+      try {
+        // First attempt: include form_schema
+        finalUpdateData.form_schema = form_schema;
+        
+        const { data, error } = await supabase
+          .from('scholarships')
+          .update(finalUpdateData)
+          .eq('id', id)
+          .select()
+          .single();
 
-    return { data, error: error?.message || null };
+        if (error && error.message?.includes('form_schema')) {
+          // If form_schema column doesn't exist, try without it
+          console.warn('form_schema column not found, updating without it');
+          const { form_schema: _, ...dataWithoutSchema } = finalUpdateData;
+          
+          const fallbackResult = await supabase
+            .from('scholarships')
+            .update(dataWithoutSchema)
+            .eq('id', id)
+            .select()
+            .single();
+            
+          if (fallbackResult.error) {
+            return { data: null, error: fallbackResult.error.message || 'Failed to update scholarship' };
+          }
+          
+          return { 
+            data: fallbackResult.data, 
+            error: 'Scholarship updated successfully. Note: Advanced form builder requires database migration - please contact your administrator.' 
+          };
+        }
+
+        return { data, error: error?.message || null };
+      } catch (schemaError) {
+        // Fallback if there's any schema-related error
+        console.warn('Schema error, attempting update without form_schema:', schemaError);
+        const { form_schema: _, ...dataWithoutSchema } = finalUpdateData;
+        
+        const { data, error } = await supabase
+          .from('scholarships')
+          .update(dataWithoutSchema)
+          .eq('id', id)
+          .select()
+          .single();
+
+        return { 
+          data, 
+          error: error?.message || 'Scholarship updated, but advanced form features are not available. Please contact your administrator.' 
+        };
+      }
+    } else {
+      // No form_schema to save, proceed normally
+      const { data, error } = await supabase
+        .from('scholarships')
+        .update(finalUpdateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      return { data, error: error?.message || null };
+    }
   } catch (error) {
     console.error('Error updating scholarship:', error);
     return { data: null, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };

@@ -32,7 +32,8 @@ export interface Scholarship {
   requirements: string | null;
   eligibility_criteria?: any[] | null;
   tags?: string[] | null;
-  custom_fields?: CustomField[] | null;
+  custom_fields?: CustomField[] | null; // Legacy - will be migrated to form_schema
+  form_schema?: FormSchema | null; // New dynamic form structure
   status: 'active' | 'inactive' | 'closed';
   created_at: string;
   updated_at: string;
@@ -56,6 +57,38 @@ export interface CustomField {
   };
   acceptedFormats?: string[]; // for file type
   maxSize?: number; // for file type in bytes
+}
+
+// New form schema types for fully customizable forms
+export interface FormField {
+  id: string;
+  type: 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox' | 'file' | 'email' | 'phone';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  order: number;
+  options?: string[]; // for select type
+  validation?: {
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+    pattern?: string;
+  };
+  acceptedFormats?: string[]; // for file type
+  maxSize?: number; // for file type in bytes
+}
+
+export interface FormSection {
+  id: string;
+  title: string;
+  description: string;
+  order: number;
+  fields: FormField[];
+}
+
+export interface FormSchema {
+  sections: FormSection[];
 }
 
 export interface Application {
@@ -203,6 +236,18 @@ export interface CreateApplicationData {
   career_goals?: string;
   financial_need?: string;
   community_involvement?: string;
+  
+  // Custom field responses
+  custom_responses?: Record<string, any>;
+  
+  // Additional fields from services
+  date_of_birth?: string;
+  academic_level?: 'high_school' | 'undergraduate' | 'graduate' | 'other';
+  why_deserve_scholarship?: string;
+  work_experience?: string;
+  extracurricular_activities?: string;
+  awards_and_honors?: string;
+  status?: 'draft' | 'submitted';
 }
 
 export interface UpdateApplicationData extends Partial<CreateApplicationData> {

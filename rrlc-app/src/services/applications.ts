@@ -1,44 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { sendApplicationConfirmationEmail } from '@/services/emailClient';
-
-export interface CreateApplicationData {
-  scholarship_id: string;
-  applicant_id?: string; // Optional for form, will be set automatically
-  
-  // Personal Information
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  date_of_birth?: string;
-
-  // Academic Information
-  school: string;
-  graduation_year: number;
-  gpa?: number;
-  major: string;
-  academic_level: 'high_school' | 'undergraduate' | 'graduate' | 'other';
-
-  // Essay Responses
-  career_goals?: string;
-  financial_need?: string;
-  community_involvement?: string;
-  why_deserve_scholarship?: string;
-
-  // Additional Information
-  work_experience?: string;
-  extracurricular_activities?: string;
-  awards_and_honors?: string;
-  
-  // Custom Field Responses
-  custom_responses?: Record<string, any>;
-  
-  status?: 'draft' | 'submitted';
-}
+import { CreateApplicationData } from '@/types/database';
 
 export interface Application extends CreateApplicationData {
   id: string;

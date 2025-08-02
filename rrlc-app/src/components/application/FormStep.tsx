@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FormStep as StepType } from "@/hooks/useApplicationForm";
-import { CreateApplicationData } from "@/services/applications";
-import { CustomField, Scholarship } from "@/types/database";
+import { CreateApplicationData, CustomField, FormField, Scholarship } from "@/types/database";
 import { CustomFieldRenderer } from "./CustomFieldRenderer";
 import { FiCalendar, FiDollarSign, FiFileText, FiUser } from "react-icons/fi";
 
@@ -15,7 +14,8 @@ interface FormStepProps {
   errors: Record<string, string>;
   onFieldChange: (field: keyof CreateApplicationData, value: string | number) => void;
   onMultipleFieldsChange: (updates: Partial<CreateApplicationData>) => void;
-  customFields?: CustomField[] | null;
+  onCustomFieldChange?: (fieldId: string, value: any) => void;
+  customFields?: (CustomField | FormField)[] | null;
   isReviewStep?: boolean;
   scholarship?: Scholarship;
 }
@@ -26,6 +26,7 @@ export function FormStep({
   errors,
   onFieldChange,
   onMultipleFieldsChange,
+  onCustomFieldChange,
   customFields,
   isReviewStep,
   scholarship
@@ -143,23 +144,28 @@ export function FormStep({
     );
   }
 
-  // Handle custom fields step
-  if (step.id === 'custom' && customFields) {
+  // Handle dynamic form sections or legacy custom fields
+  if (customFields && customFields.length > 0) {
     return (
       <div className="space-y-6">
         {customFields.map((field) => (
           <CustomFieldRenderer
             key={field.id}
-            field={field}
+            field={field as CustomField} // Both CustomField and FormField have the same structure
             value={formData.custom_responses?.[field.id] || ''}
             onChange={(value) => {
-              const currentResponses = formData.custom_responses || {};
-              onMultipleFieldsChange({
-                custom_responses: {
-                  ...currentResponses,
-                  [field.id]: value
-                }
-              });
+              if (onCustomFieldChange) {
+                onCustomFieldChange(field.id, value);
+              } else {
+                // Fallback to the old method if onCustomFieldChange is not provided
+                const currentResponses = formData.custom_responses || {};
+                onMultipleFieldsChange({
+                  custom_responses: {
+                    ...currentResponses,
+                    [field.id]: value
+                  }
+                });
+              }
             }}
             error={errors[field.id]}
           />

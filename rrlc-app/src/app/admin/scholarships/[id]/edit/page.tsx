@@ -7,239 +7,18 @@ import {
   FiSave, 
   FiPlus, 
   FiTrash2, 
-  FiMove,
-  FiType,
-  FiFileText,
-  FiHash,
-  FiCalendar,
-  FiList,
-  FiCheckSquare,
-  FiUpload,
-  FiMail,
-  FiPhone
+  FiFileText
 } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { getScholarshipById, updateScholarship } from "@/services/scholarships";
-import { UpdateScholarshipData, CustomField, Scholarship } from "@/types/database";
+import { UpdateScholarshipData, CustomField, Scholarship, FormSchema } from "@/types/database";
 import { useScholarshipContext } from "@/contexts/AdminContext";
+import { DynamicFormBuilder } from "@/components/admin/DynamicFormBuilder";
+import { DEFAULT_FORM_TEMPLATES } from "@/lib/formFields";
 
-interface FieldOption {
-  type: CustomField['type'];
-  label: string;
-  icon: React.ElementType;
-  defaultLabel: string;
-}
-
-const FIELD_OPTIONS: FieldOption[] = [
-  { type: 'text', label: 'Text Input', icon: FiType, defaultLabel: 'Text Field' },
-  { type: 'textarea', label: 'Text Area', icon: FiFileText, defaultLabel: 'Long Text' },
-  { type: 'number', label: 'Number', icon: FiHash, defaultLabel: 'Number Field' },
-  { type: 'date', label: 'Date', icon: FiCalendar, defaultLabel: 'Date Field' },
-  { type: 'select', label: 'Dropdown', icon: FiList, defaultLabel: 'Select Option' },
-  { type: 'checkbox', label: 'Checkbox', icon: FiCheckSquare, defaultLabel: 'Checkbox' },
-  { type: 'file', label: 'File Upload', icon: FiUpload, defaultLabel: 'Upload File' },
-  { type: 'email', label: 'Email', icon: FiMail, defaultLabel: 'Email Address' },
-  { type: 'phone', label: 'Phone', icon: FiPhone, defaultLabel: 'Phone Number' }
-];
-
-function CustomFieldBuilder({ 
-  fields, 
-  onChange 
-}: { 
-  fields: CustomField[];
-  onChange: (fields: CustomField[]) => void;
-}) {
-  const [draggedField, setDraggedField] = useState<number | null>(null);
-
-  const addField = (type: CustomField['type']) => {
-    const fieldOption = FIELD_OPTIONS.find(opt => opt.type === type);
-    const newField: CustomField = {
-      id: `field_${Date.now()}`,
-      type,
-      label: fieldOption?.defaultLabel || 'New Field',
-      required: false,
-      order: fields.length + 1,
-      options: type === 'select' ? ['Option 1', 'Option 2'] : undefined
-    };
-    onChange([...fields, newField]);
-  };
-
-  const updateField = (index: number, updates: Partial<CustomField>) => {
-    const updatedFields = [...fields];
-    updatedFields[index] = { ...updatedFields[index], ...updates };
-    onChange(updatedFields);
-  };
-
-  const removeField = (index: number) => {
-    const updatedFields = fields.filter((_, i) => i !== index);
-    // Update order
-    updatedFields.forEach((field, i) => {
-      field.order = i + 1;
-    });
-    onChange(updatedFields);
-  };
-
-  const moveField = (fromIndex: number, toIndex: number) => {
-    const updatedFields = [...fields];
-    const [movedField] = updatedFields.splice(fromIndex, 1);
-    updatedFields.splice(toIndex, 0, movedField);
-    // Update order
-    updatedFields.forEach((field, i) => {
-      field.order = i + 1;
-    });
-    onChange(updatedFields);
-  };
-
-  const handleDragStart = (index: number) => {
-    setDraggedField(index);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedField !== null && draggedField !== dropIndex) {
-      moveField(draggedField, dropIndex);
-    }
-    setDraggedField(null);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Field Type Selector */}
-      <div>
-        <h3 className="text-lg font-semibold mb-3">Add Custom Fields</h3>
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-          {FIELD_OPTIONS.map((option) => (
-            <button
-              key={option.type}
-              type="button"
-              onClick={() => addField(option.type)}
-              className="flex flex-col items-center gap-2 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <option.icon size={20} className="text-primary" />
-              <span className="text-xs text-center">{option.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Fields List */}
-      {fields.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Custom Fields ({fields.length})</h3>
-          <div className="space-y-3">
-            {fields.map((field, index) => {
-              const fieldOption = FIELD_OPTIONS.find(opt => opt.type === field.type);
-              const Icon = fieldOption?.icon || FiType;
-              
-              return (
-                <div
-                  key={field.id}
-                  draggable
-                  onDragStart={() => handleDragStart(index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                  className="bg-gray-50 border rounded-lg p-4 cursor-move"
-                >
-                  <div className="flex items-start gap-3">
-                    <FiMove className="text-gray-400 mt-1 cursor-grab" />
-                    
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Icon className="text-primary" size={20} />
-                        <Input
-                          value={field.label}
-                          onChange={(e) => updateField(index, { label: e.target.value })}
-                          placeholder="Field Label"
-                          className="flex-1"
-                        />
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={field.required}
-                            onChange={(e) => updateField(index, { required: e.target.checked })}
-                            className="rounded"
-                          />
-                          <span className="text-sm">Required</span>
-                        </label>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeField(index)}
-                          className="text-red-600 hover:bg-red-50"
-                        >
-                          <FiTrash2 size={16} />
-                        </Button>
-                      </div>
-                      
-                      <Input
-                        value={field.placeholder || ''}
-                        onChange={(e) => updateField(index, { placeholder: e.target.value || undefined })}
-                        placeholder="Placeholder text (optional)"
-                        className="text-sm"
-                      />
-                      
-                      {field.type === 'select' && (
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">Options:</p>
-                          {field.options?.map((option, optIndex) => (
-                            <div key={optIndex} className="flex gap-2">
-                              <Input
-                                value={option}
-                                onChange={(e) => {
-                                  const newOptions = [...(field.options || [])];
-                                  newOptions[optIndex] = e.target.value;
-                                  updateField(index, { options: newOptions });
-                                }}
-                                placeholder={`Option ${optIndex + 1}`}
-                                className="text-sm"
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const newOptions = field.options?.filter((_, i) => i !== optIndex);
-                                  updateField(index, { options: newOptions });
-                                }}
-                              >
-                                <FiTrash2 size={14} />
-                              </Button>
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const newOptions = [...(field.options || []), `Option ${(field.options?.length || 0) + 1}`];
-                              updateField(index, { options: newOptions });
-                            }}
-                          >
-                            <FiPlus size={14} className="mr-1" />
-                            Add Option
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function EditScholarshipContent() {
   const router = useRouter();
@@ -260,6 +39,7 @@ function EditScholarshipContent() {
     status: 'active'
   });
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
+  const [formSchema, setFormSchema] = useState<FormSchema | null>(null);
   const [extendedDescription, setExtendedDescription] = useState('');
   const [eligibilityCriteria, setEligibilityCriteria] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -306,6 +86,33 @@ function EditScholarshipContent() {
       status: data.status
     });
     setCustomFields(data.custom_fields || []);
+    
+    // Handle form schema - use existing or create default from custom fields
+    if (data.form_schema) {
+      setFormSchema(data.form_schema);
+    } else if (data.custom_fields && data.custom_fields.length > 0) {
+      // Migrate legacy custom fields to new schema
+      const migratedSchema: FormSchema = {
+        sections: [
+          ...DEFAULT_FORM_TEMPLATES.standard.sections,
+          {
+            id: 'custom',
+            title: 'Scholarship Questions',
+            description: 'Answer questions specific to this scholarship',
+            order: 5,
+            fields: data.custom_fields.map((field, index) => ({
+              ...field,
+              order: index + 1
+            }))
+          }
+        ]
+      };
+      setFormSchema(migratedSchema);
+    } else {
+      // Use default template
+      setFormSchema({ sections: DEFAULT_FORM_TEMPLATES.standard.sections });
+    }
+    
     setExtendedDescription(data.extended_description || '');
     setEligibilityCriteria(data.eligibility_criteria || []);
     setTags(data.tags || []);
@@ -347,7 +154,8 @@ function EditScholarshipContent() {
     
     const scholarshipData: any = {
       ...formData,
-      custom_fields: customFields,
+      custom_fields: customFields, // Keep for backward compatibility
+      form_schema: formSchema,
       extended_description: extendedDescription || null,
       eligibility_criteria: eligibilityCriteria.length > 0 ? eligibilityCriteria : null,
       tags: tags.length > 0 ? tags : null
@@ -356,7 +164,12 @@ function EditScholarshipContent() {
     const { data, error } = await updateScholarship(scholarshipData);
     
     if (error) {
-      alert('Failed to update scholarship: ' + error);
+      if (error.includes('database migration') || error.includes('contact your administrator')) {
+        // Show a more user-friendly message for schema issues
+        alert(`Update Status: ${error}\n\nTo enable the full dynamic form builder, please run the database migration script found in the project root: add-form-schema-supabase.sql`);
+      } else {
+        alert('Failed to update scholarship: ' + error);
+      }
     } else {
       // Update the cached scholarship data
       if (data) {
@@ -604,18 +417,25 @@ function EditScholarshipContent() {
             </div>
           </Card>
 
-          {/* Custom Fields */}
+          {/* Dynamic Form Builder */}
           <Card className="bg-white border-2 border-accent-dark p-6">
-            <h2 className="text-xl font-semibold mb-4">Application Form Builder</h2>
-            <p className="text-sm text-gray-600 mb-6">
-              Add custom fields to collect additional information from applicants.
-              The standard fields (name, email, academic info, essays) are included by default.
-            </p>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                <FiFileText className="text-primary" />
+                Application Form Builder
+              </h2>
+              <p className="text-sm text-gray-600">
+                Create a completely customized application form for this scholarship.
+                Drag and drop fields to build the exact form you need.
+              </p>
+            </div>
             
-            <CustomFieldBuilder
-              fields={customFields}
-              onChange={setCustomFields}
-            />
+            {formSchema && (
+              <DynamicFormBuilder
+                formSchema={formSchema}
+                onChange={setFormSchema}
+              />
+            )}
           </Card>
 
           {/* Submit */}
