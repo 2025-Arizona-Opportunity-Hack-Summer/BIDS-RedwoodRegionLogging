@@ -253,7 +253,7 @@ function AdminApplicationsContent() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-4 py-2 border rounded-lg"
+                className="px-4 py-2 border rounded-lg text-gray-900"
               >
                 <option value="all">All Status</option>
                 <option value="submitted">Submitted</option>
@@ -267,7 +267,7 @@ function AdminApplicationsContent() {
               <select
                 value={scholarshipFilter}
                 onChange={(e) => setScholarshipFilter(e.target.value)}
-                className="px-4 py-2 border rounded-lg"
+                className="px-4 py-2 border rounded-lg text-gray-900"
               >
                 <option value="all">All Scholarships</option>
                 {scholarships.map(scholarship => (
