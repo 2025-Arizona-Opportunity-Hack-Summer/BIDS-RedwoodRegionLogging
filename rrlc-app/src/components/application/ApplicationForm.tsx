@@ -116,13 +116,22 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
 
   const handleSaveDraft = async () => {
     setSaveError(null);
-    const result = await saveDraft();
-    if (result.success) {
-      setLastSaved(new Date());
-    } else {
-      setSaveError('Failed to save draft. Please try again.');
+    try {
+      const result = await saveDraft();
+      if (result.success) {
+        setLastSaved(new Date());
+      } else {
+        const errorMessage = result.error?.toString() || 'Failed to save draft. Please try again.';
+        setSaveError(errorMessage);
+        console.error('Draft save failed:', result.error);
+      }
+      return result;
+    } catch (error) {
+      const errorMessage = 'Failed to save draft. Please try again.';
+      setSaveError(errorMessage);
+      console.error('Draft save error:', error);
+      return { success: false, error };
     }
-    return result;
   };
 
   const handleSubmit = async () => {
@@ -139,12 +148,17 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
   };
 
   const handleNext = () => {
+    // Clear any previous submit errors
+    setSubmitError(null);
+    
     // Special handling for dynamic form sections with custom fields
     if (scholarship.form_schema?.sections) {
       const currentSection = scholarship.form_schema.sections.find(s => s.id === currentStepData.id);
       if (currentSection) {
         const customFieldErrors = validateCustomFields(currentSection.fields);
         if (Object.keys(customFieldErrors).length > 0) {
+          // Don't reset form data, just show validation errors
+          console.log('Custom field validation failed:', customFieldErrors);
           return;
         }
       }
@@ -152,12 +166,18 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
       // Legacy custom fields validation
       const customFieldErrors = validateCustomFields(scholarship.custom_fields);
       if (Object.keys(customFieldErrors).length > 0) {
+        // Don't reset form data, just show validation errors
+        console.log('Custom field validation failed:', customFieldErrors);
         return;
       }
     }
     
+    // Validate current step before proceeding
     if (validateStep(currentStep)) {
       nextStep();
+    } else {
+      // Don't reset form data, validation errors are already set
+      console.log('Step validation failed, check form errors');
     }
   };
 

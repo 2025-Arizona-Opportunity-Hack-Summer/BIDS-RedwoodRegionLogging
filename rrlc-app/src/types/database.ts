@@ -250,7 +250,7 @@ export interface CreateApplicationData {
   status?: 'draft' | 'submitted';
 }
 
-export interface UpdateApplicationData extends Partial<CreateApplicationData> {
+export interface UpdateApplicationData extends Partial<Omit<CreateApplicationData, 'status'>> {
   id: string;
   status?: Application['status'];
   awarded_amount?: number;

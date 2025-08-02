@@ -190,7 +190,7 @@ export async function checkExistingApplication(scholarshipId: string, email: str
       .select('id, status')
       .eq('scholarship_id', scholarshipId)
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
     return { data, error };
   } catch {

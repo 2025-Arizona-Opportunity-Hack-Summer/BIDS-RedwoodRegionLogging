@@ -21,7 +21,7 @@ export const APPLICATION_STEPS: FormStep[] = [
     id: 'academic',
     title: 'Academic Background',
     description: 'Share your educational journey',
-    fields: ['school', 'graduation_year', 'gpa', 'major', 'academic_level']
+    fields: ['school', 'graduation_year', 'gpa', 'major']
   },
   {
     id: 'essays',
@@ -62,7 +62,6 @@ export function useApplicationForm(scholarshipId: string) {
     school: '',
     graduation_year: new Date().getFullYear() + 1,
     major: '',
-    academic_level: 'undergraduate',
     custom_responses: {},
     status: 'draft'
   });
@@ -101,26 +100,33 @@ export function useApplicationForm(scholarshipId: string) {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  }, [errors]);
+    setErrors(prev => {
+      if (prev[field]) {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
   const updateMultipleFields = useCallback((updates: Partial<CreateApplicationData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
     
     // Clear errors for updated fields
     const updatedFields = Object.keys(updates);
-    if (updatedFields.some(field => errors[field])) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        updatedFields.forEach(field => {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      let hasChanges = false;
+      updatedFields.forEach(field => {
+        if (newErrors[field]) {
           delete newErrors[field];
-        });
-        return newErrors;
+          hasChanges = true;
+        }
       });
-    }
-  }, [errors]);
+      return hasChanges ? newErrors : prev;
+    });
+  }, []);
 
   const updateCustomFieldResponse = useCallback((fieldId: string, value: any) => {
     setFormData(prev => ({
@@ -132,10 +138,15 @@ export function useApplicationForm(scholarshipId: string) {
     }));
     
     // Clear error when user starts typing
-    if (errors[fieldId]) {
-      setErrors(prev => ({ ...prev, [fieldId]: '' }));
-    }
-  }, [errors]);
+    setErrors(prev => {
+      if (prev[fieldId]) {
+        const newErrors = { ...prev };
+        delete newErrors[fieldId];
+        return newErrors;
+      }
+      return prev;
+    });
+  }, []);
 
   const validateStep = useCallback((stepIndex: number): boolean => {
     const step = APPLICATION_STEPS[stepIndex];
@@ -147,7 +158,8 @@ export function useApplicationForm(scholarshipId: string) {
       switch (field) {
         case 'first_name':
         case 'last_name':
-          if (!value || (value as string).trim().length < 2) {
+          const stringValue = value as string;
+          if (!stringValue || stringValue.trim().length < 2) {
             stepErrors[field] = 'Must be at least 2 characters';
           }
           break;
@@ -160,9 +172,12 @@ export function useApplicationForm(scholarshipId: string) {
           break;
           
         case 'phone':
-          const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-          if (!value || !phoneRegex.test((value as string).replace(/[\s\-\(\)]/g, ''))) {
-            stepErrors[field] = 'Valid phone number is required';
+          // Phone is optional, only validate if provided
+          if (value && (value as string).trim().length > 0) {
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            if (!phoneRegex.test((value as string).replace(/[\s\-\(\)]/g, ''))) {
+              stepErrors[field] = 'Please enter a valid phone number';
+            }
           }
           break;
           
@@ -170,9 +185,7 @@ export function useApplicationForm(scholarshipId: string) {
         case 'city':
         case 'state':
         case 'zip':
-          if (!value || (value as string).trim().length === 0) {
-            stepErrors[field] = 'This field is required';
-          }
+          // Address fields are optional, skip validation
           break;
           
         case 'school':

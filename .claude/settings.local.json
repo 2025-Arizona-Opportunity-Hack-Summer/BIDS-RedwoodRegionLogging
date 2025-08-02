@@ -14,7 +14,10 @@
       "Bash(true)",
       "Bash(node:*)",
       "Bash(rm:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(npx supabase:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)"
     ],
     "deny": []
   }
