@@ -32,47 +32,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  const {
-    currentStep,
-    formData,
-    errors,
-    loading,
-    submitting,
-    updateFormData,
-    updateMultipleFields,
-    updateCustomFieldResponse,
-    validateStep,
-    validateCustomFields,
-    nextStep,
-    prevStep,
-    goToStep,
-    saveDraft,
-    submitApplication,
-    getStepProgress,
-    steps,
-    isFirstStep,
-    isLastStep,
-    isReviewStep
-  } = useApplicationForm(scholarship.id, isEditMode);
-
-  // Auto-save draft every 30 seconds if there are changes
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!isSubmitted && Object.keys(formData).some(key => formData[key as keyof typeof formData])) {
-        const result = await handleSaveDraft();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [formData, isSubmitted]);
-
-  // Pre-fill email from authenticated user
-  useEffect(() => {
-    if (user?.email && !formData.email) {
-      updateFormData('email', user.email);
-    }
-  }, [user, formData.email, updateFormData]);
-
   // Generate steps from form schema or fall back to legacy custom fields
   const getDynamicSteps = (): StepType[] => {
     if (scholarship.form_schema?.sections) {
@@ -112,6 +71,47 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
   };
 
   const allSteps = getDynamicSteps();
+
+  const {
+    currentStep,
+    formData,
+    errors,
+    loading,
+    submitting,
+    updateFormData,
+    updateMultipleFields,
+    updateCustomFieldResponse,
+    validateStep,
+    validateCustomFields,
+    nextStep,
+    prevStep,
+    goToStep,
+    saveDraft,
+    submitApplication,
+    getStepProgress,
+    steps,
+    isFirstStep,
+    isLastStep,
+    isReviewStep
+  } = useApplicationForm(scholarship.id, isEditMode, allSteps.length);
+
+  // Auto-save draft every 30 seconds if there are changes
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (!isSubmitted && Object.keys(formData).some(key => formData[key as keyof typeof formData])) {
+        const result = await handleSaveDraft();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [formData, isSubmitted]);
+
+  // Pre-fill email from authenticated user
+  useEffect(() => {
+    if (user?.email && !formData.email) {
+      updateFormData('email', user.email);
+    }
+  }, [user, formData.email, updateFormData]);
 
   const currentStepData = allSteps[currentStep];
 
@@ -163,6 +163,8 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
           return;
         }
       }
+      // For dynamic forms, skip standard validation and proceed directly
+      nextStep(true);
     } else if (currentStepData.id === 'custom' && scholarship.custom_fields) {
       // Legacy custom fields validation
       const customFieldErrors = validateCustomFields(scholarship.custom_fields);
@@ -171,14 +173,16 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
         console.log('Custom field validation failed:', customFieldErrors);
         return;
       }
-    }
-    
-    // Validate current step before proceeding
-    if (validateStep(currentStep)) {
-      nextStep();
+      // For legacy custom fields, skip standard validation and proceed directly
+      nextStep(true);
     } else {
-      // Don't reset form data, validation errors are already set
-      console.log('Step validation failed, check form errors');
+      // Standard form validation for hardcoded steps
+      if (validateStep(currentStep, currentStepData)) {
+        nextStep(true); // Skip validation since we already validated with correct step data
+      } else {
+        // Don't reset form data, validation errors are already set
+        console.log('Step validation failed, check form errors');
+      }
     }
   };
 

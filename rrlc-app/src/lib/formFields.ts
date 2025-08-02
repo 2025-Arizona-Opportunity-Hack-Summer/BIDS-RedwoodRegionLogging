@@ -40,8 +40,7 @@ export const FIELD_LIBRARY: FieldTemplate[] = [
     defaultLabel: 'First Name',
     description: 'Applicant\'s first name',
     defaultProps: {
-      required: true,
-      validation: { minLength: 2 }
+      required: true
     }
   },
   {
@@ -53,8 +52,7 @@ export const FIELD_LIBRARY: FieldTemplate[] = [
     defaultLabel: 'Last Name',
     description: 'Applicant\'s last name',
     defaultProps: {
-      required: true,
-      validation: { minLength: 2 }
+      required: true
     }
   },
   {

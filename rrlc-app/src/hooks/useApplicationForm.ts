@@ -47,7 +47,7 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-export function useApplicationForm(scholarshipId: string, isEditMode: boolean = false) {
+export function useApplicationForm(scholarshipId: string, isEditMode: boolean = false, totalSteps?: number) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CreateApplicationData>({
     scholarship_id: scholarshipId,
@@ -163,8 +163,8 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     });
   }, []);
 
-  const validateStep = useCallback((stepIndex: number): boolean => {
-    const step = APPLICATION_STEPS[stepIndex];
+  const validateStep = useCallback((stepIndex: number, stepData?: FormStep): boolean => {
+    const step = stepData || APPLICATION_STEPS[stepIndex];
     const stepErrors: FormErrors = {};
 
     step.fields.forEach(field => {
@@ -174,8 +174,8 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
         case 'first_name':
         case 'last_name':
           const stringValue = value as string;
-          if (!stringValue || stringValue.trim().length < 2) {
-            stepErrors[field] = 'Must be at least 2 characters';
+          if (!stringValue || stringValue.trim().length === 0) {
+            stepErrors[field] = 'This field is required';
           }
           break;
           
@@ -243,21 +243,23 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     return Object.keys(stepErrors).length === 0;
   }, [formData]);
 
-  const nextStep = useCallback(() => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, APPLICATION_STEPS.length - 1));
+  const nextStep = useCallback((skipValidation: boolean = false) => {
+    if (skipValidation || validateStep(currentStep)) {
+      const maxSteps = totalSteps || APPLICATION_STEPS.length;
+      setCurrentStep(prev => Math.min(prev + 1, maxSteps - 1));
     }
-  }, [currentStep, validateStep]);
+  }, [currentStep, validateStep, totalSteps]);
 
   const prevStep = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
   }, []);
 
   const goToStep = useCallback((stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < APPLICATION_STEPS.length) {
+    const maxSteps = totalSteps || APPLICATION_STEPS.length;
+    if (stepIndex >= 0 && stepIndex < maxSteps) {
       setCurrentStep(stepIndex);
     }
-  }, []);
+  }, [totalSteps]);
 
   const saveDraft = useCallback(async () => {
     setLoading(true);
@@ -358,7 +360,7 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
         case 'text':
         case 'textarea':
           if (typeof value === 'string') {
-            if (field.validation?.minLength && value.length < field.validation.minLength) {
+            if (field.validation?.minLength && field.validation.minLength > 1 && value.length < field.validation.minLength) {
               fieldErrors[field.id] = `Minimum ${field.validation.minLength} characters required`;
             }
             if (field.validation?.maxLength && value.length > field.validation.maxLength) {
@@ -424,8 +426,9 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
   }, [formData.custom_responses]);
 
   const getStepProgress = useCallback(() => {
-    return ((currentStep + 1) / APPLICATION_STEPS.length) * 100;
-  }, [currentStep]);
+    const maxSteps = totalSteps || APPLICATION_STEPS.length;
+    return ((currentStep + 1) / maxSteps) * 100;
+  }, [currentStep, totalSteps]);
 
   return {
     currentStep,
@@ -446,7 +449,7 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     getStepProgress,
     steps: APPLICATION_STEPS,
     isFirstStep: currentStep === 0,
-    isLastStep: currentStep === APPLICATION_STEPS.length - 1,
-    isReviewStep: currentStep === APPLICATION_STEPS.length - 1
+    isLastStep: currentStep === (totalSteps || APPLICATION_STEPS.length) - 1,
+    isReviewStep: currentStep === (totalSteps || APPLICATION_STEPS.length) - 1
   };
 }

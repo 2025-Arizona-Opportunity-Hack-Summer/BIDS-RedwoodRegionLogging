@@ -195,7 +195,7 @@ export function CustomFieldRenderer({ field, value, onChange, error }: CustomFie
       
       {field.validation && (
         <div className="text-sm text-gray-600">
-          {field.validation.minLength && (
+          {field.validation.minLength && field.validation.minLength > 1 && (
             <span>Minimum {field.validation.minLength} characters</span>
           )}
           {field.validation.maxLength && (
