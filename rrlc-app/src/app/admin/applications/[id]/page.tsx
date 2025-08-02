@@ -29,6 +29,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { ApplicationWithDetails } from "@/types/database";
 import { getApplicationByIdForAdmin, updateApplicationStatus } from "@/services/adminApplications";
 import { formatDate, formatCurrency } from "@/lib/utils";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 type ApplicationStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'awarded';
 
@@ -44,6 +45,7 @@ function ApplicationDetailsContent() {
   const [showAwardForm, setShowAwardForm] = useState(false);
   const [awardAmount, setAwardAmount] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
 
   useEffect(() => {
     fetchApplicationDetails();
@@ -169,10 +171,40 @@ function ApplicationDetailsContent() {
     alert('Export feature coming soon!');
   };
 
-  const handleSendEmail = () => {
-    if (!application) return;
-    // TODO: Implement email composer
-    alert(`Send email to ${application.email} - Feature coming soon!`);
+  const handleRemoveAward = () => {
+    if (!application?.awarded_amount) return;
+    setShowRemoveModal(true);
+  };
+
+  const confirmRemoveAward = async () => {
+    if (!application?.awarded_amount) return;
+
+    setUpdating(true);
+    try {
+      const { data, error } = await updateApplicationStatus(
+        application.id,
+        'approved',
+        undefined, // Remove awarded amount
+        undefined, // Remove awarded date
+        application.admin_notes || undefined
+      );
+
+      if (error) {
+        alert(`Failed to remove award: ${error}`);
+        return;
+      }
+
+      if (data) {
+        setApplication(data);
+        setShowRemoveModal(false);
+        alert('Award removed successfully');
+      }
+    } catch (err) {
+      console.error('Error removing award:', err);
+      alert('Failed to remove award');
+    } finally {
+      setUpdating(false);
+    }
   };
 
   if (loading) {
@@ -315,10 +347,6 @@ function ApplicationDetailsContent() {
               <FiDownload className="mr-2" />
               Export
             </Button>
-            <Button size="sm" onClick={handleSendEmail}>
-              <FiMail className="mr-2" />
-              Email
-            </Button>
           </div>
         </div>
 
@@ -457,7 +485,7 @@ function ApplicationDetailsContent() {
                       <div>
                         <p className="font-medium">{doc.file_name}</p>
                         <p className="text-sm text-gray-600">
-                          {doc.field_name} • Uploaded {formatDate(doc.uploaded_at)}
+                          Document • Uploaded {formatDate(doc.uploaded_at)}
                         </p>
                       </div>
                       <Button
@@ -571,6 +599,18 @@ function ApplicationDetailsContent() {
                     Award Scholarship
                   </Button>
                 )}
+                
+                {application.status === 'awarded' && application.awarded_amount && (
+                  <Button
+                    variant="outline"
+                    className="w-full text-red-600 border-red-600 hover:bg-red-50"
+                    onClick={handleRemoveAward}
+                    disabled={updating}
+                  >
+                    <FiX className="mr-2" />
+                    Remove Award
+                  </Button>
+                )}
               </div>
               
               {showAwardForm && (
@@ -620,6 +660,19 @@ function ApplicationDetailsContent() {
           </div>
         </div>
       </div>
+
+      {/* Remove Award Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showRemoveModal}
+        onClose={() => setShowRemoveModal(false)}
+        onConfirm={confirmRemoveAward}
+        title="Remove Award"
+        message={`Are you sure you want to remove the award of ${application?.awarded_amount ? formatCurrency(application.awarded_amount) : ''} from ${application ? `${application.first_name} ${application.last_name}` : ''}? This action will change their status back to "Approved".`}
+        confirmText="Remove Award"
+        cancelText="Cancel"
+        variant="warning"
+        isLoading={updating}
+      />
     </div>
   );
 }

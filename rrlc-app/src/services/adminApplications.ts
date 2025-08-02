@@ -106,8 +106,14 @@ export async function updateApplicationStatus(
       updateData.awarded_amount = awardedAmount;
     }
     
-    if (awardedDate) {
+    if (awardedDate !== undefined) {
       updateData.awarded_date = awardedDate;
+    }
+
+    // When removing awards (setting status back to approved), clear award fields
+    if (status === 'approved' && awardedAmount === undefined && awardedDate === undefined) {
+      updateData.awarded_amount = null;
+      updateData.awarded_date = null;
     }
 
     if (notes !== undefined) {

@@ -14,7 +14,8 @@ import {
   FiCalendar,
   FiUser,
   FiFileText,
-  FiMoreVertical
+  FiMoreVertical,
+  FiEdit
 } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { updateApplicationStatus } from "@/services/adminApplications";
 import { ApplicationWithDetails } from "@/types/database";
 import { useAdminApplicationContext } from "@/contexts/AdminContext";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 type ApplicationStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'awarded';
 
@@ -30,10 +32,11 @@ interface ApplicationActionsProps {
   application: ApplicationWithDetails;
   onView: () => void;
   onUpdateStatus: (status: ApplicationStatus) => void;
-  onSendEmail: () => void;
+  onRemoveAward: () => void;
+  onEditAward: () => void;
 }
 
-function ApplicationActions({ application, onView, onUpdateStatus, onSendEmail }: ApplicationActionsProps) {
+function ApplicationActions({ application, onView, onUpdateStatus, onRemoveAward, onEditAward }: ApplicationActionsProps) {
   const [showMenu, setShowMenu] = useState(false);
 
   const statusActions = [
@@ -67,16 +70,30 @@ function ApplicationActions({ application, onView, onUpdateStatus, onSendEmail }
             View Details
           </button>
           
-          <button
-            onClick={() => {
-              onSendEmail();
-              setShowMenu(false);
-            }}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left text-sm"
-          >
-            <FiMail size={14} />
-            Send Email
-          </button>
+          {application.awarded_amount && (
+            <>
+              <button
+                onClick={() => {
+                  onEditAward();
+                  setShowMenu(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left text-sm text-blue-600"
+              >
+                <FiEdit size={14} />
+                Edit Award
+              </button>
+              <button
+                onClick={() => {
+                  onRemoveAward();
+                  setShowMenu(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left text-sm text-red-600"
+              >
+                <FiX size={14} />
+                Remove Award
+              </button>
+            </>
+          )}
           
           <div className="border-t my-2" />
           
@@ -108,6 +125,11 @@ function AdminApplicationsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ApplicationStatus>("all");
   const [scholarshipFilter, setScholarshipFilter] = useState<string>("all");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [applicationToRemoveAward, setApplicationToRemoveAward] = useState<ApplicationWithDetails | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [applicationToEditAward, setApplicationToEditAward] = useState<ApplicationWithDetails | null>(null);
+  const [editAwardAmount, setEditAwardAmount] = useState("");
 
   const [scholarships, setScholarships] = useState<{id: string, name: string}[]>([]);
 
@@ -172,9 +194,54 @@ function AdminApplicationsContent() {
     router.push(`/admin/applications/${application.id}`);
   };
 
-  const handleSendEmail = (application: ApplicationWithDetails) => {
-    // This would open email composer
-    alert(`Send email to ${application.email} - Feature coming soon!`);
+  const handleRemoveAward = (application: ApplicationWithDetails) => {
+    setApplicationToRemoveAward(application);
+    setShowRemoveModal(true);
+  };
+
+  const confirmRemoveAward = async () => {
+    if (!applicationToRemoveAward) return;
+
+    const { data, error } = await updateApplicationStatus(applicationToRemoveAward.id, 'approved');
+    if (!error && data) {
+      updateApplicationInCache(data);
+      setShowRemoveModal(false);
+      setApplicationToRemoveAward(null);
+    } else {
+      alert('Failed to remove award');
+    }
+  };
+
+  const handleEditAward = (application: ApplicationWithDetails) => {
+    setApplicationToEditAward(application);
+    setEditAwardAmount(application.awarded_amount?.toString() || '');
+    setShowEditModal(true);
+  };
+
+  const confirmEditAward = async () => {
+    if (!applicationToEditAward || !editAwardAmount) return;
+
+    const newAmount = parseFloat(editAwardAmount);
+    if (isNaN(newAmount) || newAmount <= 0) {
+      alert('Please enter a valid award amount');
+      return;
+    }
+
+    const { data, error } = await updateApplicationStatus(
+      applicationToEditAward.id, 
+      'awarded',
+      newAmount,
+      new Date().toISOString()
+    );
+    
+    if (!error && data) {
+      updateApplicationInCache(data);
+      setShowEditModal(false);
+      setApplicationToEditAward(null);
+      setEditAwardAmount('');
+    } else {
+      alert('Failed to update award amount');
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -350,7 +417,8 @@ function AdminApplicationsContent() {
                       application={application}
                       onView={() => handleViewApplication(application)}
                       onUpdateStatus={(status) => handleUpdateStatus(application.id, status)}
-                      onSendEmail={() => handleSendEmail(application)}
+                      onRemoveAward={() => handleRemoveAward(application)}
+                      onEditAward={() => handleEditAward(application)}
                     />
                   </div>
                   
@@ -369,6 +437,67 @@ function AdminApplicationsContent() {
           )}
         </div>
       </div>
+
+      {/* Remove Award Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showRemoveModal}
+        onClose={() => {
+          setShowRemoveModal(false);
+          setApplicationToRemoveAward(null);
+        }}
+        onConfirm={confirmRemoveAward}
+        title="Remove Award"
+        message={`Are you sure you want to remove the award of ${applicationToRemoveAward ? formatCurrency(applicationToRemoveAward.awarded_amount) : ''} from ${applicationToRemoveAward ? `${applicationToRemoveAward.first_name} ${applicationToRemoveAward.last_name}` : ''}? This action will change their status back to "Approved".`}
+        confirmText="Remove Award"
+        cancelText="Cancel"
+        variant="warning"
+      />
+
+      {/* Edit Award Modal */}
+      {showEditModal && applicationToEditAward && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-primary mb-4">
+              Edit Award Amount
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Update the award amount for {applicationToEditAward.first_name} {applicationToEditAward.last_name}
+            </p>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Award Amount ($)
+              </label>
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                value={editAwardAmount}
+                onChange={(e) => setEditAwardAmount(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setApplicationToEditAward(null);
+                  setEditAwardAmount('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmEditAward}
+                className="bg-primary text-white hover:bg-primary-light"
+                disabled={!editAwardAmount || isNaN(parseFloat(editAwardAmount)) || parseFloat(editAwardAmount) <= 0}
+              >
+                Update Award
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

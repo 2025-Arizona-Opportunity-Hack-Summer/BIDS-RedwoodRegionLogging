@@ -39,8 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Project documentation files (for Claude Code use only)
-CLAUDE.md
-PLANNING.md
-TASKS.md

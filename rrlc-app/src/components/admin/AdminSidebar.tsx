@@ -9,8 +9,6 @@ import {
   FiBook, 
   FiUsers, 
   FiFileText, 
-  FiBarChart, 
-  FiCalendar,
   FiSettings,
   FiUser,
   FiMenu,
@@ -51,18 +49,6 @@ const sidebarItems: SidebarItem[] = [
     label: 'Users',
     href: '/admin/users',
     icon: FiUsers
-  },
-  {
-    id: 'events',
-    label: 'Events',
-    href: '/admin/events',
-    icon: FiCalendar
-  },
-  {
-    id: 'analytics',
-    label: 'Analytics',
-    href: '/admin/analytics',
-    icon: FiBarChart
   },
   {
     id: 'reports',

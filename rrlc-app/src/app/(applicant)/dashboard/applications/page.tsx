@@ -123,12 +123,10 @@ function MyApplicationsContent() {
     return (
       <div className="min-h-screen bg-accent p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col gap-6">
-            <div className="h-20 bg-gray-300 rounded animate-pulse" />
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className="h-32 bg-gray-300 rounded animate-pulse" />
-              ))}
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-primary-dark">Loading your applications...</p>
             </div>
           </div>
         </div>
