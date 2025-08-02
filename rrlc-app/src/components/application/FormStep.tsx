@@ -98,19 +98,31 @@ export function FormStep({
               {formData.career_goals && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-2">Career Goals:</p>
-                  <p className="whitespace-pre-wrap">{formData.career_goals}</p>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full">
+                      {formData.career_goals}
+                    </div>
+                  </div>
                 </div>
               )}
               {formData.financial_need && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-2">Financial Need:</p>
-                  <p className="whitespace-pre-wrap">{formData.financial_need}</p>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full">
+                      {formData.financial_need}
+                    </div>
+                  </div>
                 </div>
               )}
               {formData.community_involvement && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-2">Community Involvement:</p>
-                  <p className="whitespace-pre-wrap">{formData.community_involvement}</p>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full">
+                      {formData.community_involvement}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

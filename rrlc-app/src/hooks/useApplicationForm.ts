@@ -250,13 +250,24 @@ export function useApplicationForm(scholarshipId: string) {
       const { data, error } = await applicationService.saveApplicationDraft(formData);
       if (error) {
         console.error('Draft save error:', error);
-        // Provide a more user-friendly error message
-        const errorMessage = (error as any)?.message || 'Failed to save draft';
+        console.error('Draft save error details:', JSON.stringify(error, null, 2));
+        // Provide a more user-friendly error message with specific details
+        let errorMessage = 'Failed to save draft';
+        if (error && typeof error === 'object') {
+          if ('message' in error && error.message) {
+            errorMessage = error.message;
+          } else if ('code' in error && error.code) {
+            errorMessage = `Database error: ${error.code}`;
+          } else if ('hint' in error && error.hint) {
+            errorMessage = `Database hint: ${error.hint}`;
+          }
+        }
         return { success: false, error: errorMessage };
       }
       return { success: true, data };
     } catch (error) {
       console.error('Error saving draft:', error);
+      console.error('Draft save catch error details:', JSON.stringify(error, null, 2));
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while saving your draft';
       return { success: false, error: errorMessage };
     } finally {
@@ -284,12 +295,24 @@ export function useApplicationForm(scholarshipId: string) {
       const { data, error } = await applicationService.submitApplication(formData);
       if (error) {
         console.error('Application submission error:', error);
-        const errorMessage = (error as any)?.message || 'Failed to submit application';
+        console.error('Application submission error details:', JSON.stringify(error, null, 2));
+        // Provide a more user-friendly error message with specific details
+        let errorMessage = 'Failed to submit application';
+        if (error && typeof error === 'object') {
+          if ('message' in error && error.message) {
+            errorMessage = error.message;
+          } else if ('code' in error && error.code) {
+            errorMessage = `Database error: ${error.code}`;
+          } else if ('hint' in error && error.hint) {
+            errorMessage = `Database hint: ${error.hint}`;
+          }
+        }
         return { success: false, error: errorMessage };
       }
       return { success: true, data };
     } catch (error) {
       console.error('Error submitting application:', error);
+      console.error('Application submission catch error details:', JSON.stringify(error, null, 2));
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while submitting your application';
       return { success: false, error: errorMessage };
     } finally {
