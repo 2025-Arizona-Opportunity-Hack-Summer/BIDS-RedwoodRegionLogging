@@ -5,10 +5,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { HiEye, HiEyeSlash } from "react-icons/hi2";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   // All users are applicants by default
   const [error, setError] = useState("");
@@ -100,14 +102,24 @@ export default function RegisterPage() {
                 <label className="block mb-2 text-sm font-medium text-primary-dark">
                   Password <span className="text-error">*</span>
                 </label>
-                <Input 
-                  type="password" 
-                  value={password} 
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your password"
-                  className="border-accent-dark text-primary-dark"
-                />
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password} 
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    placeholder="Enter your password"
+                    className="border-accent-dark text-primary-dark pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <HiEyeSlash size={20} /> : <HiEye size={20} />}
+                  </button>
+                </div>
               </div>
               
               {error && (
