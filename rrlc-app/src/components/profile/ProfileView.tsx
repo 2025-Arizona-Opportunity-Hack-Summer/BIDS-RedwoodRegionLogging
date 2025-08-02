@@ -143,34 +143,6 @@ export function ProfileView({ profile, editPath, showEditButton = true }: Profil
               </div>
             )}
 
-            {/* Notification Preferences */}
-            <div className="card">
-              <div className="card-header">
-                <h3 className="text-lg font-semibold text-primary">Notification Preferences</h3>
-              </div>
-              <div className="card-body">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-900">Email notifications</span>
-                    <span className={`badge ${profile.notification_preferences?.email_notifications ? 'badge-success' : 'badge-error'}`}>
-                      {profile.notification_preferences?.email_notifications ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-900">Application updates</span>
-                    <span className={`badge ${profile.notification_preferences?.application_updates ? 'badge-success' : 'badge-error'}`}>
-                      {profile.notification_preferences?.application_updates ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-900">Scholarship announcements</span>
-                    <span className={`badge ${profile.notification_preferences?.scholarship_announcements ? 'badge-success' : 'badge-error'}`}>
-                      {profile.notification_preferences?.scholarship_announcements ? 'Enabled' : 'Disabled'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Account Information */}
             <div className="card">

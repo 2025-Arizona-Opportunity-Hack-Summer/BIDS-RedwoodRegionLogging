@@ -24,11 +24,6 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
     date_of_birth: profile.date_of_birth || '',
     linkedin_url: profile.linkedin_url || '',
     website_url: profile.website_url || '',
-    notification_preferences: profile.notification_preferences || {
-      email_notifications: true,
-      application_updates: true,
-      scholarship_announcements: true
-    }
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -46,16 +41,6 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
     }
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      notification_preferences: {
-        ...prev.notification_preferences!,
-        [name]: checked
-      }
-    }));
-  };
 
   const handleAvatarUpdate = (url: string | null) => {
     setCurrentAvatar(url);
@@ -288,67 +273,6 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
           </div>
         </div>
 
-        {/* Notification Preferences */}
-        <div className="card">
-          <div className="card-header">
-            <h2 className="text-lg font-semibold text-primary">Notification Preferences</h2>
-            <p className="text-gray-600 text-sm">Choose what notifications you&apos;d like to receive</p>
-          </div>
-          <div className="card-body">
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="email_notifications"
-                  name="email_notifications"
-                  checked={formData.notification_preferences?.email_notifications || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-3"
-                />
-                <div>
-                  <label htmlFor="email_notifications" className="text-sm font-medium text-gray-900">
-                    Email notifications
-                  </label>
-                  <p className="text-gray-500 text-sm">Receive general email notifications</p>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="application_updates"
-                  name="application_updates"
-                  checked={formData.notification_preferences?.application_updates || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-3"
-                />
-                <div>
-                  <label htmlFor="application_updates" className="text-sm font-medium text-gray-900">
-                    Application updates
-                  </label>
-                  <p className="text-gray-500 text-sm">Get notified when your application status changes</p>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="scholarship_announcements"
-                  name="scholarship_announcements"
-                  checked={formData.notification_preferences?.scholarship_announcements || false}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded mr-3"
-                />
-                <div>
-                  <label htmlFor="scholarship_announcements" className="text-sm font-medium text-gray-900">
-                    Scholarship announcements
-                  </label>
-                  <p className="text-gray-500 text-sm">Receive notifications about new scholarship opportunities</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Submit Error */}
         {submitError && (

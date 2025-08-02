@@ -13,11 +13,6 @@ export interface Profile {
   avatar_url: string | null;
   linkedin_url: string | null;
   website_url: string | null;
-  notification_preferences: {
-    email_notifications: boolean;
-    application_updates: boolean;
-    scholarship_announcements: boolean;
-  } | null;
   created_at: string;
   updated_at: string;
 }
@@ -295,11 +290,6 @@ export interface UpdateProfileData {
   date_of_birth?: string;
   linkedin_url?: string;
   website_url?: string;
-  notification_preferences?: {
-    email_notifications: boolean;
-    application_updates: boolean;
-    scholarship_announcements: boolean;
-  };
 }
 
 // Supabase Database Type Definition
