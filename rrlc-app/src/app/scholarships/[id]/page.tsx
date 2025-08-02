@@ -24,7 +24,7 @@ export default function PublicScholarshipDetailPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [scholarship, setScholarship] = useState<Scholarship | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasApplied, setHasApplied] = useState(false);
   const [checkingApplication, setCheckingApplication] = useState(false);
@@ -122,20 +122,23 @@ export default function PublicScholarshipDetailPage() {
     }).format(amount);
   };
 
+  // Show loading only when actively fetching data
   if (loading) {
     return (
       <div className="min-h-screen bg-accent p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="space-y-6">
-            <div className="h-12 bg-gray-300 rounded animate-pulse" />
-            <div className="h-96 bg-gray-300 rounded animate-pulse" />
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-primary-dark">Loading scholarship details...</p>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (error || !scholarship) {
+  if (error) {
     return (
       <div className="min-h-screen bg-accent p-6">
         <div className="max-w-4xl mx-auto">
@@ -145,7 +148,7 @@ export default function PublicScholarshipDetailPage() {
               Scholarship Not Found
             </h1>
             <p className="text-primary-dark mb-6">
-              {error || "The scholarship you're looking for doesn't exist or is no longer available."}
+              {error}
             </p>
             <Link href="/scholarships">
               <Button className="bg-primary text-white hover:bg-primary-light">
@@ -153,6 +156,34 @@ export default function PublicScholarshipDetailPage() {
               </Button>
             </Link>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // If no scholarship data yet, show loading state within the layout
+  if (!scholarship) {
+    return (
+      <div className="min-h-screen bg-accent p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-6">
+            {/* Back Button */}
+            <Link 
+              href="/scholarships"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary-light transition-colors"
+            >
+              <FiArrowLeft size={20} />
+              <span>Back to Scholarships</span>
+            </Link>
+
+            {/* Loading Content */}
+            <Card className="bg-white border-2 border-accent-dark">
+              <CardContent className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-primary-dark">Loading scholarship details...</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );
@@ -319,7 +350,14 @@ export default function PublicScholarshipDetailPage() {
                     disabled={checkingApplication}
                     className="bg-primary text-white hover:bg-primary-light flex-1"
                   >
-                    {checkingApplication ? 'Checking...' : 'Apply Now'}
+                    {checkingApplication ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Checking...</span>
+                      </div>
+                    ) : (
+                      'Apply Now'
+                    )}
                   </Button>
                 )}
                 

@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { CreateApplicationData } from '@/services/applications';
+import { CustomField } from '@/types/database';
 import * as applicationService from '@/services/applications';
 
 export interface FormStep {
@@ -68,6 +69,32 @@ export function useApplicationForm(scholarshipId: string) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+
+  // Load existing draft on mount
+  useEffect(() => {
+    const loadDraft = async () => {
+      if (draftLoaded) return; // Prevent multiple loads
+      
+      try {
+        const { data: draft, error } = await applicationService.loadApplicationDraft(scholarshipId);
+        if (draft && !error) {
+          // Merge draft data with form data, preserving any required fields
+          setFormData(prev => ({
+            ...prev,
+            ...draft,
+            scholarship_id: scholarshipId, // Ensure scholarship_id is correct
+          }));
+        }
+      } catch (error) {
+        console.error('Error loading draft:', error);
+      } finally {
+        setDraftLoaded(true);
+      }
+    };
+
+    loadDraft();
+  }, [scholarshipId, draftLoaded]);
 
   const updateFormData = useCallback((field: keyof CreateApplicationData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -193,12 +220,16 @@ export function useApplicationForm(scholarshipId: string) {
     try {
       const { data, error } = await applicationService.saveApplicationDraft(formData);
       if (error) {
-        throw new Error('Failed to save draft');
+        console.error('Draft save error:', error);
+        // Provide a more user-friendly error message
+        const errorMessage = (error as any)?.message || 'Failed to save draft';
+        return { success: false, error: errorMessage };
       }
       return { success: true, data };
     } catch (error) {
       console.error('Error saving draft:', error);
-      return { success: false, error };
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while saving your draft';
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -223,16 +254,107 @@ export function useApplicationForm(scholarshipId: string) {
     try {
       const { data, error } = await applicationService.submitApplication(formData);
       if (error) {
-        throw new Error('Failed to submit application');
+        console.error('Application submission error:', error);
+        const errorMessage = (error as any)?.message || 'Failed to submit application';
+        return { success: false, error: errorMessage };
       }
       return { success: true, data };
     } catch (error) {
       console.error('Error submitting application:', error);
-      return { success: false, error };
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while submitting your application';
+      return { success: false, error: errorMessage };
     } finally {
       setSubmitting(false);
     }
   }, [formData, validateStep]);
+
+  const validateCustomFields = useCallback((customFields: CustomField[]): FormErrors => {
+    const fieldErrors: FormErrors = {};
+    const customResponses = formData.custom_responses || {};
+
+    customFields.forEach(field => {
+      const value = customResponses[field.id];
+      
+      // Required field validation
+      if (field.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+        fieldErrors[field.id] = 'This field is required';
+        return;
+      }
+
+      // Skip validation if field is not required and empty
+      if (!value || (typeof value === 'string' && value.trim() === '')) {
+        return;
+      }
+
+      // Type-specific validation
+      switch (field.type) {
+        case 'text':
+        case 'textarea':
+          if (typeof value === 'string') {
+            if (field.validation?.minLength && value.length < field.validation.minLength) {
+              fieldErrors[field.id] = `Minimum ${field.validation.minLength} characters required`;
+            }
+            if (field.validation?.maxLength && value.length > field.validation.maxLength) {
+              fieldErrors[field.id] = `Maximum ${field.validation.maxLength} characters allowed`;
+            }
+            if (field.validation?.pattern) {
+              const regex = new RegExp(field.validation.pattern);
+              if (!regex.test(value)) {
+                fieldErrors[field.id] = 'Invalid format';
+              }
+            }
+          }
+          break;
+
+        case 'number':
+          const numValue = typeof value === 'string' ? parseFloat(value) : value;
+          if (isNaN(numValue)) {
+            fieldErrors[field.id] = 'Must be a valid number';
+          } else {
+            if (field.validation?.min !== undefined && numValue < field.validation.min) {
+              fieldErrors[field.id] = `Minimum value is ${field.validation.min}`;
+            }
+            if (field.validation?.max !== undefined && numValue > field.validation.max) {
+              fieldErrors[field.id] = `Maximum value is ${field.validation.max}`;
+            }
+          }
+          break;
+
+        case 'email':
+          if (typeof value === 'string') {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+              fieldErrors[field.id] = 'Invalid email address';
+            }
+          }
+          break;
+
+        case 'phone':
+          if (typeof value === 'string') {
+            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+            if (!phoneRegex.test(value.replace(/[\s\-\(\)]/g, ''))) {
+              fieldErrors[field.id] = 'Invalid phone number';
+            }
+          }
+          break;
+
+        case 'date':
+          if (typeof value === 'string' && value) {
+            const dateValue = new Date(value);
+            if (isNaN(dateValue.getTime())) {
+              fieldErrors[field.id] = 'Invalid date';
+            }
+          }
+          break;
+
+        case 'file':
+          // File validation would be handled by the FileUploadField component
+          break;
+      }
+    });
+
+    return fieldErrors;
+  }, [formData.custom_responses]);
 
   const getStepProgress = useCallback(() => {
     return ((currentStep + 1) / APPLICATION_STEPS.length) * 100;
@@ -247,6 +369,7 @@ export function useApplicationForm(scholarshipId: string) {
     updateFormData,
     updateMultipleFields,
     validateStep,
+    validateCustomFields,
     nextStep,
     prevStep,
     goToStep,

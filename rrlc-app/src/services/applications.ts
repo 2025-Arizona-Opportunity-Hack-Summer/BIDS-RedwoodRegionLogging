@@ -3,6 +3,7 @@ import { sendApplicationConfirmationEmail } from '@/services/emailClient';
 
 export interface CreateApplicationData {
   scholarship_id: string;
+  applicant_id?: string; // Optional for form, will be set automatically
   
   // Personal Information
   first_name: string;
@@ -33,6 +34,9 @@ export interface CreateApplicationData {
   extracurricular_activities?: string;
   awards_and_honors?: string;
   
+  // Custom Field Responses
+  custom_responses?: Record<string, any>;
+  
   status?: 'draft' | 'submitted';
 }
 
@@ -49,16 +53,48 @@ export interface Application extends CreateApplicationData {
 // Submit a new application
 export async function submitApplication(applicationData: CreateApplicationData) {
   try {
-    // First, submit the application
-    const { data, error } = await supabase
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Set applicant_id and submission details
+    const dataWithApplicant = {
+      ...applicationData,
+      applicant_id: user.id,
+      status: 'submitted' as const,
+      submission_date: new Date().toISOString(),
+    };
+
+    // Check if there's an existing draft to update
+    const { data: existingDraft, error: findError } = await supabase
       .from('applications')
-      .insert([{
-        ...applicationData,
-        status: 'submitted',
-        submission_date: new Date().toISOString(),
-      }])
-      .select()
-      .single();
+      .select('id')
+      .eq('scholarship_id', applicationData.scholarship_id)
+      .eq('applicant_id', user.id)
+      .eq('status', 'draft')
+      .maybeSingle();
+
+    let result;
+    if (existingDraft) {
+      // Update existing draft to submitted
+      result = await supabase
+        .from('applications')
+        .update(dataWithApplicant)
+        .eq('id', existingDraft.id)
+        .select()
+        .single();
+    } else {
+      // Create new submitted application
+      result = await supabase
+        .from('applications')
+        .insert([dataWithApplicant])
+        .select()
+        .single();
+    }
+
+    const { data, error } = result;
 
     if (error) {
       return { data: null, error };
@@ -92,22 +128,59 @@ export async function submitApplication(applicationData: CreateApplicationData) 
   }
 }
 
-// Save application as draft
+// Save application as draft with upsert logic
 export async function saveApplicationDraft(applicationData: CreateApplicationData) {
   try {
-    const { data, error } = await supabase
-      .from('applications')
-      .insert([{
-        ...applicationData,
-        status: 'draft',
-      }])
-      .select()
-      .single();
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('User not authenticated');
+    }
 
-    return { data, error };
+    // Set applicant_id
+    const dataWithApplicant = {
+      ...applicationData,
+      applicant_id: user.id,
+      status: 'draft' as const,
+      updated_at: new Date().toISOString(),
+    };
+
+    // First, try to find existing draft
+    const { data: existingDraft, error: findError } = await supabase
+      .from('applications')
+      .select('id')
+      .eq('scholarship_id', applicationData.scholarship_id)
+      .eq('applicant_id', user.id)
+      .eq('status', 'draft')
+      .maybeSingle();
+
+    if (findError) {
+      console.error('Error finding existing draft:', findError);
+      return { data: null, error: findError };
+    }
+
+    let result;
+    if (existingDraft) {
+      // Update existing draft
+      result = await supabase
+        .from('applications')
+        .update(dataWithApplicant)
+        .eq('id', existingDraft.id)
+        .select()
+        .single();
+    } else {
+      // Create new draft
+      result = await supabase
+        .from('applications')
+        .insert([dataWithApplicant])
+        .select()
+        .single();
+    }
+
+    return { data: result.data, error: result.error };
   } catch (error) {
     console.error('Error saving application draft:', error);
-    return { data: null, error };
+    return { data: null, error: error instanceof Error ? error : new Error('Unknown error') };
   }
 }
 
@@ -161,5 +234,29 @@ export async function checkExistingApplication(scholarshipId: string, email: str
   } catch {
     // No existing application found is expected, so we return null
     return { data: null, error: null };
+  }
+}
+
+// Load existing draft for a scholarship
+export async function loadApplicationDraft(scholarshipId: string) {
+  try {
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return { data: null, error: 'User not authenticated' };
+    }
+
+    const { data, error } = await supabase
+      .from('applications')
+      .select('*')
+      .eq('scholarship_id', scholarshipId)
+      .eq('applicant_id', user.id)
+      .eq('status', 'draft')
+      .maybeSingle();
+
+    return { data, error };
+  } catch (error) {
+    console.error('Error loading application draft:', error);
+    return { data: null, error: error instanceof Error ? error : new Error('Unknown error') };
   }
 }
