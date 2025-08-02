@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { updateScholarship, deleteScholarship } from "@/services/scholarships";
+import { updateScholarship, deleteScholarship, isScholarshipExpired } from "@/services/scholarships";
 import { Scholarship } from "@/types/database";
 import { useScholarshipContext } from "@/contexts/AdminContext";
 
@@ -75,7 +75,15 @@ function ScholarshipActions({ scholarship, onEdit, onDuplicate, onToggleStatus, 
               onToggleStatus();
               setShowMenu(false);
             }}
-            className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left text-sm"
+            className={`flex items-center gap-2 px-4 py-2 w-full text-left text-sm ${
+              scholarship.status === 'inactive' && isScholarshipExpired(scholarship.deadline)
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-gray-100 cursor-pointer'
+            }`}
+            disabled={scholarship.status === 'inactive' && isScholarshipExpired(scholarship.deadline)}
+            title={scholarship.status === 'inactive' && isScholarshipExpired(scholarship.deadline) 
+              ? 'Cannot activate scholarship with past due date' 
+              : ''}
           >
             {scholarship.status === 'active' ? <FiEyeOff size={14} /> : <FiEye size={14} />}
             {scholarship.status === 'active' ? 'Deactivate' : 'Activate'}
@@ -147,13 +155,21 @@ function AdminScholarshipsContent() {
   };
 
   const handleToggleStatus = async (scholarship: Scholarship) => {
+    // Prevent activation of expired scholarships
+    if (scholarship.status === 'inactive' && isScholarshipExpired(scholarship.deadline)) {
+      alert('Cannot activate scholarship with a past due date. Please edit the scholarship and set a future deadline.');
+      return;
+    }
+    
     const newStatus = scholarship.status === 'active' ? 'inactive' : 'active';
     const { data, error } = await updateScholarship({ 
       id: scholarship.id, 
       status: newStatus 
     });
     
-    if (!error && data) {
+    if (error) {
+      alert(error);
+    } else if (data) {
       updateScholarshipInCache(data);
     }
   };
@@ -275,8 +291,14 @@ function AdminScholarshipsContent() {
                         <h3 className="text-xl font-semibold text-primary">
                           {scholarship.name}
                         </h3>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(scholarship.status)}`}>
-                          {scholarship.status}
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          isScholarshipExpired(scholarship.deadline) && scholarship.status === 'active' 
+                            ? 'bg-orange-100 text-orange-800' 
+                            : getStatusColor(scholarship.status)
+                        }`}>
+                          {isScholarshipExpired(scholarship.deadline) && scholarship.status === 'active' 
+                            ? 'expired' 
+                            : scholarship.status}
                         </span>
                       </div>
                       
@@ -291,9 +313,16 @@ function AdminScholarshipsContent() {
                         </div>
                         
                         {scholarship.deadline && (
-                          <div className="flex items-center gap-1">
-                            <FiCalendar className="text-secondary" size={16} />
-                            <span>Deadline: {new Date(scholarship.deadline).toLocaleDateString()}</span>
+                          <div className={`flex items-center gap-1 ${
+                            isScholarshipExpired(scholarship.deadline) ? 'text-orange-600' : ''
+                          }`}>
+                            <FiCalendar className={
+                              isScholarshipExpired(scholarship.deadline) ? 'text-orange-600' : 'text-secondary'
+                            } size={16} />
+                            <span>
+                              Deadline: {new Date(scholarship.deadline).toLocaleDateString()}
+                              {isScholarshipExpired(scholarship.deadline) && ' (Past due)'}
+                            </span>
                           </div>
                         )}
                         

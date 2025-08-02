@@ -214,7 +214,7 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
                   type="date"
                   id="date_of_birth"
                   name="date_of_birth"
-                  value={ProfileService.formatDateForInput(formData.date_of_birth)}
+                  value={ProfileService.formatDateForInput(formData.date_of_birth || null)}
                   onChange={handleInputChange}
                   className="input"
                 />

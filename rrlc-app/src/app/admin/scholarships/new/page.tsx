@@ -293,6 +293,18 @@ function NewScholarshipContent() {
     if (!formData.description?.trim()) {
       newErrors.description = 'Description is required';
     }
+
+    // Validate deadline if status is active
+    if (formData.status === 'active' && formData.deadline) {
+      const deadlineDate = new Date(formData.deadline);
+      const now = new Date();
+      now.setHours(23, 59, 59, 999); // End of today
+      deadlineDate.setHours(23, 59, 59, 999);
+      
+      if (deadlineDate < now) {
+        newErrors.deadline = 'Cannot activate scholarship with a past due date. Please set a future deadline or keep status as inactive.';
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -434,7 +446,11 @@ function NewScholarshipContent() {
                     type="date"
                     value={formData.deadline || ''}
                     onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                    className={errors.deadline ? 'border-red-500' : ''}
                   />
+                  {errors.deadline && (
+                    <p className="text-red-500 text-sm mt-1">{errors.deadline}</p>
+                  )}
                 </div>
               </div>
 

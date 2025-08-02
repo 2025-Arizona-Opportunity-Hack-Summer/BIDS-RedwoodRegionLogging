@@ -95,13 +95,21 @@ export default function PublicScholarshipDetailPage() {
     router.push(`/scholarships/${scholarshipId}/apply`);
   };
 
-  const getDaysUntilDeadline = (deadline: string | null): number | null => {
-    if (!deadline) return null;
+  const getDaysUntilDeadline = (deadline: string | null): { days: number | null; isExpired: boolean } => {
+    if (!deadline) return { days: null, isExpired: false };
     const deadlineDate = new Date(deadline);
     const now = new Date();
+    // Set time to start of day for accurate comparison
+    now.setHours(0, 0, 0, 0);
+    deadlineDate.setHours(0, 0, 0, 0);
+    
     const diffTime = deadlineDate.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    
+    return {
+      days: diffDays,
+      isExpired: deadlineDate < now
+    };
   };
 
   const formatCurrency = (amount: number | null) => {
@@ -150,8 +158,7 @@ export default function PublicScholarshipDetailPage() {
     );
   }
 
-  const daysLeft = getDaysUntilDeadline(scholarship.deadline);
-  const isExpired = daysLeft === 0 || (daysLeft !== null && daysLeft < 0);
+  const { days: daysLeft, isExpired } = getDaysUntilDeadline(scholarship.deadline);
 
   return (
     <div className="min-h-screen bg-accent p-6">

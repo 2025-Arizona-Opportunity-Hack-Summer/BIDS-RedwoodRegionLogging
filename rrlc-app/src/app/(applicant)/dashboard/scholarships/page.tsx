@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiInfo, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiInfo, FiCheckCircle, FiXCircle, FiX } from "react-icons/fi";
 import { useActiveScholarships } from "@/hooks/useScholarships";
 import { Scholarship } from "@/types/database";
 
@@ -35,16 +35,24 @@ function ScholarshipCardSkeleton() {
 }
 
 function CountdownBadge({ deadline }: { deadline: string | null }) {
-  const getDaysUntilDeadline = (deadline: string | null): number | null => {
-    if (!deadline) return null;
+  const getDaysUntilDeadline = (deadline: string | null): { days: number | null; isExpired: boolean } => {
+    if (!deadline) return { days: null, isExpired: false };
     const deadlineDate = new Date(deadline);
     const now = new Date();
+    // Set time to start of day for accurate comparison
+    now.setHours(0, 0, 0, 0);
+    deadlineDate.setHours(0, 0, 0, 0);
+    
     const diffTime = deadlineDate.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    
+    return {
+      days: diffDays,
+      isExpired: deadlineDate < now
+    };
   };
 
-  const days = getDaysUntilDeadline(deadline);
+  const { days, isExpired } = getDaysUntilDeadline(deadline);
   
   if (days === null) {
     return (
@@ -52,6 +60,17 @@ function CountdownBadge({ deadline }: { deadline: string | null }) {
         <div className="flex items-center space-x-1">
           <FiClock size={12} />
           <span className="text-xs">No deadline</span>
+        </div>
+      </span>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <span className="badge bg-red-100 text-red-700 px-3 py-1 rounded-full">
+        <div className="flex items-center space-x-1">
+          <FiX size={12} />
+          <span className="text-xs">Expired</span>
         </div>
       </span>
     );

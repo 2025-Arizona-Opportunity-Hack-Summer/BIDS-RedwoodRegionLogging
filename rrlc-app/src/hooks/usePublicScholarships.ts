@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Scholarship } from '@/types/database';
 import * as scholarshipService from '@/services/scholarships';
+import { isScholarshipExpired } from '@/services/scholarships';
 
 export interface ScholarshipFilters {
   search: string;
@@ -131,6 +132,7 @@ export function usePublicScholarships() {
   // Calculate days until deadline
   const getDaysUntilDeadline = (deadline: string | null): number | null => {
     if (!deadline) return null;
+    if (isScholarshipExpired(deadline)) return 0;
     const deadlineDate = new Date(deadline);
     const now = new Date();
     const diffTime = deadlineDate.getTime() - now.getTime();
