@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Avatar } from "@/components/ui/avatar";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminContext } from "@/contexts/AdminContext";
@@ -176,11 +177,11 @@ function AdminDashboardContent() {
                     .map((app) => (
                       <div key={app.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                            <span className="text-white text-xs font-semibold">
-                              {app.first_name?.[0]}{app.last_name?.[0]}
-                            </span>
-                          </div>
+                          <Avatar
+                            name={`${app.first_name} ${app.last_name}`}
+                            src={app.profile?.avatar_url}
+                            size="sm"
+                          />
                           <div>
                             <p className="font-medium text-primary">
                               {app.first_name} {app.last_name}

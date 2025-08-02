@@ -83,6 +83,14 @@ export function ProfileView({ profile, editPath, showEditButton = true }: Profil
               <div className="card-body">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
+                    <label className="text-sm font-medium text-gray-500">Full Name</label>
+                    <p className="text-gray-900 mt-1">{profile.full_name || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Preferred Name</label>
+                    <p className="text-gray-900 mt-1">{profile.preferred_name || 'Not provided'}</p>
+                  </div>
+                  <div>
                     <label className="text-sm font-medium text-gray-500">Email</label>
                     <p className="text-gray-900 mt-1">{profile.email}</p>
                   </div>
@@ -105,44 +113,45 @@ export function ProfileView({ profile, editPath, showEditButton = true }: Profil
             </div>
 
             {/* Professional Links */}
-            {(profile.linkedin_url || profile.website_url) && (
-              <div className="card">
-                <div className="card-header">
-                  <h3 className="text-lg font-semibold text-primary">Professional Links</h3>
-                </div>
-                <div className="card-body">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {profile.linkedin_url && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">LinkedIn</label>
-                        <a
-                          href={profile.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-light underline mt-1 block"
-                        >
-                          View LinkedIn Profile
-                        </a>
-                      </div>
+            <div className="card">
+              <div className="card-header">
+                <h3 className="text-lg font-semibold text-primary">Professional Links</h3>
+              </div>
+              <div className="card-body">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">LinkedIn</label>
+                    {profile.linkedin_url ? (
+                      <a
+                        href={profile.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary-light underline mt-1 block"
+                      >
+                        View LinkedIn Profile
+                      </a>
+                    ) : (
+                      <p className="text-gray-900 mt-1">Not provided</p>
                     )}
-                    {profile.website_url && (
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">Website</label>
-                        <a
-                          href={profile.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:text-primary-light underline mt-1 block"
-                        >
-                          Visit Website
-                        </a>
-                      </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Website</label>
+                    {profile.website_url ? (
+                      <a
+                        href={profile.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary-light underline mt-1 block"
+                      >
+                        Visit Website
+                      </a>
+                    ) : (
+                      <p className="text-gray-900 mt-1">Not provided</p>
                     )}
                   </div>
                 </div>
               </div>
-            )}
-
+            </div>
 
             {/* Account Information */}
             <div className="card">

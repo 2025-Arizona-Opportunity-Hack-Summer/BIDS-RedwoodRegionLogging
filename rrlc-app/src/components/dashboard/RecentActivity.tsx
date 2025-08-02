@@ -11,6 +11,7 @@ import {
 } from "react-icons/fi";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
@@ -25,6 +26,11 @@ interface Activity {
   scholarshipId: string;
   status?: string;
   awardAmount?: number;
+  user?: {
+    full_name: string | null;
+    preferred_name: string | null;
+    avatar_url: string | null;
+  };
 }
 
 export function RecentActivity() {
@@ -52,7 +58,8 @@ export function RecentActivity() {
           created_at,
           updated_at,
           submission_date,
-          scholarship:scholarships(id, name)
+          scholarship:scholarships(id, name),
+          applicant:profiles!applicant_id(full_name, preferred_name, avatar_url)
         `)
         .eq('applicant_id', user.id)
         .order('updated_at', { ascending: false })
@@ -77,7 +84,8 @@ export function RecentActivity() {
             timestamp: app.submission_date,
             scholarshipName: app.scholarship?.name || 'Scholarship',
             scholarshipId: app.scholarship?.id || '',
-            status: app.status
+            status: app.status,
+            user: app.applicant
           });
         }
 
@@ -92,7 +100,8 @@ export function RecentActivity() {
             scholarshipName: app.scholarship?.name || 'Scholarship',
             scholarshipId: app.scholarship?.id || '',
             status: app.status,
-            awardAmount: app.awarded_amount
+            awardAmount: app.awarded_amount,
+            user: app.applicant
           });
         }
 
@@ -113,7 +122,8 @@ export function RecentActivity() {
               timestamp: app.updated_at,
               scholarshipName: app.scholarship?.name || 'Scholarship',
               scholarshipId: app.scholarship?.id || '',
-              status: app.status
+              status: app.status,
+              user: app.applicant
             });
           }
         }
@@ -216,6 +226,13 @@ export function RecentActivity() {
           <div className="space-y-4">
             {activities.map((activity) => (
               <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="flex-shrink-0 mt-1">
+                  <Avatar
+                    name={activity.user?.preferred_name || activity.user?.full_name || 'User'}
+                    src={activity.user?.avatar_url}
+                    size="sm"
+                  />
+                </div>
                 <div className="flex-shrink-0 mt-1">
                   {getActivityIcon(activity)}
                 </div>

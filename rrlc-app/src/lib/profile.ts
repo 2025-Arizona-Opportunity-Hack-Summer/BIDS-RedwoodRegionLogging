@@ -144,9 +144,9 @@ export const ProfileService = {
   validateProfileData(data: UpdateProfileData): { isValid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {};
 
-    // Validate phone number format
-    if (data.phone && !/^[\+]?[1-9][\d]{0,15}$/.test(data.phone)) {
-      errors.phone = 'Please enter a valid phone number';
+    // Validate phone number format (XXX-XXX-XXXX)
+    if (data.phone && !/^\d{3}-\d{3}-\d{4}$/.test(data.phone)) {
+      errors.phone = 'Please enter a valid phone number in format: XXX-XXX-XXXX';
     }
 
     // Validate bio length
@@ -156,7 +156,7 @@ export const ProfileService = {
 
     // Validate LinkedIn URL
     if (data.linkedin_url && !data.linkedin_url.match(/^https?:\/\/.*linkedin\.com.*/)) {
-      errors.linkedin_url = 'Please enter a valid LinkedIn URL';
+      errors.linkedin_url = 'Please enter a valid LinkedIn URL (must contain linkedin.com)';
     }
 
     // Validate website URL

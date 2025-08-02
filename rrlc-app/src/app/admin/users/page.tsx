@@ -655,7 +655,11 @@ export default function UsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <Avatar name={user.full_name || user.email} size="sm" />
+                            <Avatar 
+                              name={user.full_name || user.email} 
+                              src={user.avatar_url} 
+                              size="sm" 
+                            />
                             <div className="ml-3">
                               <p className="text-sm font-medium text-gray-900">
                                 {user.full_name || "Unnamed User"}
@@ -823,6 +827,7 @@ export default function UsersPage() {
               <div className="flex items-center space-x-4">
                 <Avatar
                   name={selectedUser.full_name || selectedUser.email}
+                  src={selectedUser.avatar_url}
                   size="lg"
                 />
                 <div>

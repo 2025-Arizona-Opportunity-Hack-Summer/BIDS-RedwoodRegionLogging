@@ -60,7 +60,19 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
     }
 
     try {
-      const { data, error } = await ProfileService.updateProfile(profile.id, formData);
+      // Convert empty strings to null before sending to database
+      const cleanedFormData = {
+        ...formData,
+        date_of_birth: formData.date_of_birth === '' ? null : formData.date_of_birth,
+        phone: formData.phone === '' ? null : formData.phone,
+        bio: formData.bio === '' ? null : formData.bio,
+        location: formData.location === '' ? null : formData.location,
+        linkedin_url: formData.linkedin_url === '' ? null : formData.linkedin_url,
+        website_url: formData.website_url === '' ? null : formData.website_url,
+        preferred_name: formData.preferred_name === '' ? null : formData.preferred_name
+      };
+      
+      const { data, error } = await ProfileService.updateProfile(profile.id, cleanedFormData);
       
       if (error) {
         setSubmitError(error);
@@ -170,7 +182,7 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
                   value={formData.phone}
                   onChange={handleInputChange}
                   className="input"
-                  placeholder="+1 (555) 123-4567"
+                  placeholder="555-123-4567"
                 />
                 {errors.phone && <p className="text-error text-sm mt-1">{errors.phone}</p>}
               </div>

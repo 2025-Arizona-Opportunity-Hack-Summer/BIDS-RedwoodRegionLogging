@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Avatar } from "@/components/ui/avatar";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { updateApplicationStatus } from "@/services/adminApplications";
 import { ApplicationWithDetails } from "@/types/database";
@@ -366,7 +367,11 @@ function AdminApplicationsContent() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex items-center gap-2">
-                          <FiUser className="text-primary" size={18} />
+                          <Avatar
+                            name={`${application.first_name} ${application.last_name}`}
+                            src={application.profile?.avatar_url}
+                            size="sm"
+                          />
                           <h3 className="text-xl font-semibold text-primary">
                             {application.first_name} {application.last_name}
                           </h3>
