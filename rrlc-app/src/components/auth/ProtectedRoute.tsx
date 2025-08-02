@@ -38,7 +38,7 @@ export function ProtectedRoute({
       
       // If applicant tries to access admin routes, redirect to applicant home
       if (requireAdmin && !isAdmin()) {
-        router.push('/home');
+        router.push('/dashboard');
         return;
       }
     }

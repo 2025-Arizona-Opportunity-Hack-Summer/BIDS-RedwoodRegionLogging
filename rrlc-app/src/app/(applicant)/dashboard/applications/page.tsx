@@ -182,7 +182,7 @@ function MyApplicationsContent() {
                 No Applications Yet
               </h3>
               <p className="text-primary-dark mb-6">
-                You haven't submitted any scholarship applications yet. 
+                You haven&apos;t submitted any scholarship applications yet. 
                 Browse available scholarships to get started!
               </p>
               <Link href="/scholarships">
@@ -259,7 +259,7 @@ function MyApplicationsContent() {
                         {application.status === 'awarded' && (
                           <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                             <p className="text-purple-800 text-sm">
-                              🏆 Amazing! You've been awarded this scholarship. Check your email for next steps.
+                              🏆 Amazing! You&apos;ve been awarded this scholarship. Check your email for next steps.
                             </p>
                           </div>
                         )}
@@ -267,7 +267,7 @@ function MyApplicationsContent() {
                         {application.status === 'rejected' && (
                           <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                             <p className="text-red-800 text-sm">
-                              We appreciate your application. While you weren't selected this time, keep applying to other opportunities!
+                              We appreciate your application. While you weren&apos;t selected this time, keep applying to other opportunities!
                             </p>
                           </div>
                         )}

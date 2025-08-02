@@ -50,7 +50,7 @@ export default function Navbar() {
 
   const getHomeRoute = () => {
     if (!isAuthenticated()) return "/";
-    return isAdmin() ? "/admin" : "/home";
+    return isAdmin() ? "/admin" : "/dashboard";
   };
 
   const handleLogout = async () => {
@@ -79,10 +79,10 @@ export default function Navbar() {
   // Navigation items for applicant users
   const applicantNavItems = [
     {
-      href: '/home',
+      href: '/dashboard',
       label: 'Dashboard',
       icon: FiHome,
-      active: pathname === '/home'
+      active: pathname === '/dashboard'
     },
     {
       href: '/scholarships',
@@ -91,19 +91,17 @@ export default function Navbar() {
       active: pathname.startsWith('/scholarships')
     },
     {
-      href: '/applications',
+      href: '/dashboard/applications',
       label: 'My Applications',
       icon: FiFileText,
-      active: pathname.startsWith('/applications')
+      active: pathname.startsWith('/dashboard/applications')
     }
   ];
 
   const showApplicantNavigation = false; // Remove applicant navigation from navbar
   const isAdminPage = pathname.startsWith('/admin');
   const isApplicantPage = isAuthenticated() && !isAdmin() && (
-    pathname.startsWith('/home') || 
     pathname.startsWith('/dashboard') || 
-    pathname.startsWith('/applications') ||
     pathname.startsWith('/profile')
   );
 

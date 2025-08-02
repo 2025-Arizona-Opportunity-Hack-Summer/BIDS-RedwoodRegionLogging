@@ -27,7 +27,7 @@ const sidebarItems: SidebarItem[] = [
   {
     id: 'dashboard',
     label: 'Dashboard',
-    href: '/home',
+    href: '/dashboard',
     icon: FiHome
   },
   {
@@ -39,13 +39,13 @@ const sidebarItems: SidebarItem[] = [
   {
     id: 'applications',
     label: 'My Applications',
-    href: '/applications',
+    href: '/dashboard/applications',
     icon: FiFileText
   },
   {
     id: 'profile',
     label: 'Profile',
-    href: '/profile',
+    href: '/dashboard/profile',
     icon: FiUser
   }
 ];
@@ -73,17 +73,17 @@ export function ApplicantSidebar({ className = '' }: ApplicantSidebarProps) {
   };
 
   const isActive = (href: string) => {
-    if (href === '/home') {
-      return pathname === '/home';
+    if (href === '/dashboard') {
+      return pathname === '/dashboard';
     }
     if (href === '/dashboard/scholarships') {
       return pathname.startsWith('/dashboard/scholarships');
     }
-    if (href === '/applications') {
-      return pathname.startsWith('/applications');
+    if (href === '/dashboard/applications') {
+      return pathname.startsWith('/dashboard/applications');
     }
-    if (href === '/profile') {
-      return pathname.startsWith('/profile');
+    if (href === '/dashboard/profile') {
+      return pathname.startsWith('/dashboard/profile');
     }
     return pathname === href;
   };

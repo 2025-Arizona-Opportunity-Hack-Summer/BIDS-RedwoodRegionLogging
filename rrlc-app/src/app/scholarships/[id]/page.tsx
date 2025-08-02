@@ -317,7 +317,7 @@ export default function PublicScholarshipDetailPage() {
                 )}
                 
                 {isAuthenticated() && hasApplied && (
-                  <Link href="/applications" className="flex-1">
+                  <Link href="/dashboard/applications" className="flex-1">
                     <Button 
                       variant="outline"
                       className="w-full border-primary text-primary hover:bg-primary hover:text-white"

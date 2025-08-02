@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { useAuth } from "@/contexts/AuthContext";
 
-function HomePageContent() {
-  const { profile } = useAuth();
+function DashboardPageContent() {
 
   return (
     <div className="min-h-screen bg-accent p-4">
@@ -40,7 +38,7 @@ function HomePageContent() {
               <p className="text-primary-dark mb-3">
                 Track your scholarship applications
               </p>
-              <Link href="/applications">
+              <Link href="/dashboard/applications">
                 <Button className="bg-secondary text-primary hover:bg-secondary-light">
                   View Applications
                 </Button>
@@ -53,10 +51,10 @@ function HomePageContent() {
   );
 }
 
-export default function HomePage() {
+export default function DashboardPage() {
   return (
     <ProtectedRoute requireApplicant={true}>
-      <HomePageContent />
+      <DashboardPageContent />
     </ProtectedRoute>
   );
 }

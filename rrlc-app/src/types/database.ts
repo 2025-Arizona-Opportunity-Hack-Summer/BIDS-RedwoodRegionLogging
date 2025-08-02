@@ -4,7 +4,20 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string | null;
+  preferred_name: string | null;
   role: 'admin' | 'applicant' | 'reviewer';
+  phone: string | null;
+  bio: string | null;
+  location: string | null;
+  date_of_birth: string | null;
+  avatar_url: string | null;
+  linkedin_url: string | null;
+  website_url: string | null;
+  notification_preferences: {
+    email_notifications: boolean;
+    application_updates: boolean;
+    scholarship_announcements: boolean;
+  } | null;
   created_at: string;
   updated_at: string;
 }
@@ -225,6 +238,23 @@ export interface CreateEventRegistrationData {
 
 export interface UpdateEventRegistrationData extends Partial<CreateEventRegistrationData> {
   id: string;
+}
+
+// Profile form types
+export interface UpdateProfileData {
+  full_name?: string;
+  preferred_name?: string;
+  phone?: string;
+  bio?: string;
+  location?: string;
+  date_of_birth?: string;
+  linkedin_url?: string;
+  website_url?: string;
+  notification_preferences?: {
+    email_notifications: boolean;
+    application_updates: boolean;
+    scholarship_announcements: boolean;
+  };
 }
 
 // Supabase Database Type Definition

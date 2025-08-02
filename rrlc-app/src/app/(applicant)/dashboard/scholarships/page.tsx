@@ -114,7 +114,7 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
 
   const handleViewApplicationClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push('/applications'); // Navigate to applications page filtered for this scholarship
+    router.push('/dashboard/applications'); // Navigate to applications page filtered for this scholarship
   };
 
   return (

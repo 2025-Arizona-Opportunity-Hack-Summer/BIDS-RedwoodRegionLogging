@@ -12,6 +12,7 @@ import {
   FiBarChart, 
   FiCalendar,
   FiSettings,
+  FiUser,
   FiMenu,
   FiX,
   FiChevronLeft,
@@ -68,6 +69,12 @@ const sidebarItems: SidebarItem[] = [
     label: 'Reports',
     href: '/admin/reports',
     icon: FiSettings
+  },
+  {
+    id: 'profile',
+    label: 'Profile',
+    href: '/admin/profile',
+    icon: FiUser
   }
 ];
 

@@ -17,7 +17,7 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated() && isAuthReady()) {
-      router.push(isAdmin() ? "/admin" : "/home");
+      router.push(isAdmin() ? "/admin" : "/dashboard");
     }
   }, [isAuthenticated, isAdmin, isAuthReady, router]);
 
@@ -34,7 +34,7 @@ export default function LoginPage() {
         // Wait for the auth state to update and profile to be fetched
         const checkAuthReady = () => {
           if (isAuthReady()) {
-            router.push(isAdmin() ? "/admin" : "/home");
+            router.push(isAdmin() ? "/admin" : "/dashboard");
           } else {
             setTimeout(checkAuthReady, 100);
           }
