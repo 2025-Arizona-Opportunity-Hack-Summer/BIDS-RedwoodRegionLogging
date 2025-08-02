@@ -7,15 +7,11 @@
 - [Team Slack Channel](https://opportunity-hack.slack.com/app_redirect?channel=bids)
 - RRLC Website: [https://www.rrlc.net/](https://www.rrlc.net/)
 
-## Creator
-
-@Bai Pai (on Slack)
 
 ## Team "BIDS"
 
-- [Team Member 1](GitHub profile link)
-- [Team Member 2](GitHub profile link)
-- [Team Member 3](GitHub profile link)
+- George Badulescu [(GitHub profile link)](https://github.com/gbchill)
+
 <!-- Add all team members -->
 
 ## Problem Statement

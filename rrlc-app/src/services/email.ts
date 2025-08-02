@@ -1,6 +1,4 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Email service - using console logging for now (Resend removed)
 
 export interface EmailTemplate {
   subject: string;
@@ -301,38 +299,24 @@ export function generateAwardNotificationEmail(applicantName: string, scholarshi
   return { subject, html, text };
 }
 
-// Send email function
+// Send email function - currently logs to console
 export async function sendEmail({ to, subject, html, text }: SendEmailData): Promise<{ success: boolean; error: string | null; messageId?: string }> {
   try {
-    // Check if Resend API key is configured
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'your_resend_api_key') {
-      console.log('Email simulation - Resend API key not configured');
-      console.log(`To: ${to}`);
-      console.log(`Subject: ${subject}`);
-      console.log(`Text: ${text || 'No text version'}`);
-      return { 
-        success: true, 
-        error: null, 
-        messageId: `simulated-${Date.now()}` 
-      };
-    }
-
-    const { data, error } = await resend.emails.send({
-      from: 'RRLC Scholarships <scholarships@rrlc.org>',
-      to: [to],
-      subject,
-      html,
-      text,
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      return { success: false, error: error.message || 'Failed to send email' };
-    }
-
-    return { success: true, error: null, messageId: data?.id };
+    // Log email details to console (for development/testing)
+    console.log('=== EMAIL NOTIFICATION ===');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Text: ${text || 'No text version'}`);
+    console.log('========================');
+    
+    // Return success with simulated message ID
+    return { 
+      success: true, 
+      error: null, 
+      messageId: `logged-${Date.now()}` 
+    };
   } catch (error) {
-    console.error('Email sending error:', error);
+    console.error('Email logging error:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown email error' 
