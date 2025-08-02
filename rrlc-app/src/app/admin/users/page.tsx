@@ -657,7 +657,7 @@ export default function UsersPage() {
                           <div className="flex items-center">
                             <Avatar 
                               name={user.full_name || user.email} 
-                              src={user.avatar_url} 
+                              src={user.avatar_url || undefined} 
                               size="sm" 
                             />
                             <div className="ml-3">
@@ -827,7 +827,7 @@ export default function UsersPage() {
               <div className="flex items-center space-x-4">
                 <Avatar
                   name={selectedUser.full_name || selectedUser.email}
-                  src={selectedUser.avatar_url}
+                  src={selectedUser.avatar_url || undefined}
                   size="lg"
                 />
                 <div>

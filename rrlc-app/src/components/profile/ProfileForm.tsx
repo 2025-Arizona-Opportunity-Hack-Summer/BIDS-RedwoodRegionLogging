@@ -63,13 +63,13 @@ export function ProfileForm({ profile, onUpdate, cancelPath }: ProfileFormProps)
       // Convert empty strings to null before sending to database
       const cleanedFormData = {
         ...formData,
-        date_of_birth: formData.date_of_birth === '' ? null : formData.date_of_birth,
-        phone: formData.phone === '' ? null : formData.phone,
-        bio: formData.bio === '' ? null : formData.bio,
-        location: formData.location === '' ? null : formData.location,
-        linkedin_url: formData.linkedin_url === '' ? null : formData.linkedin_url,
-        website_url: formData.website_url === '' ? null : formData.website_url,
-        preferred_name: formData.preferred_name === '' ? null : formData.preferred_name
+        date_of_birth: formData.date_of_birth === '' ? undefined : formData.date_of_birth,
+        phone: formData.phone === '' ? undefined : formData.phone,
+        bio: formData.bio === '' ? undefined : formData.bio,
+        location: formData.location === '' ? undefined : formData.location,
+        linkedin_url: formData.linkedin_url === '' ? undefined : formData.linkedin_url,
+        website_url: formData.website_url === '' ? undefined : formData.website_url,
+        preferred_name: formData.preferred_name === '' ? undefined : formData.preferred_name
       };
       
       const { data, error } = await ProfileService.updateProfile(profile.id, cleanedFormData);

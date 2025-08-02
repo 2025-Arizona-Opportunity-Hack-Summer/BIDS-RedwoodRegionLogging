@@ -369,7 +369,7 @@ function AdminApplicationsContent() {
                         <div className="flex items-center gap-2">
                           <Avatar
                             name={`${application.first_name} ${application.last_name}`}
-                            src={application.profile?.avatar_url}
+                            src={application.profile?.avatar_url || undefined}
                             size="sm"
                           />
                           <h3 className="text-xl font-semibold text-primary">

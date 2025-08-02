@@ -179,7 +179,7 @@ function AdminDashboardContent() {
                         <div className="flex items-center gap-3">
                           <Avatar
                             name={`${app.first_name} ${app.last_name}`}
-                            src={app.profile?.avatar_url}
+                            src={app.profile?.avatar_url || undefined}
                             size="sm"
                           />
                           <div>

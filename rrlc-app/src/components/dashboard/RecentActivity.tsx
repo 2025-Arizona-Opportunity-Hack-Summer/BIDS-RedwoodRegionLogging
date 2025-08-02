@@ -229,7 +229,7 @@ export function RecentActivity() {
                 <div className="flex-shrink-0 mt-1">
                   <Avatar
                     name={activity.user?.preferred_name || activity.user?.full_name || 'User'}
-                    src={activity.user?.avatar_url}
+                    src={activity.user?.avatar_url || undefined}
                     size="sm"
                   />
                 </div>
