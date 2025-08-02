@@ -325,7 +325,7 @@ function ApplicationDetailsContent() {
             </Button>
             
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-primary">
+              <h1 className="text-4xl font-bold text-primary mb-2">
                 {application.first_name} {application.last_name}
               </h1>
               <Badge className={`${getStatusColor(application.status)} px-3 py-1`}>

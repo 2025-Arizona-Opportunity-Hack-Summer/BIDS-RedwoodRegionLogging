@@ -36,7 +36,7 @@ function AdminDashboardContent() {
         <div className="flex flex-col gap-6">
           {/* Header */}
           <div>
-            <h1 className="text-3xl font-bold text-primary">
+            <h1 className="text-4xl font-bold text-primary mb-2">
               Admin Dashboard
             </h1>
           </div>

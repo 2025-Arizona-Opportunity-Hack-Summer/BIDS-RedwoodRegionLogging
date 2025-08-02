@@ -452,7 +452,7 @@ export default function ApplicantScholarshipsPage() {
         <div className="flex flex-col space-y-6">
           <div className="text-center">
             <div className="flex items-center justify-center gap-3">
-              <h1 className="text-4xl font-bold text-primary mb-4">
+              <h1 className="text-4xl font-bold text-primary mb-2">
                 Scholarship Opportunities
               </h1>
               {loading && (

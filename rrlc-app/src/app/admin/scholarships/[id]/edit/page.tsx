@@ -237,7 +237,7 @@ function EditScholarshipContent() {
                 Back to Scholarships
               </Button>
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-primary">
+                <h1 className="text-4xl font-bold text-primary mb-2">
                   Edit Scholarship
                 </h1>
                 {loadingScholarship && scholarship && (

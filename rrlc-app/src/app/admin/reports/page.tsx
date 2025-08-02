@@ -137,7 +137,7 @@ function AdminReportsContent() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold text-primary">
+              <h1 className="text-4xl font-bold text-primary mb-2">
                 Reports & Analytics
               </h1>
             </div>

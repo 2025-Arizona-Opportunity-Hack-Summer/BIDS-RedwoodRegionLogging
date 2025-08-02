@@ -196,7 +196,7 @@ function NewScholarshipContent() {
                 <FiArrowLeft className="mr-2" />
                 Back to Scholarships
               </Button>
-              <h1 className="text-3xl font-bold text-primary">
+              <h1 className="text-4xl font-bold text-primary mb-2">
                 {duplicateId ? 'Duplicate Scholarship' : 'Create New Scholarship'}
               </h1>
             </div>

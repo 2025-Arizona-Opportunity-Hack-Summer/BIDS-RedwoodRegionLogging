@@ -20,7 +20,7 @@ export function ProfileView({ profile, editPath, showEditButton = true }: Profil
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Profile</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">Profile</h1>
           <p className="text-gray-600 mt-1">Manage your personal information</p>
         </div>
         {showEditButton && (

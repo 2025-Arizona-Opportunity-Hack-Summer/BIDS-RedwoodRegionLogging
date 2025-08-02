@@ -436,7 +436,7 @@ export default function UsersPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">User Management</h1>
         </div>
         <div className="flex items-center space-x-3">
           <Tooltip content="Refresh data">

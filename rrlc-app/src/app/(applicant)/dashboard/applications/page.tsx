@@ -160,7 +160,7 @@ function MyApplicationsContent() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-4xl font-bold text-primary">
+              <h1 className="text-4xl font-bold text-primary mb-2">
                 My Applications
               </h1>
             </div>
