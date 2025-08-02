@@ -20,7 +20,7 @@
 
 ## Problem Statement
 
-The Redwood Region Logging Conference (RRLC), Northern California's largest timber-focused nonprofit event and educational organization, faces growing operational complexity with data scattered across manual spreadsheets and disconnected systems.
+The Redwood Region Logging Conferencge (RRLC), Northern California's largest timber-focused nonprofit event and educational organization, faces growing operational complexity with data scattered across manual spreadsheets and disconnected systems.
 
 **Current Challenges:**
 
