@@ -259,7 +259,7 @@ function MyApplicationsContent() {
                         {application.status === 'awarded' && (
                           <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                             <p className="text-purple-800 text-sm">
-                              🏆 Amazing! You&apos;ve been awarded this scholarship. Check your email for next steps.
+                              🏆 Amazing! You&apos;ve been awarded this scholarship. 
                             </p>
                           </div>
                         )}

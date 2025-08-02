@@ -111,7 +111,7 @@ export async function updateApplicationStatus(
     }
 
     if (notes !== undefined) {
-      updateData.internal_notes = notes;
+      updateData.admin_notes = notes;
     }
 
     // First, update the application
@@ -121,20 +121,19 @@ export async function updateApplicationStatus(
       .eq('id', id)
       .select(`
         *,
-        scholarships:scholarship_id (
-          name
-        )
+        scholarship:scholarships(*),
+        profile:profiles(*)
       `)
       .single();
 
     if (error) {
-      return { data: null, error };
+      return { data: null, error: error.message || 'Failed to update application' };
     }
 
     // If successful, send status change email (non-blocking)
     if (data && data.email && data.first_name && data.last_name) {
       const applicantName = `${data.first_name} ${data.last_name}`;
-      const scholarshipName = data.scholarships?.name || 'Scholarship';
+      const scholarshipName = data.scholarship?.name || 'Scholarship';
       
       sendEmailForStatusChange(
         data.email,
@@ -149,7 +148,18 @@ export async function updateApplicationStatus(
       });
     }
 
-    return { data, error: null };
+    // Fetch documents to return complete ApplicationWithDetails
+    const { data: documents } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('application_id', id);
+
+    const applicationWithDetails: ApplicationWithDetails = {
+      ...data,
+      documents: documents || []
+    };
+
+    return { data: applicationWithDetails, error: null };
   } catch (error) {
     console.error('Error updating application status:', error);
     return { data: null, error };
@@ -208,6 +218,51 @@ export async function bulkUpdateApplications(applicationIds: string[], updates: 
   } catch (error) {
     console.error('Error bulk updating applications:', error);
     return { data: null, error };
+  }
+}
+
+// Get single application by ID for admin view with all details
+export async function getApplicationByIdForAdmin(id: string): Promise<{
+  data: ApplicationWithDetails | null;
+  error: string | null;
+}> {
+  try {
+    const { data: application, error: appError } = await supabase
+      .from('applications')
+      .select(`
+        *,
+        scholarship:scholarships(*),
+        profile:profiles(*)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (appError) {
+      return { data: null, error: appError.message };
+    }
+
+    // Fetch documents separately
+    const { data: documents, error: docsError } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('application_id', id);
+
+    if (docsError) {
+      console.error('Error fetching documents:', docsError);
+    }
+
+    const applicationWithDetails: ApplicationWithDetails = {
+      ...application,
+      documents: documents || []
+    };
+
+    return { data: applicationWithDetails, error: null };
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    return {
+      data: null,
+      error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error'
+    };
   }
 }
 
