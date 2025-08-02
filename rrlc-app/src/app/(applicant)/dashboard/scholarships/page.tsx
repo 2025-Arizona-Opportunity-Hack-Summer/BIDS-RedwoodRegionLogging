@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { FiClock, FiDollarSign, FiFileText, FiArrowRight, FiInfo, FiCheckCircle, FiXCircle, FiX } from "react-icons/fi";
+import { FiClock, FiDollarSign, FiArrowRight, FiInfo, FiCheckCircle, FiXCircle, FiX, FiEdit, FiTrash2 } from "react-icons/fi";
 import { useActiveScholarships } from "@/hooks/useScholarships";
 import { Scholarship } from "@/types/database";
+import { getUserApplicationsMap, revokeApplication } from "@/services/applications";
+import { useAuth } from "@/contexts/AuthContext";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,19 +124,48 @@ function ApplicationStatusBadge({ hasApplied }: { hasApplied: boolean }) {
   );
 }
 
-function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
+function ScholarshipCard({ 
+  scholarship, 
+  applicationInfo,
+  onRevokeApplication 
+}: { 
+  scholarship: Scholarship;
+  applicationInfo?: { id: string; status: string } | null;
+  onRevokeApplication: () => void;
+}) {
   const router = useRouter();
-  // TODO: Replace with actual application status check
-  const hasApplied = false; // This would come from checking user's applications
+  const [showRevokeModal, setShowRevokeModal] = useState(false);
+  const [isRevoking, setIsRevoking] = useState(false);
+  const hasApplied = !!applicationInfo;
 
   const handleApplyClick = (e: React.MouseEvent) => {
     e.preventDefault();
     router.push(`/scholarships/${scholarship.id}/apply`);
   };
 
-  const handleViewApplicationClick = (e: React.MouseEvent) => {
+  const handleEditApplicationClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    router.push('/dashboard/applications'); // Navigate to applications page filtered for this scholarship
+    router.push(`/scholarships/${scholarship.id}/apply?mode=edit`);
+  };
+
+  const handleRevokeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowRevokeModal(true);
+  };
+
+  const confirmRevoke = async () => {
+    if (!applicationInfo?.id) return;
+    
+    setIsRevoking(true);
+    const { success, error } = await revokeApplication(applicationInfo.id);
+    
+    if (success) {
+      onRevokeApplication();
+      setShowRevokeModal(false);
+    } else {
+      alert(error || 'Failed to revoke application');
+    }
+    setIsRevoking(false);
   };
 
   return (
@@ -186,15 +218,38 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
         </Link>
         
         {hasApplied ? (
-          <Button 
-            size="sm"
-            onClick={handleViewApplicationClick}
-            variant="outline"
-            className="flex-1 border-blue-500 text-blue-600 hover:bg-blue-50"
-          >
-            <FiFileText size={14} className="mr-2" />
-            View Application
-          </Button>
+          <>
+            {applicationInfo?.status === 'draft' ? (
+              <Button 
+                size="sm"
+                onClick={handleEditApplicationClick}
+                className="flex-1 bg-primary text-white hover:bg-primary-light"
+              >
+                <FiEdit size={14} className="mr-2" />
+                Continue Application
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  size="sm"
+                  onClick={handleEditApplicationClick}
+                  variant="outline"
+                  className="flex-1 border-primary text-primary hover:bg-primary hover:text-white"
+                >
+                  <FiEdit size={14} className="mr-2" />
+                  Edit
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleRevokeClick}
+                  variant="outline"
+                  className="border-red-500 text-red-600 hover:bg-red-50"
+                >
+                  <FiTrash2 size={14} />
+                </Button>
+              </>
+            )}
+          </>
         ) : (
           <Button 
             size="sm"
@@ -206,6 +261,19 @@ function ScholarshipCard({ scholarship }: { scholarship: Scholarship }) {
           </Button>
         )}
       </div>
+      
+      {showRevokeModal && (
+        <ConfirmationModal
+          isOpen={showRevokeModal}
+          onClose={() => setShowRevokeModal(false)}
+          onConfirm={confirmRevoke}
+          title="Revoke Application"
+          message="Are you sure you want to revoke your application? This action cannot be undone."
+          confirmText="Revoke"
+          cancelText="Cancel"
+          isLoading={isRevoking}
+        />
+      )}
     </div>
   );
 }
@@ -281,6 +349,7 @@ function FilterSection({ filters, updateFilters }: FilterSectionProps) {
 }
 
 export default function ApplicantScholarshipsPage() {
+  const { user } = useAuth();
   const [filters, setFilters] = useState<ScholarshipFilters>({
     search: '',
     deadline: 'all',
@@ -288,8 +357,26 @@ export default function ApplicantScholarshipsPage() {
     minAmount: undefined,
     maxAmount: undefined,
   });
+  const [applicationsMap, setApplicationsMap] = useState<Map<string, { id: string; status: string }> | null>(null);
+  const [loadingApplications, setLoadingApplications] = useState(true);
 
   const { scholarships, loading, error } = useActiveScholarships();
+
+  // Fetch user's applications
+  useEffect(() => {
+    if (user) {
+      fetchUserApplications();
+    }
+  }, [user]);
+
+  const fetchUserApplications = async () => {
+    setLoadingApplications(true);
+    const { data, error } = await getUserApplicationsMap();
+    if (!error && data) {
+      setApplicationsMap(data);
+    }
+    setLoadingApplications(false);
+  };
 
   const updateFilters = (updates: Partial<typeof filters>) => {
     setFilters(prev => ({ ...prev, ...updates }));
@@ -337,10 +424,11 @@ export default function ApplicantScholarshipsPage() {
       }
     }
 
-    // Status filter (TODO: implement actual application status check)
+    // Status filter
     if (filters.status !== 'all') {
-      // This would check against user's actual applications
-      // For now, showing all scholarships
+      const hasApplication = applicationsMap?.has(scholarship.id);
+      if (filters.status === 'applied' && !hasApplication) return false;
+      if (filters.status === 'not_applied' && hasApplication) return false;
     }
 
     return true;
@@ -379,13 +467,18 @@ export default function ApplicantScholarshipsPage() {
           <FilterSection filters={filters} updateFilters={updateFilters} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading && scholarships.length === 0 ? (
+            {(loading || loadingApplications) && scholarships.length === 0 ? (
               Array.from({ length: 6 }).map((_, index) => (
                 <ScholarshipCardSkeleton key={index} />
               ))
             ) : filteredScholarships.length > 0 ? (
               filteredScholarships.map((scholarship) => (
-                <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
+                <ScholarshipCard 
+                  key={scholarship.id} 
+                  scholarship={scholarship}
+                  applicationInfo={applicationsMap?.get(scholarship.id)}
+                  onRevokeApplication={fetchUserApplications}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-12">

@@ -24,7 +24,7 @@ function DashboardPageContent() {
               <p className="text-primary-dark mb-3">
                 Discover available scholarship opportunities
               </p>
-              <Link href="/scholarships">
+              <Link href="/dashboard/scholarships">
                 <Button className="bg-primary text-white hover:bg-primary-light">
                   View Scholarships
                 </Button>

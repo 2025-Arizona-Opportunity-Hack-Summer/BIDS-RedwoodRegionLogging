@@ -47,7 +47,7 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-export function useApplicationForm(scholarshipId: string) {
+export function useApplicationForm(scholarshipId: string, isEditMode: boolean = false) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CreateApplicationData>({
     scholarship_id: scholarshipId,
@@ -71,30 +71,45 @@ export function useApplicationForm(scholarshipId: string) {
   const [submitting, setSubmitting] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
 
-  // Load existing draft on mount
+  // Load existing application data on mount
   useEffect(() => {
-    const loadDraft = async () => {
+    const loadApplicationData = async () => {
       if (draftLoaded) return; // Prevent multiple loads
       
       try {
-        const { data: draft, error } = await applicationService.loadApplicationDraft(scholarshipId);
-        if (draft && !error) {
-          // Merge draft data with form data, preserving any required fields
+        let applicationData = null;
+        
+        if (isEditMode) {
+          // In edit mode, load any existing application (draft or submitted)
+          const { data, error } = await applicationService.getUserApplicationForScholarship(scholarshipId);
+          if (data && !error) {
+            applicationData = data;
+          }
+        } else {
+          // In normal mode, only load drafts
+          const { data, error } = await applicationService.loadApplicationDraft(scholarshipId);
+          if (data && !error) {
+            applicationData = data;
+          }
+        }
+        
+        if (applicationData) {
+          // Merge application data with form data, preserving any required fields
           setFormData(prev => ({
             ...prev,
-            ...draft,
+            ...applicationData,
             scholarship_id: scholarshipId, // Ensure scholarship_id is correct
           }));
         }
       } catch (error) {
-        console.error('Error loading draft:', error);
+        console.error('Error loading application data:', error);
       } finally {
         setDraftLoaded(true);
       }
     };
 
-    loadDraft();
-  }, [scholarshipId, draftLoaded]);
+    loadApplicationData();
+  }, [scholarshipId, isEditMode, draftLoaded]);
 
   const updateFormData = useCallback((field: keyof CreateApplicationData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -292,7 +307,7 @@ export function useApplicationForm(scholarshipId: string) {
 
     setSubmitting(true);
     try {
-      const { data, error } = await applicationService.submitApplication(formData);
+      const { data, error } = await applicationService.submitApplication(formData, isEditMode);
       if (error) {
         console.error('Application submission error:', error);
         console.error('Application submission error details:', JSON.stringify(error, null, 2));
@@ -318,7 +333,7 @@ export function useApplicationForm(scholarshipId: string) {
     } finally {
       setSubmitting(false);
     }
-  }, [formData, validateStep]);
+  }, [formData, validateStep, isEditMode]);
 
   const validateCustomFields = useCallback((customFields: CustomField[]): FormErrors => {
     const fieldErrors: FormErrors = {};

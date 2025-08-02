@@ -21,10 +21,11 @@ import { DEFAULT_FORM_TEMPLATES } from "@/lib/formFields";
 
 interface ApplicationFormProps {
   scholarship: Scholarship;
+  isEditMode?: boolean;
   onSuccess: () => void;
 }
 
-export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps) {
+export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: ApplicationFormProps) {
   const { user } = useAuth();
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -52,7 +53,7 @@ export function ApplicationForm({ scholarship, onSuccess }: ApplicationFormProps
     isFirstStep,
     isLastStep,
     isReviewStep
-  } = useApplicationForm(scholarship.id);
+  } = useApplicationForm(scholarship.id, isEditMode);
 
   // Auto-save draft every 30 seconds if there are changes
   useEffect(() => {

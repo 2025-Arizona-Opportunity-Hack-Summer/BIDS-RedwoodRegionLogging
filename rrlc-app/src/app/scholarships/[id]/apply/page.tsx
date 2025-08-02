@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FiArrowLeft, FiAlertCircle } from "react-icons/fi";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { ApplicationForm } from "@/components/application/ApplicationForm";
 export default function ApplyPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading, isAuthenticated, isAuthReady } = useAuth();
   const [scholarship, setScholarship] = useState<Scholarship | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function ApplyPage() {
   const [hasApplied, setHasApplied] = useState(false);
 
   const scholarshipId = params.id as string;
+  const isEditMode = searchParams.get('mode') === 'edit';
 
   useEffect(() => {
     // Wait for auth to be ready and user to be available
@@ -32,7 +34,7 @@ export default function ApplyPage() {
       // User is not authenticated, redirect will be handled by ProtectedRoute
       setLoading(false);
     }
-  }, [scholarshipId, user, authLoading, isAuthReady, isAuthenticated]);
+  }, [scholarshipId, user, authLoading, isAuthReady, isAuthenticated, isEditMode]);
 
   const fetchScholarshipAndCheckApplication = async () => {
     try {
@@ -63,8 +65,8 @@ export default function ApplyPage() {
 
       setScholarship(scholarshipData);
 
-      // Check for existing application
-      if (user && user.email) {
+      // Check for existing application (only block if not in edit mode)
+      if (user && user.email && !isEditMode) {
         const { data: existingApp, error: appError } = await checkExistingApplication(scholarshipId, user.email);
         if (existingApp) {
           setHasApplied(true);
@@ -158,6 +160,7 @@ export default function ApplyPage() {
             {scholarship ? (
               <ApplicationForm 
                 scholarship={scholarship} 
+                isEditMode={isEditMode}
                 onSuccess={() => {
                   router.push('/dashboard/applications');
                 }}
