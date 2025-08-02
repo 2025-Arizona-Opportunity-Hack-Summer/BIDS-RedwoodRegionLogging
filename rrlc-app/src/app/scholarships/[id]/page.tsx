@@ -281,9 +281,13 @@ export default function PublicScholarshipDetailPage() {
                   <h2 className="text-xl font-semibold text-primary mb-4">Requirements</h2>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                     <div className="prose prose-gray max-w-none">
-                      <p className="text-primary-dark leading-relaxed whitespace-pre-wrap">
-                        {scholarship.requirements}
-                      </p>
+                      <div className="text-primary-dark leading-relaxed">
+                        {scholarship.requirements.split('\n').map((paragraph, index) => (
+                          <p key={index} className="mb-2 last:mb-0 break-words">
+                            {paragraph || '\u00A0'}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

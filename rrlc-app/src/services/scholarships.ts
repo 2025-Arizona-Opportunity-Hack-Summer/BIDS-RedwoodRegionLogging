@@ -201,12 +201,12 @@ export async function updateScholarship(scholarshipData: any): Promise<{ data: S
   }
 }
 
-// Soft delete scholarship (set status to inactive)
+// Hard delete scholarship (permanently remove from database)
 export async function deleteScholarship(id: string): Promise<{ success: boolean; error: string | null }> {
   try {
     const { error } = await supabase
       .from('scholarships')
-      .update({ status: 'inactive' })
+      .delete()
       .eq('id', id);
 
     return { success: !error, error: error?.message || null };
@@ -216,20 +216,21 @@ export async function deleteScholarship(id: string): Promise<{ success: boolean;
   }
 }
 
-// Hard delete scholarship (only for testing - remove in production)
-export async function hardDeleteScholarship(id: string): Promise<{ success: boolean; error: string | null }> {
+// Soft delete scholarship (set status to inactive) - for backward compatibility
+export async function deactivateScholarship(id: string): Promise<{ success: boolean; error: string | null }> {
   try {
     const { error } = await supabase
       .from('scholarships')
-      .delete()
+      .update({ status: 'inactive' })
       .eq('id', id);
 
     return { success: !error, error: error?.message || null };
   } catch (error) {
-    console.error('Error hard deleting scholarship:', error);
+    console.error('Error deactivating scholarship:', error);
     return { success: false, error: typeof error === 'string' ? error : (error as Error)?.message || 'Unknown error' };
   }
 }
+
 
 // Search scholarships
 export async function searchScholarships(query: string): Promise<{ data: Scholarship[] | null; error: string | null }> {

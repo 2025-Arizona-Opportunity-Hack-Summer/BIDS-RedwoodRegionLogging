@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { updateScholarship, deleteScholarship, isScholarshipExpired } from "@/services/scholarships";
 import { Scholarship } from "@/types/database";
@@ -113,6 +114,9 @@ function AdminScholarshipsContent() {
   const [filteredScholarships, setFilteredScholarships] = useState<Scholarship[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "closed">("all");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [scholarshipToDelete, setScholarshipToDelete] = useState<Scholarship | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     filterScholarships();
@@ -174,13 +178,34 @@ function AdminScholarshipsContent() {
     }
   };
 
-  const handleDelete = async (scholarship: Scholarship) => {
-    if (confirm(`Are you sure you want to delete "${scholarship.name}"?`)) {
-      const { error } = await deleteScholarship(scholarship.id);
+  const handleDelete = (scholarship: Scholarship) => {
+    setScholarshipToDelete(scholarship);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!scholarshipToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await deleteScholarship(scholarshipToDelete.id);
       if (!error) {
-        removeScholarshipFromCache(scholarship.id);
+        removeScholarshipFromCache(scholarshipToDelete.id);
+        setShowDeleteModal(false);
+        setScholarshipToDelete(null);
+      } else {
+        alert(`Error deleting scholarship: ${error}`);
       }
+    } catch (error) {
+      alert(`Error deleting scholarship: ${error}`);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setScholarshipToDelete(null);
   };
 
   const formatCurrency = (amount: number | null) => {
@@ -349,6 +374,19 @@ function AdminScholarshipsContent() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="Delete Scholarship"
+        message={`Are you sure you want to permanently delete "${scholarshipToDelete?.name}"? This action cannot be undone and will remove the scholarship from the database.`}
+        confirmText="Delete Scholarship"
+        cancelText="Cancel"
+        isLoading={isDeleting}
+        variant="danger"
+      />
     </div>
   );
 }
