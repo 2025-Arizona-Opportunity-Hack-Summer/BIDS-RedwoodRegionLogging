@@ -160,28 +160,53 @@ export function FormStep({
   if (customFields && customFields.length > 0) {
     return (
       <div className="space-y-6">
-        {customFields.map((field) => (
-          <CustomFieldRenderer
-            key={field.id}
-            field={field as CustomField} // Both CustomField and FormField have the same structure
-            value={formData.custom_responses?.[field.id] || ''}
-            onChange={(value) => {
-              if (onCustomFieldChange) {
-                onCustomFieldChange(field.id, value);
-              } else {
-                // Fallback to the old method if onCustomFieldChange is not provided
-                const currentResponses = formData.custom_responses || {};
-                onMultipleFieldsChange({
-                  custom_responses: {
-                    ...currentResponses,
-                    [field.id]: value
+        {customFields.map((field) => {
+          // Check if this is a standard field that should update main form data
+          const standardFields = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zip', 
+                                 'school', 'major', 'graduation_year', 'gpa', 'career_goals', 'financial_need', 
+                                 'community_involvement', 'additional_info'];
+          
+          const isStandardField = standardFields.includes(field.id);
+          
+          if (isStandardField) {
+            // For standard fields, use the standard form data and update handler
+            return (
+              <CustomFieldRenderer
+                key={field.id}
+                field={field as CustomField}
+                value={formData[field.id as keyof CreateApplicationData] || ''}
+                onChange={(value) => {
+                  onFieldChange(field.id as keyof CreateApplicationData, value);
+                }}
+                error={errors[field.id]}
+              />
+            );
+          } else {
+            // For truly custom fields, use custom_responses
+            return (
+              <CustomFieldRenderer
+                key={field.id}
+                field={field as CustomField}
+                value={formData.custom_responses?.[field.id] || ''}
+                onChange={(value) => {
+                  if (onCustomFieldChange) {
+                    onCustomFieldChange(field.id, value);
+                  } else {
+                    // Fallback to the old method if onCustomFieldChange is not provided
+                    const currentResponses = formData.custom_responses || {};
+                    onMultipleFieldsChange({
+                      custom_responses: {
+                        ...currentResponses,
+                        [field.id]: value
+                      }
+                    });
                   }
-                });
-              }
-            }}
-            error={errors[field.id]}
-          />
-        ))}
+                }}
+                error={errors[field.id]}
+              />
+            );
+          }
+        })}
       </div>
     );
   }
@@ -279,7 +304,6 @@ export function FormStep({
           case 'career_goals':
           case 'financial_need':
           case 'community_involvement':
-          case 'why_deserve_scholarship':
           case 'work_experience':
           case 'extracurricular_activities':
           case 'awards_and_honors':
@@ -289,11 +313,10 @@ export function FormStep({
                   {fieldName === 'career_goals' && 'What are your career goals?'}
                   {fieldName === 'financial_need' && 'Describe your financial need'}
                   {fieldName === 'community_involvement' && 'Describe your community involvement'}
-                  {fieldName === 'why_deserve_scholarship' && 'Why do you deserve this scholarship?'}
                   {fieldName === 'work_experience' && 'Work Experience'}
                   {fieldName === 'extracurricular_activities' && 'Extracurricular Activities'}
                   {fieldName === 'awards_and_honors' && 'Awards and Honors'}
-                  {['career_goals', 'financial_need', 'community_involvement', 'why_deserve_scholarship'].includes(fieldName) && 
+                  {['career_goals', 'financial_need', 'community_involvement'].includes(fieldName) && 
                     <span className="text-red-500 ml-1">*</span>
                   }
                 </Label>
@@ -307,7 +330,6 @@ export function FormStep({
                     fieldName === 'career_goals' ? 'Describe your short-term and long-term career goals...' :
                     fieldName === 'financial_need' ? 'Explain your financial situation and need for this scholarship...' :
                     fieldName === 'community_involvement' ? 'List your community service and volunteer activities...' :
-                    fieldName === 'why_deserve_scholarship' ? 'Explain why you are a strong candidate for this scholarship...' :
                     ''
                   }
                 />
@@ -316,7 +338,7 @@ export function FormStep({
                 )}
                 <p className="text-sm text-gray-600 mt-1">
                   {['career_goals'].includes(fieldName) && 'Minimum 50 characters'}
-                  {['financial_need', 'community_involvement', 'why_deserve_scholarship'].includes(fieldName) && 'Minimum 25 characters'}
+                  {['financial_need', 'community_involvement'].includes(fieldName) && 'Minimum 25 characters'}
                 </p>
               </div>
             );

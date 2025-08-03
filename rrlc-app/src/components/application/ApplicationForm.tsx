@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { 
-  FiSave, 
   FiSend, 
   FiChevronLeft, 
   FiChevronRight,
@@ -27,8 +26,6 @@ interface ApplicationFormProps {
 
 export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: ApplicationFormProps) {
   const { user } = useAuth();
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
@@ -76,7 +73,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
     currentStep,
     formData,
     errors,
-    loading,
     submitting,
     updateFormData,
     updateMultipleFields,
@@ -86,25 +82,14 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
     nextStep,
     prevStep,
     goToStep,
-    saveDraft,
     submitApplication,
     getStepProgress,
     steps,
     isFirstStep,
     isLastStep,
     isReviewStep
-  } = useApplicationForm(scholarship.id, isEditMode, allSteps.length);
+  } = useApplicationForm(scholarship.id, isEditMode, allSteps.length, allSteps);
 
-  // Auto-save draft every 30 seconds if there are changes
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      if (!isSubmitted && Object.keys(formData).some(key => formData[key as keyof typeof formData])) {
-        const result = await handleSaveDraft();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [formData, isSubmitted]);
 
   // Pre-fill email from authenticated user
   useEffect(() => {
@@ -115,25 +100,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
 
   const currentStepData = allSteps[currentStep];
 
-  const handleSaveDraft = async () => {
-    setSaveError(null);
-    try {
-      const result = await saveDraft();
-      if (result.success) {
-        setLastSaved(new Date());
-      } else {
-        const errorMessage = result.error?.toString() || 'Failed to save draft. Please try again.';
-        setSaveError(errorMessage);
-        console.error('Draft save failed:', result.error);
-      }
-      return result;
-    } catch (error) {
-      const errorMessage = 'Failed to save draft. Please try again.';
-      setSaveError(errorMessage);
-      console.error('Draft save error:', error);
-      return { success: false, error };
-    }
-  };
 
   const handleSubmit = async () => {
     setSubmitError(null);
@@ -159,7 +125,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
         const customFieldErrors = validateCustomFields(currentSection.fields);
         if (Object.keys(customFieldErrors).length > 0) {
           // Don't reset form data, just show validation errors
-          console.log('Custom field validation failed:', customFieldErrors);
           return;
         }
       }
@@ -170,7 +135,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
       const customFieldErrors = validateCustomFields(scholarship.custom_fields);
       if (Object.keys(customFieldErrors).length > 0) {
         // Don't reset form data, just show validation errors
-        console.log('Custom field validation failed:', customFieldErrors);
         return;
       }
       // For legacy custom fields, skip standard validation and proceed directly
@@ -261,11 +225,11 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
           />
 
           {/* Error Messages */}
-          {(saveError || submitError) && (
+          {submitError && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-center gap-2 text-red-700">
                 <FiAlertCircle />
-                <span>{saveError || submitError}</span>
+                <span>{submitError}</span>
               </div>
             </div>
           )}
@@ -276,7 +240,7 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
               <Button
                 variant="outline"
                 onClick={prevStep}
-                disabled={isFirstStep || loading || submitting}
+                disabled={isFirstStep || submitting}
                 className="border-gray-300"
               >
                 <FiChevronLeft className="mr-1" />
@@ -286,7 +250,7 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
               {!isLastStep && (
                 <Button
                   onClick={handleNext}
-                  disabled={loading || submitting}
+                  disabled={submitting}
                   className="bg-primary text-white hover:bg-primary-light"
                 >
                   Next
@@ -296,20 +260,10 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
             </div>
 
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={loading || submitting || isSubmitted}
-                className="border-primary text-primary hover:bg-primary hover:text-white"
-              >
-                <FiSave className="mr-1" />
-                Save Draft
-              </Button>
-              
               {isLastStep && (
                 <Button
                   onClick={handleSubmit}
-                  disabled={loading || submitting}
+                  disabled={submitting}
                   className="bg-secondary text-white hover:bg-secondary-dark"
                 >
                   <FiSend className="mr-1" />
@@ -319,21 +273,6 @@ export function ApplicationForm({ scholarship, isEditMode = false, onSuccess }: 
             </div>
           </div>
 
-          {/* Auto-save indicator */}
-          {(lastSaved || loading) && (
-            <div className="mt-4 text-sm text-center">
-              {loading ? (
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                  <span>Saving draft...</span>
-                </div>
-              ) : lastSaved ? (
-                <span className="text-green-600">
-                  ✓ Draft saved {lastSaved.toLocaleTimeString()}
-                </span>
-              ) : null}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

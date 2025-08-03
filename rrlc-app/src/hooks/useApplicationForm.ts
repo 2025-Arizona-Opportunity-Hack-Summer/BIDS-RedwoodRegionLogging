@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { CreateApplicationData } from '@/types/database';
 import { CustomField } from '@/types/database';
 import * as applicationService from '@/services/applications';
@@ -27,7 +27,7 @@ export const APPLICATION_STEPS: FormStep[] = [
     id: 'essays',
     title: 'Essay Questions',
     description: 'Help us understand your goals and motivations',
-    fields: ['career_goals', 'financial_need', 'community_involvement', 'why_deserve_scholarship']
+    fields: ['career_goals', 'financial_need', 'community_involvement']
   },
   {
     id: 'additional',
@@ -47,7 +47,7 @@ export interface FormErrors {
   [key: string]: string;
 }
 
-export function useApplicationForm(scholarshipId: string, isEditMode: boolean = false, totalSteps?: number) {
+export function useApplicationForm(scholarshipId: string, isEditMode: boolean = false, totalSteps?: number, dynamicSteps?: FormStep[]) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<CreateApplicationData>({
     scholarship_id: scholarshipId,
@@ -67,49 +67,7 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [draftLoaded, setDraftLoaded] = useState(false);
-
-  // Load existing application data on mount
-  useEffect(() => {
-    const loadApplicationData = async () => {
-      if (draftLoaded) return; // Prevent multiple loads
-      
-      try {
-        let applicationData = null;
-        
-        if (isEditMode) {
-          // In edit mode, load any existing application (draft or submitted)
-          const { data, error } = await applicationService.getUserApplicationForScholarship(scholarshipId);
-          if (data && !error) {
-            applicationData = data;
-          }
-        } else {
-          // In normal mode, only load drafts
-          const { data, error } = await applicationService.loadApplicationDraft(scholarshipId);
-          if (data && !error) {
-            applicationData = data;
-          }
-        }
-        
-        if (applicationData) {
-          // Merge application data with form data, preserving any required fields
-          setFormData(prev => ({
-            ...prev,
-            ...applicationData,
-            scholarship_id: scholarshipId, // Ensure scholarship_id is correct
-          }));
-        }
-      } catch (error) {
-        console.error('Error loading application data:', error);
-      } finally {
-        setDraftLoaded(true);
-      }
-    };
-
-    loadApplicationData();
-  }, [scholarshipId, isEditMode, draftLoaded]);
 
   const updateFormData = useCallback((field: keyof CreateApplicationData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -163,8 +121,10 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     });
   }, []);
 
-  const validateStep = useCallback((stepIndex: number, stepData?: FormStep): boolean => {
-    const step = stepData || APPLICATION_STEPS[stepIndex];
+  // Helper function to validate a step and return errors without setting global state
+  const validateStepAndGetErrors = useCallback((stepIndex: number, stepData?: FormStep): FormErrors => {
+    // Use provided stepData, or try dynamic steps, or fall back to APPLICATION_STEPS
+    const step = stepData || (dynamicSteps && dynamicSteps[stepIndex]) || APPLICATION_STEPS[stepIndex];
     const stepErrors: FormErrors = {};
 
     step.fields.forEach(field => {
@@ -231,7 +191,6 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
           
         case 'financial_need':
         case 'community_involvement':
-        case 'why_deserve_scholarship':
           if (!value || (value as string).trim().length < 25) {
             stepErrors[field] = 'Please provide at least 25 characters';
           }
@@ -239,9 +198,14 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
       }
     });
 
+    return stepErrors;
+  }, [formData, dynamicSteps]);
+
+  const validateStep = useCallback((stepIndex: number, stepData?: FormStep): boolean => {
+    const stepErrors = validateStepAndGetErrors(stepIndex, stepData);
     setErrors(stepErrors);
     return Object.keys(stepErrors).length === 0;
-  }, [formData]);
+  }, [validateStepAndGetErrors]);
 
   const nextStep = useCallback((skipValidation: boolean = false) => {
     if (skipValidation || validateStep(currentStep)) {
@@ -261,50 +225,85 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     }
   }, [totalSteps]);
 
-  const saveDraft = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await applicationService.saveApplicationDraft(formData);
-      if (error) {
-        console.error('Draft save error:', error);
-        console.error('Draft save error details:', JSON.stringify(error, null, 2));
-        // Provide a more user-friendly error message with specific details
-        let errorMessage = 'Failed to save draft';
-        if (error && typeof error === 'object') {
-          if ('message' in error && error.message) {
-            errorMessage = error.message;
-          } else if ('code' in error && error.code) {
-            errorMessage = `Database error: ${error.code}`;
-          } else if ('hint' in error && error.hint) {
-            errorMessage = `Database hint: ${error.hint}`;
-          }
-        }
-        return { success: false, error: errorMessage };
-      }
-      return { success: true, data };
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      console.error('Draft save catch error details:', JSON.stringify(error, null, 2));
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred while saving your draft';
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  }, [formData]);
 
   const submitApplication = useCallback(async () => {
-    // Validate all steps before submission
+    // Validate all steps before submission using the actual step count
+    const maxSteps = totalSteps || APPLICATION_STEPS.length;
     let isValid = true;
-    for (let i = 0; i < APPLICATION_STEPS.length - 1; i++) {
-      if (!validateStep(i)) {
+    let firstInvalidStep = -1;
+    const validationErrors: string[] = [];
+    
+    // Only validate non-review steps (exclude the last step which is review)
+    for (let i = 0; i < maxSteps - 1; i++) {
+      const currentStepData = (dynamicSteps && dynamicSteps[i]) || APPLICATION_STEPS[i];
+      let stepValid = true;
+      let stepErrorDetails: string[] = [];
+      
+      // For dynamic steps with custom fields, use custom field validation
+      if (dynamicSteps && dynamicSteps[i] && dynamicSteps[i].fields.length === 0) {
+        // This might be a custom field step - skip standard validation
+        stepValid = true;
+      } else if (dynamicSteps && currentStepData.id !== 'personal' && currentStepData.id !== 'academic' && 
+                 currentStepData.id !== 'essays' && currentStepData.id !== 'additional' && currentStepData.id !== 'review') {
+        // This is likely a dynamic form section with custom fields
+        // For now, assume it's valid - the custom field validation happens in the UI
+        stepValid = true;
+      } else {
+        // Standard step validation using our new function
+        const stepErrors = validateStepAndGetErrors(i);
+        
+        // Filter out errors for fields that don't exist in the actual form
+        const actualFields = currentStepData.fields;
+        const relevantErrors: FormErrors = {};
+        
+        Object.entries(stepErrors).forEach(([field, error]) => {
+          if (actualFields.includes(field)) {
+            relevantErrors[field] = error;
+          }
+        });
+        
+        stepValid = Object.keys(relevantErrors).length === 0;
+        
+        if (!stepValid) {
+          // Collect specific field error messages
+          stepErrorDetails = Object.entries(relevantErrors).map(([field, error]) => `${field}: ${error}`);
+        }
+      }
+      
+      if (!stepValid) {
         isValid = false;
-        setCurrentStep(i); // Go to first invalid step
-        break;
+        if (firstInvalidStep === -1) {
+          firstInvalidStep = i;
+        }
+        
+        if (stepErrorDetails.length > 0) {
+          validationErrors.push(`Step ${i + 1} (${currentStepData.title}): ${stepErrorDetails.join(', ')}`);
+        } else {
+          validationErrors.push(`Step ${i + 1} (${currentStepData.title}): Missing required fields`);
+        }
       }
     }
 
     if (!isValid) {
-      return { success: false, error: 'Please complete all required fields' };
+      // Set specific field errors for the first invalid step so users see red text under fields
+      if (firstInvalidStep !== -1) {
+        const firstInvalidStepData = (dynamicSteps && dynamicSteps[firstInvalidStep]) || APPLICATION_STEPS[firstInvalidStep];
+        const stepErrors = validateStepAndGetErrors(firstInvalidStep, firstInvalidStepData);
+        
+        // Filter errors to only include fields that actually exist in the form
+        const actualFields = firstInvalidStepData.fields;
+        const relevantErrors: FormErrors = {};
+        
+        Object.entries(stepErrors).forEach(([field, error]) => {
+          if (actualFields.includes(field)) {
+            relevantErrors[field] = error;
+          }
+        });
+        
+        setErrors(relevantErrors); // This will show red error text under each field
+        setCurrentStep(firstInvalidStep); // Go to first invalid step
+      }
+      return { success: false, error: `Please complete all required fields. Issues found: ${validationErrors.join('; ')}` };
     }
 
     setSubmitting(true);
@@ -335,14 +334,23 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     } finally {
       setSubmitting(false);
     }
-  }, [formData, validateStep, isEditMode]);
+  }, [formData, validateStepAndGetErrors, isEditMode, totalSteps, dynamicSteps]);
 
   const validateCustomFields = useCallback((customFields: CustomField[]): FormErrors => {
     const fieldErrors: FormErrors = {};
     const customResponses = formData.custom_responses || {};
+    
+    // List of standard fields that should be checked in main form data
+    const standardFields = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zip', 
+                           'school', 'major', 'graduation_year', 'gpa', 'career_goals', 'financial_need', 
+                           'community_involvement', 'additional_info'];
 
     customFields.forEach(field => {
-      const value = customResponses[field.id];
+      // Check if this is a standard field or a custom field
+      const isStandardField = standardFields.includes(field.id);
+      const value = isStandardField 
+        ? formData[field.id as keyof CreateApplicationData]
+        : customResponses[field.id];
       
       // Required field validation
       if (field.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
@@ -423,7 +431,7 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     });
 
     return fieldErrors;
-  }, [formData.custom_responses]);
+  }, [formData]);
 
   const getStepProgress = useCallback(() => {
     const maxSteps = totalSteps || APPLICATION_STEPS.length;
@@ -434,7 +442,6 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     currentStep,
     formData,
     errors,
-    loading,
     submitting,
     updateFormData,
     updateMultipleFields,
@@ -444,7 +451,6 @@ export function useApplicationForm(scholarshipId: string, isEditMode: boolean = 
     nextStep,
     prevStep,
     goToStep,
-    saveDraft,
     submitApplication,
     getStepProgress,
     steps: APPLICATION_STEPS,
